@@ -13,6 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     Route::resource('users', UserController::class)->except(['show']);
     Route::resource('roles', RoleController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::inertia('bolsas/create', 'Bolsas/Crear')->name('bolsas.create');
 });
 
 require __DIR__.'/settings.php';

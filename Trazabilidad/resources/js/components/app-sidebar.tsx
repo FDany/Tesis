@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
     LayoutDashboard,
+    Plus,
     Settings,
     ShieldCheck,
     Trash2,
@@ -64,6 +65,12 @@ const navItems: AppNavItem[] = [
         href: '/configuracion',
         icon: Settings,
         adminOnly: true,
+    },
+
+    {
+        title: 'Nueva Carga',
+        href: '/bolsas/create',
+        icon: Plus, 
     },
 ];
 
