@@ -1,32 +1,34 @@
-import { Form, Head, Link, usePage } from '@inertiajs/react';
-import { Pencil, Trash2 } from 'lucide-react';
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
+import { Head, Link } from '@inertiajs/react';
+import { UserTable } from '@/pages/users/components/userTable';
 
-type Role = {
+interface Role {
     id: number;
     name: string;
-};
+}
 
-type UserRecord = {
+interface User {
     id: number;
     first_name: string;
     last_name: string;
     dni: string;
     email: string;
     roles: Role[];
-};
+}
 
-type PageProps = {
+interface IndexProps {
     users: {
-        data: UserRecord[];
-        links: { url: string | null; label: string; active: boolean }[];
+        data: User[];
+        links: {
+            url: string | null;
+            label: string;
+            active: boolean;
+        }[];
     };
     flash: { success: string | null; error: string | null };
-};
+}
 
-export default function UsersIndex({ users }: PageProps) {
-    const { flash } = usePage<PageProps>().props;
+export default function UsersIndex({ users, flash }: IndexProps) {
+    // const { flash } = usePage<IndexProps>().props;
 
     return (
         <>
@@ -58,93 +60,7 @@ export default function UsersIndex({ users }: PageProps) {
                     </p>
                 )}
 
-                <div className="overflow-x-auto rounded-lg border">
-                    <table className="w-full text-left text-sm">
-                        <thead className="bg-muted/50">
-                            <tr>
-                                <th className="p-3">Nombre</th>
-                                <th className="p-3">DNI</th>
-                                <th className="p-3">Correo</th>
-                                <th className="p-3">Roles</th>
-                                <th className="p-3">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.data.map((user) => (
-                                <tr key={user.id} className="border-t">
-                                    <td className="p-3">
-                                        {user.first_name} {user.last_name}
-                                    </td>
-                                    <td className="p-3">{user.dni}</td>
-                                    <td className="p-3">{user.email}</td>
-                                    <td className="p-3">
-                                        {user.roles
-                                            .map((role) => role.name)
-                                            .join(', ') || '—'}
-                                    </td>
-                                    <td className="p-3">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <Button
-                                                asChild
-                                                variant="ghost"
-                                                size="icon"
-                                                className="text-muted-foreground hover:text-foreground"
-                                            >
-                                                <Link
-                                                    href={`/users/${user.id}/edit`}
-                                                    aria-label={`Editar usuario ${user.first_name} ${user.last_name}`}
-                                                    title="Editar"
-                                                >
-                                                    <Pencil className="size-4" />
-                                                </Link>
-                                            </Button>
-                                            <Form
-                                                action={`/users/${user.id}`}
-                                                method="delete"
-                                                options={{
-                                                    preserveScroll: true,
-                                                }}
-                                            >
-                                                {({ processing, errors }) => (
-                                                    <div className="flex items-center gap-2">
-                                                        <Button
-                                                            type="submit"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                                            disabled={
-                                                                processing
-                                                            }
-                                                            aria-label={`Eliminar usuario ${user.first_name} ${user.last_name}`}
-                                                            title="Eliminar"
-                                                        >
-                                                            <Trash2 className="size-4" />
-                                                        </Button>
-                                                        <InputError
-                                                            message={
-                                                                errors.user
-                                                            }
-                                                        />
-                                                    </div>
-                                                )}
-                                            </Form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                            {users.data.length === 0 && (
-                                <tr>
-                                    <td
-                                        colSpan={5}
-                                        className="p-6 text-center text-muted-foreground"
-                                    >
-                                        No hay usuarios registrados.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <UserTable users={users.data} />
 
                 <nav className="flex flex-wrap gap-2" aria-label="Paginación">
                     {users.links.map((link, index) =>
@@ -172,5 +88,5 @@ export default function UsersIndex({ users }: PageProps) {
                 </nav>
             </div>
         </>
-    );
+    )
 }

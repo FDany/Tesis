@@ -19,8 +19,8 @@ class RoleAndUserSeeder extends Seeder
             'name' => 'admin',
             'guard_name' => 'web',
         ]);
-        $operatorRole = Role::firstOrCreate([
-            'name' => 'operador',
+        $recepcionRole = Role::firstOrCreate([
+            'name' => 'recepcion',
             'guard_name' => 'web',
         ]);
 
@@ -35,7 +35,19 @@ class RoleAndUserSeeder extends Seeder
             ]
         );
 
-        // 3. Asignar Rol de Spatie
+         // 3. Crear un Recepcionista de Prueba
+        $recepcionista = User::firstOrCreate(
+            ['dni' => '87654321'],
+            [
+                'first_name' => 'Recepcionista',
+                'last_name' => 'Sistema',
+                'email' => 'recepcionista@ecogestion.com',
+                'password' => '87654321',
+            ]
+        );
+
+        // 3. Asignar Roles de Spatie
         $admin->assignRole($adminRole);
+        $recepcionista->assignRole($recepcionRole);
     }
 }
