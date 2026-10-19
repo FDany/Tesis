@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
+use App\Models\Tamanio;
 
 class RemitoRecepcionController extends Controller
 {
@@ -23,6 +24,7 @@ class RemitoRecepcionController extends Controller
                 ->orderBy('id', 'desc')
                 ->paginate(15),
             'tiposBolsa' => TipoBolsa::all(),
+            'tamanios' => Tamanio::all(),
         ]);
     }
 
@@ -46,7 +48,7 @@ class RemitoRecepcionController extends Controller
             'codigo_fin'         => 'required|string|regex:/^\d+-\d+$/',
             'tipo_bolsa_id'      => 'required|exists:tipos_bolsa,id',
             'cantidad_declarada' => 'required|integer|min:1',
-            'tamanio'            => 'required|string',
+            'tamanio_id'         => 'required|exists:tamanios,id', // Validar que el tamaño exista en la tabla tamanios
         ]);
 
         // Extraer prefijos y correlativos del rango
@@ -78,7 +80,7 @@ class RemitoRecepcionController extends Controller
                 $bolsasData[] = [
                     'codigo_barra'  => $codigo13Digitos,
                     'tipo_bolsa_id' => $validated['tipo_bolsa_id'],
-                    'tamanio'       => $validated['tamanio'],
+                    'tamanio_id'    => $validated['tamanio_id'],
                     'estado'        => 'no_recibido',
                     'rem_rep_id'    => $remito->id,
                     'created_at'    => $now,

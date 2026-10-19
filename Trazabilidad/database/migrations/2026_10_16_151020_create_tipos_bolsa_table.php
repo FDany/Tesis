@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('tipos_bolsa', function (Blueprint $table) {
             $table->id();
-            $table->string('tipo_residuo')->unique();
-            $table->string('color')->unique();
+            $table->string('tipo_residuo');
+            $table->string('color');
             $table->string('proveedor');
+            $table->unique(['tipo_residuo', 'color']);// Evita duplicar exactamente la misma combinación de flujo y color
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

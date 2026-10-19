@@ -46,7 +46,7 @@ export const TiposBolsaPage: React.FC<Props> = ({ tiposBolsa }) => {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Gestión de Tipos de Bolsa / Residuos</h1>

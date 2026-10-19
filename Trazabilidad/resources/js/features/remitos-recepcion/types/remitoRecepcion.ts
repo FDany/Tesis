@@ -5,7 +5,7 @@ export interface Bolsa {
   id: number;
   codigo_barra: string;
   tipo_bolsa_id: number;
-  tamanio?: string | null;
+  tamanio_id?: number | null;
   estado: string;
   peso?: number | null;
   remitos_serv_id?: number | null;
@@ -25,7 +25,7 @@ export interface RemitoRecepcion {
   codigo_fin: string;
   tipo_bolsa_id: number;
   cantidad_declarada: number;
-  tamanio: string;
+  tamanio_id: number;
   created_at?: string;
   updated_at?: string;
   usuario_recep?: User;
@@ -40,7 +40,7 @@ export interface CreateRemitoDTO {
   codigo_fin: string;
   tipo_bolsa_id: number;
   cantidad_declarada: number;
-  tamanio: string;
+  tamanio_id: number;
 }
 
 // Estructura para Links de paginación de Laravel

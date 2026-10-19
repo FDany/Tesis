@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('codigo_inicio');
             $table->string('codigo_fin');
             $table->foreignId('tipo_bolsa_id')->constrained('tipos_bolsa');
+            $table->foreignId('tamanio_id')->constrained('tamanios');
             $table->integer('cantidad_declarada');
-            $table->string('tamanio');
             $table->timestamps();
         });
     }

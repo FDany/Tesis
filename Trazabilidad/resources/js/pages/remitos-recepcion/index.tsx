@@ -7,15 +7,17 @@ import {
   type RemitoRecepcion,
 } from '@/features/remitos-recepcion';
 import type { TipoBolsa } from '@/features/tipos-bolsa';
+import type { Tamanio } from '@/features/tamanios';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
 interface IndexProps {
   remitos: PaginatedResponse<RemitoRecepcion> | RemitoRecepcion[];// Puede ser un array simple o una respuesta paginada de Laravel
   tiposBolsa: TipoBolsa[];
+  tamanios: Tamanio[]; // Array de tamaños de bolsa
 }
 
-export default function Index({ remitos, tiposBolsa }: IndexProps) {
+export default function Index({ remitos, tiposBolsa, tamanios }: IndexProps) {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   // Si remitos viene paginado desde Laravel ($remitos->paginate()), extraemos el array de data
@@ -49,6 +51,7 @@ export default function Index({ remitos, tiposBolsa }: IndexProps) {
           open={modalOpen}
           onOpenChange={setModalOpen}
           tiposBolsa={tiposBolsa}
+          tamanios={tamanios}
         />
       </div>
     </>

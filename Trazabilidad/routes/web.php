@@ -4,6 +4,8 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TipoBolsaController;
 use App\Http\Controllers\RemitoRecepcionController;
+use App\Http\Controllers\TamanioController;
+use App\Http\Controllers\ServicioController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -17,6 +19,8 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     Route::resource('roles', RoleController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::inertia('bolsas/create', 'Bolsas/Crear')->name('bolsas.create');
     Route::resource('tipos-bolsa',TipoBolsaController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('tamanios', TamanioController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('servicios', ServicioController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('remitos-recepcion', RemitoRecepcionController::class)->only(['index', 'store', 'update', 'destroy']);
 });
 

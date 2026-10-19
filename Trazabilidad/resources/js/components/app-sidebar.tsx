@@ -48,6 +48,16 @@ const navItems: AppNavItem[] = [
         icon: ShieldCheck,
         adminOnly: true,
     },
+    {
+        title: 'Gestión de Tamaños de Bolsa',
+        href: '/tamanios',
+        icon: Trash2,
+    },
+    {
+        title: 'Gestión de Servicios',
+        href: '/servicios',
+        icon: LayoutDashboard,
+    },
 
     // Agrega estos enlaces cuando existan sus rutas Laravel y páginas Inertia.
     {
