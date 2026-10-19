@@ -10,15 +10,34 @@ use Illuminate\Http\RedirectResponse;
 
 class TipoBolsaController extends Controller
 {
+    private const OPCIONES_POR_PAGINA = [5, 10, 20];
+
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $opcionesPorPagina = self::OPCIONES_POR_PAGINA;
+        $porPagina = (int) $request->input('por_pagina', $opcionesPorPagina[0]);
+
+        if (!in_array($porPagina, $opcionesPorPagina, true)) {
+            $porPagina = $opcionesPorPagina[0];
+        }
+
+        $tiposBolsa = TipoBolsa::select([
+                'id',
+                'tipo_residuo',
+                'color',
+                'proveedor',
+            ])
+            ->latest()
+            ->paginate($porPagina)
+            ->withQueryString();
+
         return Inertia::render('tipos-bolsa/index', [
-            'tiposBolsa' => TipoBolsa::select(['id', 'tipo_residuo', 'color', 'proveedor'])
-                ->latest()
-                ->get(),
+            'tiposBolsa' => $tiposBolsa,
+            'porPagina' => $porPagina,
+            'opcionesPorPagina' => $opcionesPorPagina,
         ]);
     }
 
