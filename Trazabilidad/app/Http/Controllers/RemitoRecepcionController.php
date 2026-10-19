@@ -13,16 +13,35 @@ use Illuminate\Http\RedirectResponse;
 
 class RemitoRecepcionController extends Controller
 {
+
+    private const OPCIONES_POR_PAGINA = [5, 10, 20];
+
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
+
+        $opcionesPorPagina = self::OPCIONES_POR_PAGINA;
+        $porPagina = (int) $request->input('por_pagina', $opcionesPorPagina[0]);
+
+        if (!in_array($porPagina, $opcionesPorPagina, true)) {
+            $porPagina = $opcionesPorPagina[0];
+        }
+
+        $remitos = RemitoRecepcion::with([
+            'usuarioRecep', 
+            'tipoBolsa'
+        ])
+            ->orderBy('id', 'desc')
+            ->paginate($porPagina)
+            ->withQueryString();
+
         return Inertia::render('remitos-recepcion/index', [
-            'remitos' => RemitoRecepcion::with(['usuarioRecep', 'tipoBolsa'])
-                ->orderBy('id', 'desc')
-                ->paginate(15),
+            'remitos' => $remitos,
             'tiposBolsa' => TipoBolsa::all(),
+            'porPagina' => $porPagina,
+            'opcionesPorPagina' => $opcionesPorPagina,
         ]);
     }
 

@@ -18,11 +18,11 @@ interface Props {
   onDelete: (id: number) => void;
 }
 
-export const TipoBolsaTable: React.FC<Props> = ({
+export function TipoBolsaTable({
   tiposBolsa,
   onEdit,
   onDelete,
-}) => {
+}: Props) {
   if (!tiposBolsa || tiposBolsa.length === 0) {
     return (
       <div className="p-8 text-center text-muted-foreground border rounded-lg bg-card">
