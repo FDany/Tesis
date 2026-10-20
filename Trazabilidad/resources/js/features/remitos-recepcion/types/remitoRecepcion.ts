@@ -1,11 +1,11 @@
 import type { User } from '@/types/auth';
 import type { TipoBolsa } from '@/features/tipos-bolsa';
-
+import type { Tamanio } from '@/features/tamanios';
 export interface Bolsa {
   id: number;
   codigo_barra: string;
   tipo_bolsa_id: number;
-  tamanio?: string | null;
+  tamanio_id?: number | null;
   estado: string;
   peso?: number | null;
   remitos_serv_id?: number | null;
@@ -25,44 +25,21 @@ export interface RemitoRecepcion {
   codigo_fin: string;
   tipo_bolsa_id: number;
   cantidad_declarada: number;
-  tamanio: string;
+  tamanio_id: number;
   created_at?: string;
   updated_at?: string;
   usuario_recep?: User;
   tipo_bolsa?: TipoBolsa;
+  tamanio?: Tamanio;
   bolsas?: Bolsa[];
 }
 
-export interface CreateRemitoDTO {
+export interface CreateRemitoRecepcionDTO {
   fecha_recepcion: string;
   observaciones?: string;
   codigo_inicio: string;
   codigo_fin: string;
   tipo_bolsa_id: number;
   cantidad_declarada: number;
-  tamanio: string;
-}
-
-// Estructura para Links de paginación de Laravel
-export interface PageLink {
-  url: string | null;
-  label: string;
-  active: boolean;
-}
-
-// Paginador estándar de Laravel/Inertia (LengthAwarePaginator)
-export interface PaginatedResponse<T> {
-  data: T[];
-  current_page: number;
-  first_page_url: string;
-  from: number | null;
-  last_page: number;
-  last_page_url: string;
-  links: PageLink[];
-  next_page_url: string | null;
-  path: string;
-  per_page: number;
-  prev_page_url: string | null;
-  to: number | null;
-  total: number;
+  tamanio_id: number;
 }

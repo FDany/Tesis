@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('codigo_barra', 30)->unique();
             $table->foreignId('tipo_bolsa_id')->constrained('tipos_bolsa');
-            $table->string('tamanio')->nullable();
+            $table->foreignId('tamanio_id')->constrained('tamanios');
             $table->string('estado');
             $table->float('peso')->nullable();
-            $table->foreignId('remitos_serv_id')->nullable()->constrained('remitos_entrega_servicios');
             $table->foreignId('rem_rep_id')->constrained('remitos_recepcion');
+            $table->foreignId('remitos_serv_id')->nullable()->constrained('remitos_entrega_servicios');
             $table->foreignId('recep_dep_id')->nullable()->constrained('recepciones_deposito');
             $table->foreignId('rem_sal_id')->nullable()->constrained('remitos_salida_retiro');
             $table->timestamps();

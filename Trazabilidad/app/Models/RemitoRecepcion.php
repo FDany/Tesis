@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'codigo_fin',
     'cantidad_declarada',
     'tipo_bolsa_id',
-    'tamanio'
+    'tamanio_id'
 ])]
 class RemitoRecepcion extends Model
 {
@@ -29,21 +29,27 @@ class RemitoRecepcion extends Model
         'cantidad_declarada' => 'integer',
     ];
 
-    /**Relaciones eloquent*/
+    /** Relaciones Eloquent */
 
-    /**Usuario que registra el remito de recepción.*/
+    /** Usuario que registra el remito de recepción. */
     public function usuarioRecep(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recep_usuario_id');
     }
 
-    /**Tipo de bolsa asociado al lote del remito.*/
+    /** Tipo de bolsa (corriente/flujo) asociado al lote del remito. */
     public function tipoBolsa(): BelongsTo
     {
         return $this->belongsTo(TipoBolsa::class, 'tipo_bolsa_id');
     }
 
-    /**Bolsas generadas/asociadas a este remito de recepción.*/
+    /** Tamaño de la bolsa ingresado en este remito. */
+    public function tamanio(): BelongsTo
+    {
+        return $this->belongsTo(Tamanio::class, 'tamanio_id');
+    }
+
+    /** Bolsas generadas/asociadas a este remito de recepción. */
     public function bolsas(): HasMany
     {
         return $this->hasMany(Bolsa::class, 'rem_rep_id');

@@ -10,15 +10,15 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
+use App\Models\Tamanio;
 
 class RemitoRecepcionController extends Controller
 {
-
     private const OPCIONES_POR_PAGINA = [5, 10, 20];
-
     /**
      * Display a listing of the resource.
      */
+
     public function index(Request $request): Response
     {
 
@@ -30,10 +30,11 @@ class RemitoRecepcionController extends Controller
         }
 
         $remitos = RemitoRecepcion::with([
-            'usuarioRecep', 
-            'tipoBolsa'
+            'usuarioRecep',
+            'tipoBolsa',
+            'tamanio'
         ])
-            ->orderBy('id', 'desc')
+            ->orderBy('fecha_recepcion')
             ->paginate($porPagina)
             ->withQueryString();
 
@@ -42,6 +43,7 @@ class RemitoRecepcionController extends Controller
             'tiposBolsa' => TipoBolsa::all(),
             'porPagina' => $porPagina,
             'opcionesPorPagina' => $opcionesPorPagina,
+            'tamanios' => Tamanio::all(),
         ]);
     }
 
@@ -61,11 +63,11 @@ class RemitoRecepcionController extends Controller
         $validated = $request->validate([
             'fecha_recepcion'    => 'required|date',
             'observaciones'      => 'nullable|string',
-            'codigo_inicio'      => 'required|string|regex:/^\d+-\d+$/',
-            'codigo_fin'         => 'required|string|regex:/^\d+-\d+$/',
+            'codigo_inicio' => ['required', 'string', 'regex:/^\d{1,4}-\d{1,9}$/'],
+            'codigo_fin'    => ['required', 'string', 'regex:/^\d{1,4}-\d{1,9}$/'],
             'tipo_bolsa_id'      => 'required|exists:tipos_bolsa,id',
-            'cantidad_declarada' => 'required|integer|min:1',
-            'tamanio'            => 'required|string',
+            'cantidad_declarada' => 'required|integer|min:1|max:1000',      //control de cantidad ingresada
+            'tamanio_id'         => 'required|exists:tamanios,id', // Validar que el tamaño exista en la tabla tamanios
         ]);
 
         // Extraer prefijos y correlativos del rango
@@ -75,9 +77,27 @@ class RemitoRecepcionController extends Controller
         $inicioInt = (int) $correlativoInicio;
         $finInt    = (int) $correlativoFin;
 
+        // Compara los prefijos ignorando ceros iniciales: 3 y 0003 se consideran iguales.
+        $prefijoInicioNormalizado = ltrim($prefijoInicio, '0') ?: '0';
+        $prefijoFinNormalizado = ltrim($prefijoFin, '0') ?: '0';
+
+        if ($prefijoInicioNormalizado !== $prefijoFinNormalizado) {
+            return back()->withErrors([
+                'codigo_fin' => 'El código inicial y el final deben tener el mismo prefijo.',
+            ]);
+        }
+
         if ($inicioInt > $finInt) {
             return back()->withErrors([
                 'codigo_inicio' => 'El código inicial no puede ser mayor al final.',
+            ]);
+        }
+
+        $cantidadEnRango = $finInt - $inicioInt + 1;
+
+        if ($cantidadEnRango !== (int) $validated['cantidad_declarada']) {
+            return back()->withErrors([
+                'cantidad_declarada' => 'La cantidad declarada debe coincidir con la cantidad de códigos del rango.',
             ]);
         }
 
@@ -97,7 +117,7 @@ class RemitoRecepcionController extends Controller
                 $bolsasData[] = [
                     'codigo_barra'  => $codigo13Digitos,
                     'tipo_bolsa_id' => $validated['tipo_bolsa_id'],
-                    'tamanio'       => $validated['tamanio'],
+                    'tamanio_id'    => $validated['tamanio_id'],
                     'estado'        => 'no_recibido',
                     'rem_rep_id'    => $remito->id,
                     'created_at'    => $now,

@@ -6,26 +6,29 @@ import {
   type RemitoRecepcion,
 } from '@/features/remitos-recepcion';
 import type { TipoBolsa } from '@/features/tipos-bolsa';
+import type { Tamanio } from '@/features/tamanios';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
 import Paginacion, {
   type PaginacionData,
 } from '@/components/Paginador';
-import CantFilas from '@/components/cantFilas';
+import CantFilas from '@/components/CantFilas';
 
 interface IndexProps {
-  remitos: PaginacionData & { data: RemitoRecepcion[] };  //requiere una respuesta paginada cuyos elementos son remitos. 
+  remitos: PaginacionData & { data: RemitoRecepcion[] };  //requiere una respuesta paginada cuyos elementos son remitos.
   tiposBolsa: TipoBolsa[];                      //arreglo de tipos de bolsa
   porPagina: number;                            //requiere un número con la cantidad de remitos que se muestran por página.
   opcionesPorPagina: number[];                  //requiere un arreglo de números con las cantidades que el selector puede ofrecer
+  tamanios: Tamanio[];
 }
 
-export default function Index({ 
-  remitos, 
+export default function Index({
+  remitos,
   tiposBolsa,
   porPagina,
   opcionesPorPagina,
+  tamanios
 }: IndexProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -80,6 +83,7 @@ export default function Index({
           open={modalOpen}
           onOpenChange={setModalOpen}
           tiposBolsa={tiposBolsa}
+          tamanios={tamanios}
         />
       </div>
     </>

@@ -12,7 +12,7 @@ import Paginacion, {
   type PaginacionData,
 } from '@/components/Paginador';
 
-import CantFilas from '@/components/cantFilas';
+import CantFilas from '@/components/CantFilas';
 
 
 // 1. Los datos vienen directamente como props desde el controlador de Laravel
@@ -70,9 +70,9 @@ export function TiposBolsaPage({
       },
     );
   };
-  
+
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div className='p-8'>
           <h1 className="text-2xl font-bold tracking-tight">

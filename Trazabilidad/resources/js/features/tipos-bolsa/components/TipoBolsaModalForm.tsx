@@ -112,9 +112,10 @@ export const TipoBolsaModalForm: React.FC<Props> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="proveedor">Proveedor (Opcional)</Label>
+            <Label htmlFor="proveedor">Proveedor</Label>
             <Input
               id="proveedor"
+              required
               placeholder="Ej: Plásticos S.A."
               value={data.proveedor as string}
               onChange={(e) => setData('proveedor', e.target.value)}

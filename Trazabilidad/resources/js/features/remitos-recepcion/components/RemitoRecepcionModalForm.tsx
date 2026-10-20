@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import type { TipoBolsa } from '@/features/tipos-bolsa';
+import type { Tamanio } from '@/features/tamanios';
 import {
   Dialog,
   DialogContent,
@@ -23,19 +24,21 @@ interface RemitoRecepcionModalFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tiposBolsa: TipoBolsa[];
+  tamanios: Tamanio[];
 }
 
 export function RemitoRecepcionModalForm({
   open,
   onOpenChange,
   tiposBolsa = [],
+  tamanios= [],
 }: RemitoRecepcionModalFormProps) {
   // Hook nativo de Inertia
   const { data, setData, post, processing, errors, reset, clearErrors } =
     useForm({
       fecha_recepcion: '',
       tipo_bolsa_id: '',
-      tamanio: 'Mediano',
+      tamanio_id: '',
       cantidad_declarada: '',
       codigo_inicio: '',
       codigo_fin: '',
@@ -118,20 +121,22 @@ export function RemitoRecepcionModalForm({
             <div className="space-y-1">
               <Label className="font-medium cursor-default">Tamaño</Label>
               <Select
-                value={data.tamanio}
-                onValueChange={(val) => setData('tamanio', val)}
+                value={String(data.tamanio_id)}
+                onValueChange={(val) => setData('tamanio_id', val)}
               >
                 <SelectTrigger className={`${inputStyle} cursor-pointer`}>
                   <SelectValue placeholder="Seleccionar tamaño" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Chico">Chico</SelectItem>
-                  <SelectItem value="Mediano">Mediano</SelectItem>
-                  <SelectItem value="Grande">Grande</SelectItem>
+                  {tamanios.map((t) => (
+                    <SelectItem key={t.id} value={String(t.id)}>
+                      {t.nombre}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              {errors.tamanio && (
-                <span className="text-xs text-destructive">{errors.tamanio}</span>
+              {errors.tamanio_id && (
+                <span className="text-xs text-destructive">{errors.tamanio_id}</span>
               )}
             </div>
           </div>
