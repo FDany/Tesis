@@ -44,10 +44,10 @@ class RemitoRecepcionController extends Controller
         $validated = $request->validate([
             'fecha_recepcion'    => 'required|date',
             'observaciones'      => 'nullable|string',
-            'codigo_inicio'      => 'required|string|regex:/^\d+-\d+$/',
-            'codigo_fin'         => 'required|string|regex:/^\d+-\d+$/',
+            'codigo_inicio' => ['required', 'string', 'regex:/^\d{1,4}-\d{1,9}$/'],
+            'codigo_fin'    => ['required', 'string', 'regex:/^\d{1,4}-\d{1,9}$/'],
             'tipo_bolsa_id'      => 'required|exists:tipos_bolsa,id',
-            'cantidad_declarada' => 'required|integer|min:1',
+            'cantidad_declarada' => 'required|integer|min:1|max:1000',      //control de cantidad ingresada
             'tamanio_id'         => 'required|exists:tamanios,id', // Validar que el tamaño exista en la tabla tamanios
         ]);
 
@@ -58,9 +58,27 @@ class RemitoRecepcionController extends Controller
         $inicioInt = (int) $correlativoInicio;
         $finInt    = (int) $correlativoFin;
 
+        // Compara los prefijos ignorando ceros iniciales: 3 y 0003 se consideran iguales.
+        $prefijoInicioNormalizado = ltrim($prefijoInicio, '0') ?: '0';
+        $prefijoFinNormalizado = ltrim($prefijoFin, '0') ?: '0';
+
+        if ($prefijoInicioNormalizado !== $prefijoFinNormalizado) {
+            return back()->withErrors([
+                'codigo_fin' => 'El código inicial y el final deben tener el mismo prefijo.',
+            ]);
+        }
+
         if ($inicioInt > $finInt) {
             return back()->withErrors([
                 'codigo_inicio' => 'El código inicial no puede ser mayor al final.',
+            ]);
+        }
+
+        $cantidadEnRango = $finInt - $inicioInt + 1;
+
+        if ($cantidadEnRango !== (int) $validated['cantidad_declarada']) {
+            return back()->withErrors([
+                'cantidad_declarada' => 'La cantidad declarada debe coincidir con la cantidad de códigos del rango.',
             ]);
         }
 

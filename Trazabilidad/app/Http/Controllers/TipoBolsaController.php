@@ -38,7 +38,7 @@ class TipoBolsaController extends Controller
         $validated = $request->validate([
             'tipo_residuo' => 'required|string|max:100',
             'color'        => 'required|string|max:50',
-            'proveedor'    => 'nullable|string|max:100',
+            'proveedor'    => 'required|string|max:100',
         ]);
 
         TipoBolsa::create($validated);
@@ -70,7 +70,7 @@ class TipoBolsaController extends Controller
         $validated = $request->validate([
             'tipo_residuo' => 'required|string|max:100',
             'color'        => 'required|string|max:50',
-            'proveedor'    => 'nullable|string|max:100',
+            'proveedor'    => 'required|string|max:100',
         ]);
 
         $tipos_bolsa->update($validated);

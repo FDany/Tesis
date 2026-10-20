@@ -44,6 +44,6 @@ class RemitoEntregaServicio extends Model
     /**Bolsas asociadas a este remito de entrega.*/
     public function bolsas(): HasMany
     {
-        return $this->hasMany(Bolsa::class, 'remito_entrega_servicio_id');
+        return $this->hasMany(Bolsa::class, 'remitos_serv_id');
     }
 }
