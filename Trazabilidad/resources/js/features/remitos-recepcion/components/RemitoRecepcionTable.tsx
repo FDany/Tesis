@@ -63,7 +63,13 @@ export function RemitoRecepcionTable({ data }: RemitoRecepcionTableProps) {
                   </code>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">{remito.tamanio}</Badge>
+                  {remito.tamanio?(
+                    <span>
+                        {remito.tamanio.nombre}
+                    </span>
+                  ):(
+                    '-'
+                  )}
                 </TableCell>
               </TableRow>
             ))

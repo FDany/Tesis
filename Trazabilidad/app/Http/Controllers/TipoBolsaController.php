@@ -30,6 +30,7 @@ class TipoBolsaController extends Controller
                 'color',
                 'proveedor',
             ])
+            ->orderBy('id','asc')
             ->latest()
             ->paginate($porPagina)
             ->withQueryString();

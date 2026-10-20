@@ -17,6 +17,7 @@ class TamanioController extends Controller
     {
         return Inertia::render('tamanios/index', [
             'tamanios' => Tamanio::select(['id', 'nombre'])
+                ->orderBy('id', 'asc')
                 ->latest()
                 ->get(),
         ]);

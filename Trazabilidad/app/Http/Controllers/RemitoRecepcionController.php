@@ -31,9 +31,10 @@ class RemitoRecepcionController extends Controller
 
         $remitos = RemitoRecepcion::with([
             'usuarioRecep',
-            'tipoBolsa'
+            'tipoBolsa',
+            'tamanio'
         ])
-            ->orderBy('id', 'desc')
+            ->orderBy('fecha_recepcion')
             ->paginate($porPagina)
             ->withQueryString();
 
