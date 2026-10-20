@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { router } from '@inertiajs/react';
 import {
   TipoBolsaModalForm,
@@ -8,13 +8,27 @@ import {
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
+import Paginacion, {
+  type PaginacionData,
+} from '@/components/Paginador';
+
+import CantFilas from '@/components/CantFilas';
+
+
 // 1. Los datos vienen directamente como props desde el controlador de Laravel
 interface Props {
-  tiposBolsa: TipoBolsa[];
+  tiposBolsa: PaginacionData & { data: TipoBolsa[] };
+  porPagina: number;
+  opcionesPorPagina: number[];
 }
 
-export const TiposBolsaPage: React.FC<Props> = ({ tiposBolsa }) => {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+export function TiposBolsaPage({
+  tiposBolsa,
+  porPagina,
+  opcionesPorPagina,
+}: Props) {
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTipo, setSelectedTipo] = useState<TipoBolsa | null>(null);
 
   // 2. Eliminación adaptada a Inertia
@@ -45,11 +59,25 @@ export const TiposBolsaPage: React.FC<Props> = ({ tiposBolsa }) => {
     setSelectedTipo(null);
   };
 
+  const handlePorPaginaChange = (cantidad: number) => {
+    router.get(
+      '/tipos-bolsa',
+      { por_pagina: cantidad },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+      },
+    );
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Gestión de Tipos de Bolsa / Residuos</h1>
+        <div className='p-8'>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Gestión de Tipos de Bolsa / Residuos
+          </h1>
           <p className="text-sm text-muted-foreground">
             Configura los flujos de residuos habilitados en el sistema.
           </p>
@@ -59,12 +87,22 @@ export const TiposBolsaPage: React.FC<Props> = ({ tiposBolsa }) => {
         </Button>
       </div>
 
+      {/* Limitador de cantidad de filas */}
+      <CantFilas
+        value={porPagina}
+        options={opcionesPorPagina}
+        onChange={handlePorPaginaChange}
+      />
+
       {/* La tabla recibe directamente las props de Inertia */}
       <TipoBolsaTable
-        tiposBolsa={tiposBolsa}
+        tiposBolsa={tiposBolsa.data}
         onEdit={handleOpenEditModal}
         onDelete={handleDelete}
       />
+
+      {/* Paginacion */}
+      <Paginacion pagination={tiposBolsa} />
 
       {/* El modal maneja sus propias llamadas POST/PUT mediante su useForm de Inertia */}
       <TipoBolsaModalForm
@@ -74,6 +112,6 @@ export const TiposBolsaPage: React.FC<Props> = ({ tiposBolsa }) => {
       />
     </div>
   );
-};
+}
 
 export default TiposBolsaPage;

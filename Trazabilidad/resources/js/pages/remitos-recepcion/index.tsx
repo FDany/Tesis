@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import {
-    PaginatedResponse,
   RemitoRecepcionModalForm,
   RemitoRecepcionTable,
   type RemitoRecepcion,
@@ -11,17 +10,40 @@ import type { Tamanio } from '@/features/tamanios';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
+import Paginacion, {
+  type PaginacionData,
+} from '@/components/Paginador';
+import CantFilas from '@/components/CantFilas';
+
 interface IndexProps {
-  remitos: PaginatedResponse<RemitoRecepcion> | RemitoRecepcion[];// Puede ser un array simple o una respuesta paginada de Laravel
-  tiposBolsa: TipoBolsa[];
-  tamanios: Tamanio[]; // Array de tamaños de bolsa
+  remitos: PaginacionData & { data: RemitoRecepcion[] };  //requiere una respuesta paginada cuyos elementos son remitos.
+  tiposBolsa: TipoBolsa[];                      //arreglo de tipos de bolsa
+  porPagina: number;                            //requiere un número con la cantidad de remitos que se muestran por página.
+  opcionesPorPagina: number[];                  //requiere un arreglo de números con las cantidades que el selector puede ofrecer
+  tamanios: Tamanio[];
 }
 
-export default function Index({ remitos, tiposBolsa, tamanios }: IndexProps) {
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
+export default function Index({
+  remitos,
+  tiposBolsa,
+  porPagina,
+  opcionesPorPagina,
+  tamanios
+}: IndexProps) {
+  const [modalOpen, setModalOpen] = useState(false);
 
-  // Si remitos viene paginado desde Laravel ($remitos->paginate()), extraemos el array de data
-  const remitosList = Array.isArray(remitos) ? remitos : remitos.data;
+
+  const handlePorPaginaChange = (cantidad: number) => {
+    router.get(
+      '/remitos-recepcion',
+      { por_pagina: cantidad },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+      },
+    );
+  };
 
   return (
     <>
@@ -43,8 +65,18 @@ export default function Index({ remitos, tiposBolsa, tamanios }: IndexProps) {
           </Button>
         </div>
 
+        {/* Limitador de cantidad de filas */}
+        <CantFilas
+          value={porPagina}
+          options={opcionesPorPagina}
+          onChange={handlePorPaginaChange}
+        />
+
         {/* Tabla con la lista de registros */}
-        <RemitoRecepcionTable data={remitosList} />
+        <RemitoRecepcionTable data={remitos.data} />
+
+        {/* Paginacion */}
+        <Paginacion pagination={remitos} />
 
         {/* Modal con el formulario de creación */}
         <RemitoRecepcionModalForm
