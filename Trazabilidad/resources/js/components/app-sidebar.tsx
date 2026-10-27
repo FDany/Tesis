@@ -58,7 +58,6 @@ const navItems: AppNavItem[] = [
         href: '/servicios',
         icon: LayoutDashboard,
     },
-
     // Agrega estos enlaces cuando existan sus rutas Laravel y páginas Inertia.
     {
         title: 'Gestión de Tipos de Residuos',
@@ -69,6 +68,11 @@ const navItems: AppNavItem[] = [
         title: 'Gestión de Remitos de Recepción',
         href: '/remitos-recepcion',
         icon: LayoutDashboard,
+    },
+    {
+        title: 'Gestion de Bolsas',
+        href: '/bolsas',
+        icon: Trash2,
     },
     {
         title: 'Gestión de Residuos',

@@ -1,20 +1,7 @@
 import type { User } from '@/types/auth';
 import type { TipoBolsa } from '@/features/tipos-bolsa';
 import type { Tamanio } from '@/features/tamanios';
-export interface Bolsa {
-  id: number;
-  codigo_barra: string;
-  tipo_bolsa_id: number;
-  tamanio_id?: number | null;
-  estado: string;
-  peso?: number | null;
-  remitos_serv_id?: number | null;
-  rem_rep_id: number;
-  recep_dep_id?: number | null;
-  rem_sal_id?: number | null;
-  created_at?: string;
-  updated_at?: string;
-}
+import type { Bolsa } from '@/features/bolsas'
 
 export interface RemitoRecepcion {
   id: number;
