@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('fecha_retiro');
             $table->integer('cantidad_bolsas_declaradas_Empresa');
             $table->string('responsable_empresa');
-            $table->foreignId('usuario_despacha')->constrained('users');
+            $table->foreignId('usuario_despacha_id')->constrained('users');
             $table->string('datos_transporte')->nullable();
             $table->string('observaciones')->nullable();
             $table->timestamps();

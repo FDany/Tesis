@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'numero_remito',
     'fecha_retiro',
     'cantidad_bolsas_declaradas_Empresa',
     'responsable_empresa',
-    'usuario_despacha',
+    'usuario_despacha_id',
     'datos_transporte',
     'observaciones',
 ])]
@@ -25,6 +26,7 @@ class RemitoSalidaRetiro extends Model
     protected $table = 'remitos_salida_retiro';
 
     protected $casts = [
+        'fecha_retiro' => 'datetime',
         'cantidad_bolsas_declaradas_Empresa' => 'integer',
     ];
 
@@ -33,7 +35,7 @@ class RemitoSalidaRetiro extends Model
     /**Usuario institucional que autoriza y despacha la salida del camión.*/
     public function usuarioDespacha(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'usuario_despacha');
+        return $this->belongsTo(User::class, 'usuario_despacha_id');
     }
 
     /**Bolsas incluidas en esta salida/retiro.*/
@@ -46,6 +48,11 @@ class RemitoSalidaRetiro extends Model
     public function manifiestosFinales(): HasMany
     {
         return $this->hasMany(ManifiestoFinal::class, 'rem_sal_id');
+    }
+
+    public function incidencia(): HasOne
+    {
+        return $this->hasOne(Incidencia::class, 'rem_sal_id');
     }
 
     /**Documentos o fotos adjuntas vinculadas a este remito de salida (Polimórfico).*/
