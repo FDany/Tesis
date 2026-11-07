@@ -11,11 +11,15 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
+    'numero_remito_interno',
+    'fecha_emision',
+    'cantidad_bolsas_sistema',
+    'usuario_despacha_id',
+    'estado',
     'numero_remito',
     'fecha_retiro',
     'cantidad_bolsas_declaradas_Empresa',
     'responsable_empresa',
-    'usuario_despacha_id',
     'datos_transporte',
     'observaciones',
 ])]
@@ -25,9 +29,21 @@ class RemitoSalidaRetiro extends Model
 
     protected $table = 'remitos_salida_retiro';
 
+    /**
+     * Casteo de atributos.
+     */
     protected $casts = [
+        'fecha_emision' => 'datetime',
         'fecha_retiro' => 'datetime',
+        'cantidad_bolsas_sistema' => 'integer',
         'cantidad_bolsas_declaradas_Empresa' => 'integer',
+    ];
+
+    /**
+     * Valores por defecto para los atributos.
+     */
+    protected $attributes = [
+        'estado' => 'PENDIENTE_RETIRO',
     ];
 
     /**Relaciones eloquent*/

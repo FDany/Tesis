@@ -1,6 +1,7 @@
 // resources/js/pages/incidencias/index.tsx
 
 import React, { useState } from 'react';
+import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -8,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { IncidenciaBadge } from '@/features/incidencias/components/IncidenciaBadge';
 import { IncidenciaFiltros } from '@/features/incidencias/components/IncidenciaFiltros';
 import { ResolverIncidenciaModal } from '@/features/incidencias/components/ResolverIncidenciaModal';
-import { CheckSquare, Eye, AlertCircle } from 'lucide-react';
+import { IncidenciaTabla } from '@/features/incidencias/components/IncidenciaTabla';
+import { CheckSquare, Eye, AlertCircle, Plus, Building2, Package, FileText } from 'lucide-react';
 import type { Incidencia } from '@/features/incidencias/types/incidencia';
 import type { User } from '@/types/auth';
 
@@ -61,7 +63,15 @@ export default function IncidenciasIndex({ incidencias, filters }: Props) {
                         </p>
                     </div>
 
-                    <IncidenciaFiltros filters={filters} />
+                    <div className="flex items-center gap-3">
+                        <IncidenciaFiltros filters={filters} />
+                        <Link href="/incidencias/crear">
+                            <Button className="gap-2 bg-sky-600 hover:bg-sky-700 text-white shrink-0">
+                                <Plus className="h-4 w-4" />
+                                Nueva Incidencia
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Tarjeta de la Tabla */}
@@ -73,88 +83,10 @@ export default function IncidenciasIndex({ incidencias, filters }: Props) {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-20"># ID</TableHead>
-                                    <TableHead>Fecha / Hora</TableHead>
-                                    <TableHead>Tipo Incidencia</TableHead>
-                                    <TableHead>Descripción</TableHead>
-                                    <TableHead>Origen / Referencia</TableHead>
-                                    <TableHead>Registrado Por</TableHead>
-                                    <TableHead>Estado</TableHead>
-                                    <TableHead className="text-right">Acciones</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {incidencias.data.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
-                                            No se encontraron incidencias registradas.
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    incidencias.data.map((incidencia) => (
-                                        <TableRow key={incidencia.id}>
-                                            <TableCell className="font-bold">#{incidencia.id}</TableCell>
-                                            <TableCell className="whitespace-nowrap">
-                                                {new Date(incidencia.fecha_hora).toLocaleString('es-AR', {
-                                                    dateStyle: 'short',
-                                                    timeStyle: 'short',
-                                                })}
-                                            </TableCell>
-                                            <TableCell className="font-mono text-xs font-semibold">
-                                                {incidencia.tipo_incidencia}
-                                            </TableCell>
-                                            <TableCell className="max-w-50 truncate text-xs text-muted-foreground" title={incidencia.descripcion}>
-                                                {incidencia.descripcion}
-                                            </TableCell>
-                                            <TableCell>
-                                                {incidencia.remito_salida_retiro ? (
-                                                    <span className="text-xs font-medium">
-                                                        Remito DGM: #{incidencia.remito_salida_retiro.numero_remito}
-                                                    </span>
-                                                ) : incidencia.bolsa ? (
-                                                    <span className="text-xs font-medium">
-                                                        Bolsa: {incidencia.bolsa.codigo_barra}
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-xs text-muted-foreground">General</span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                {obtenerNombreUsuario(incidencia.usuario_registra)}
-                                            </TableCell>
-                                            <TableCell>
-                                                <IncidenciaBadge estado={incidencia.estado} />
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    {/* Enlace a la vista de detalle show.tsx */}
-                                                    <Link href={`/incidencias/${incidencia.id}`}>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Ver Detalle">
-                                                            <Eye className="h-4 w-4" />
-                                                        </Button>
-                                                    </Link>
-
-                                                    {incidencia.estado !== 'CERRADA' && (
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="gap-1 text-xs"
-                                                            onClick={() => handleOpenResolverModal(incidencia)}
-                                                        >
-                                                            <CheckSquare className="h-3.5 w-3.5 text-primary" />
-                                                            Resolver
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
+                        <IncidenciaTabla
+                            incidencias={incidencias.data}
+                            onResolve={handleOpenResolverModal}
+                        />
                     </CardContent>
                 </Card>
 

@@ -1,7 +1,22 @@
 import type { User } from '@/types/auth';
 import type { Bolsa } from '@/features/bolsas/types/bolsa';
+import type { Servicio } from '@/features/servicios/types/servicio';
+import type { TipoBolsa } from '@/features/tipos-bolsa/types/tipoBolsa';
 
-// Definición opcional para el remito cargado desde Eloquent
+// Documento adjunto polimórfico (fotografías / evidencias)
+export interface DocumentoAdjunto {
+  id: number;
+  documentable_type?: string;
+  documentable_id?: number;
+  tipo_documento: string;
+  nombre_archivo: string;
+  url_archivo: string;
+  fecha_hora?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Definición para el remito de salida cargado desde Eloquent
 export interface RemitoSalidaRetiroRef {
   id: number;
   numero_remito: string;
@@ -13,14 +28,14 @@ export interface Incidencia {
   fecha_hora: string;
   usuario_registra: number | User;
 
-  // Relaciones opcionales
+  // Relaciones opcionales (IDs)
   bolsa_id?: number | null;
   rem_sal_id?: number | null;
-  codigo_no_registrado?: number | string | null;
+  codigo_no_registrado?: string | null;
   tipo_bolsa_id?: number | null;
   servicio_id?: number | null;
 
-  // Detalle de la incidencia (respetando los nombres exactos de la migración)
+  // Detalle de la incidencia
   tipo_incidencia: string;
   descripcion: string;
   accion_adoptada?: string | null;
@@ -31,24 +46,24 @@ export interface Incidencia {
   estado: 'ABIERTA' | 'EN_ANALISIS' | 'RESUELTA' | 'CERRADA' | string;
 
   // Relaciones cargadas desde Eloquent
-  usuario_registra_user?: User;
   usuario_cierra_user?: User;
-  bolsa?: Bolsa;
+  bolsa?: Bolsa | null;
   remito_salida_retiro?: RemitoSalidaRetiroRef | null;
+  servicio?: Servicio | null;
+  tipo_bolsa?: TipoBolsa | null;
+  documentos?: DocumentoAdjunto[];
 
   created_at?: string;
   updated_at?: string;
 }
 
 export interface CreateIncidenciaDTO {
-  fecha_hora: string;
   tipo_incidencia: string;
   descripcion: string;
-  accion_adoptada?: string;
-  bolsa_id?: number;
-  rem_sal_id?: number;
-  codigo_no_registrado?: number;
-  tipo_bolsa_id?: number;
-  servicio_id?: number;
-  estado?: string;
+  bolsa_id?: string | number | null;
+  rem_sal_id?: string | number | null;
+  codigo_no_registrado?: string | null;
+  tipo_bolsa_id?: string | number | null;
+  servicio_id?: string | number | null;
+  documentos?: File[];
 }

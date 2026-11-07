@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 use Spatie\Permission\Traits\HasRoles;
 
@@ -31,6 +32,7 @@ use Spatie\Permission\Traits\HasRoles;
   @property Carbon|null $created_at
   @property Carbon|null $updated_at
  */
+
 #[Fillable(['last_name', 'first_name', 'dni', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable // implements MustVerifyEmail, PasskeyUser
@@ -38,6 +40,9 @@ class User extends Authenticatable // implements MustVerifyEmail, PasskeyUser
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
+    protected $appends = [
+        'full_name',
+    ];
     /**
      * Get the attributes that should be cast.
      *
@@ -50,5 +55,12 @@ class User extends Authenticatable // implements MustVerifyEmail, PasskeyUser
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    protected function fullName(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => trim("{$this->first_name} {$this->last_name}"),
+        );
     }
 }

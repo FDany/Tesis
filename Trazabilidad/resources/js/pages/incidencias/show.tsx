@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { IncidenciaBadge } from '@/features/incidencias/components/IncidenciaBadge';
 import { ResolverIncidenciaModal } from '@/features/incidencias/components/ResolverIncidenciaModal';
-import { ArrowLeft, CheckSquare, Calendar, User as UserIcon, FileText, AlertCircle, Package } from 'lucide-react';
+import { ArrowLeft, CheckSquare, Calendar, User as UserIcon, FileText, AlertCircle, Package, Image as ImageIcon, Building2 } from 'lucide-react';
 import type { Incidencia } from '@/features/incidencias/types/incidencia';
 import type { User } from '@/types/auth';
 
@@ -30,7 +30,7 @@ export default function IncidenciaShow({ incidencia }: Props) {
     };
 
     return (
-        <div>
+        <AppLayout>
             <Head title={`Incidencia #${incidencia.id}`} />
 
             <div className="space-y-6 p-6 max-w-5xl mx-auto">
@@ -54,7 +54,7 @@ export default function IncidenciaShow({ incidencia }: Props) {
                     </div>
 
                     {incidencia.estado !== 'CERRADA' && (
-                        <Button onClick={() => setIsModalOpen(true)} className="gap-2">
+                        <Button onClick={() => setIsModalOpen(true)} className="gap-2 bg-sky-600 hover:bg-sky-700 text-white">
                             <CheckSquare className="h-4 w-4" />
                             Resolver / Actualizar
                         </Button>
@@ -62,7 +62,7 @@ export default function IncidenciaShow({ incidencia }: Props) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Columna Izquierda (2 Cols): Descripción y Resolución */}
+                    {/* Columna Izquierda (2 Cols): Descripción, Evidencia y Resolución */}
                     <div className="md:col-span-2 space-y-6">
                         {/* Descripción */}
                         <Card className="shadow-sm">
@@ -78,6 +78,40 @@ export default function IncidenciaShow({ incidencia }: Props) {
                                 </div>
                             </CardContent>
                         </Card>
+
+                        {/* Evidencia Fotográfica / Adjuntos Polimórficos */}
+                        {incidencia.documentos && incidencia.documentos.length > 0 && (
+                            <Card className="shadow-sm">
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-base font-semibold flex items-center gap-2">
+                                        <ImageIcon className="h-5 w-5 text-sky-600" />
+                                        Evidencia Adjunta
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {incidencia.documentos.map((doc) => (
+                                            <div key={doc.id} className="border rounded-lg overflow-hidden bg-background">
+                                                <a
+                                                    href={`/storage/${doc.url_archivo}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    <img
+                                                        src={`/storage/${doc.url_archivo}`}
+                                                        alt={doc.nombre_archivo || 'Evidencia'}
+                                                        className="w-full h-48 object-cover hover:opacity-90 transition-opacity"
+                                                    />
+                                                </a>
+                                                <div className="p-2 text-xs text-muted-foreground truncate border-t bg-muted/20">
+                                                    {doc.nombre_archivo}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
 
                         {/* Acción Adoptada */}
                         <Card className="shadow-sm">
@@ -165,10 +199,20 @@ export default function IncidenciaShow({ incidencia }: Props) {
                                 <CardTitle className="text-base font-semibold">Origen Asociado</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3 text-sm">
+                                {incidencia.servicio && (
+                                    <div className="p-3 border rounded-lg bg-background flex items-center gap-2">
+                                        <Building2 className="h-4 w-4 text-primary shrink-0" />
+                                        <div>
+                                            <p className="text-xs text-muted-foreground">Servicio</p>
+                                            <p className="font-bold text-xs">{incidencia.servicio.nombre}</p>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {incidencia.remito_salida_retiro && (
                                     <div className="p-3 border rounded-lg bg-background flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <FileText className="h-4 w-4 text-primary" />
+                                            <FileText className="h-4 w-4 text-primary shrink-0" />
                                             <div>
                                                 <p className="text-xs text-muted-foreground">Remito Salida DGM</p>
                                                 <p className="font-bold">#{incidencia.remito_salida_retiro.numero_remito}</p>
@@ -184,7 +228,7 @@ export default function IncidenciaShow({ incidencia }: Props) {
 
                                 {incidencia.bolsa && (
                                     <div className="p-3 border rounded-lg bg-background flex items-center gap-2">
-                                        <Package className="h-4 w-4 text-primary" />
+                                        <Package className="h-4 w-4 text-primary shrink-0" />
                                         <div>
                                             <p className="text-xs text-muted-foreground">Bolsa</p>
                                             <p className="font-mono font-bold text-xs">{incidencia.bolsa.codigo_barra}</p>
@@ -192,7 +236,19 @@ export default function IncidenciaShow({ incidencia }: Props) {
                                     </div>
                                 )}
 
-                                {!incidencia.remito_salida_retiro && !incidencia.bolsa && (
+                                {incidencia.codigo_no_registrado && (
+                                    <div className="p-3 border rounded-lg bg-amber-500/10 border-amber-500/20 flex items-center gap-2">
+                                        <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
+                                        <div>
+                                            <p className="text-xs text-amber-800 dark:text-amber-300">Código Observado (No Reg.)</p>
+                                            <p className="font-mono font-bold text-xs text-amber-950 dark:text-amber-200">
+                                                {incidencia.codigo_no_registrado}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {!incidencia.remito_salida_retiro && !incidencia.bolsa && !incidencia.servicio && !incidencia.codigo_no_registrado && (
                                     <p className="text-xs text-muted-foreground italic">
                                         Sin origen específico vinculado.
                                     </p>
@@ -201,14 +257,14 @@ export default function IncidenciaShow({ incidencia }: Props) {
                         </Card>
                     </div>
                 </div>
-            </div>
 
-            {/* Modal para Resolver */}
-            <ResolverIncidenciaModal
-                incidencia={incidencia}
-                open={isModalOpen}
-                onOpenChange={setIsModalOpen}
-            />
-        </div>
+                {/* Modal para Resolver */}
+                <ResolverIncidenciaModal
+                    incidencia={incidencia}
+                    open={isModalOpen}
+                    onOpenChange={setIsModalOpen}
+                />
+            </div>
+        </AppLayout>
     );
 }

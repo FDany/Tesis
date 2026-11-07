@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Enums\TipoIncidencia;
+use App\Models\Bolsa;
+use App\Models\DocumentoAdjunto;
 use App\Models\Incidencia;
+use App\Models\Servicio;
+use App\Models\TipoBolsa;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class IncidenciaController extends Controller
 {
@@ -22,9 +28,10 @@ class IncidenciaController extends Controller
             'bolsa',
             'tipoBolsa',
             'servicio',
+            'documentos',
         ]);
 
-        // Filtro por Estado (ej: ABIERTA, EN_ANALISIS, RESUELTA, CERRADA)
+        // Filtro por Estado
         if ($request->filled('estado')) {
             $query->where('estado', $request->estado);
         }
@@ -39,25 +46,75 @@ class IncidenciaController extends Controller
             ->withQueryString();
 
         return Inertia::render('incidencias/index', [
-            'incidencias' => $incidencias,
-            'filters'     => $request->only(['estado', 'tipo_incidencia']),
+            'incidencias'  => $incidencias,
+            'filters'      => $request->only(['estado', 'tipo_incidencia']),
+            'tiposManuales' => TipoIncidencia::tiposManuales(),
         ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Muestra el formulario para registrar una incidencia manual.
      */
-    public function create()
+    public function create(): Response
     {
-        //
+        return Inertia::render('incidencias/create', [
+            'tiposManuales' => TipoIncidencia::tiposManuales(),
+            'servicios'     => Servicio::select('id', 'nombre')->orderBy('nombre')->get(),
+            'tiposBolsa'    => TipoBolsa::select('id', 'tipo_residuo')->get(),
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Guarda una nueva incidencia manual y procesa archivos/fotografías si existen.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        //
+        $validated = $request->validate([
+            'tipo_incidencia'      => ['required', 'string', new Enum(TipoIncidencia::class)],
+            'descripcion'          => 'required|string|min:5|max:1000',
+            'bolsa_id'             => 'nullable|exists:bolsas,id',
+            'codigo_no_registrado' => 'nullable|string|max:30',
+            'servicio_id'          => 'nullable|exists:servicios,id',
+            'tipo_bolsa_id'        => 'nullable|exists:tipos_bolsa,id',
+            'rem_sal_id'           => 'nullable|exists:remitos_salida_retiro,id',
+            'documentos'           => 'nullable|array',
+            'documentos.*'         => 'file|mimes:jpeg,png,jpg,webp,pdf|max:5120', // Máx 5MB
+        ]);
+
+        // 1. Crear el registro de la Incidencia
+        $incidencia = Incidencia::create([
+            'fecha_hora'           => now(),
+            'usuario_registra'     => $request->user()->id,
+            'tipo_incidencia'      => $validated['tipo_incidencia'],
+            'descripcion'          => $validated['descripcion'],
+            'bolsa_id'             => $validated['bolsa_id'] ?? null,
+            'codigo_no_registrado' => $validated['codigo_no_registrado'] ?? null,
+            'servicio_id'          => $validated['servicio_id'] ?? null,
+            'tipo_bolsa_id'        => $validated['tipo_bolsa_id'] ?? null,
+            'rem_sal_id'           => $validated['rem_sal_id'] ?? null,
+            'estado'               => 'ABIERTA',
+        ]);
+
+        // 2. Procesar la fotografía/evidencia polimórfica si fue adjuntada
+        if ($request->hasFile('documentos')) {
+            foreach ($request->file('documentos') as $file) {
+                if ($file->isValid()) {
+                    $extension = strtolower($file->getClientOriginalExtension());
+                    $tipoDoc = ($extension === 'pdf') ? 'pdf' : 'foto_incidencia';
+                    $path = $file->store('incidencias', 'public');
+
+                    $incidencia->documentos()->create([
+                        'tipo_documento' => $tipoDoc,
+                        'nombre_archivo' => $file->getClientOriginalName(),
+                        'url_archivo'    => $path,
+                        'fecha_hora'     => now(),
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('incidencias.index')
+            ->with('message', "Incidencia #{$incidencia->id} registrada correctamente.");
     }
 
     /**
@@ -81,46 +138,22 @@ class IncidenciaController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
      * Actualiza la incidencia con las acciones adoptadas y la marca como resuelta/cerrada.
      */
     public function resolver(Request $request, Incidencia $incidencia): RedirectResponse
     {
         $validated = $request->validate([
-            'acccion_adoptada' => 'required|string|min:5',
-            'estado'           => 'required|string|in:EN_ANALISIS,RESUELTA,CERRADA',
+            'accion_adoptada' => 'required|string|min:5',
+            'estado'          => 'required|string|in:EN_ANALISIS,RESUELTA,CERRADA',
         ]);
 
         $incidencia->update([
-            'acccion_adoptada' => $validated['acccion_adoptada'],
-            'estado'           => $validated['estado'],
-            'usuario_cierra'   => $request->user()->id,
+            'accion_adoptada' => $validated['accion_adoptada'],
+            'estado'          => $validated['estado'],
+            'usuario_cierra'  => $request->user()->id,
             'fecha_resolucion' => now(),
         ]);
 
         return redirect()->back()->with('message', "Incidencia #{$incidencia->id} actualizada correctamente.");
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

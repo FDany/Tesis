@@ -32,7 +32,6 @@ class Incidencia extends Model
     protected $casts = [
         'fecha_hora' => 'datetime',
         'fecha_resolucion' => 'datetime',
-        'codigo_no_registrado' => 'integer',
     ];
 
     /**Relaciones eloquent*/

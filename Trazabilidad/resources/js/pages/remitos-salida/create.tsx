@@ -1,5 +1,3 @@
-// resources/js/pages/remitos-salida/create.tsx
-
 import React, { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -8,7 +6,6 @@ import { ArrowLeft } from 'lucide-react';
 import {
   ScannerInput,
   TablaBolsasEscaneadas,
-  ResumenConciliacion,
   FormularioRemito,
   type CreateRemitoSalidaRetiroDTO,
 } from '@/features/remitos-salida';
@@ -19,52 +16,45 @@ export default function CreateRemitoSalida() {
   const [scannedError, setScannedError] = useState<string | null>(null);
 
   const { data, setData, post, processing, errors } = useForm<CreateRemitoSalidaRetiroDTO>({
-    numero_remito: '',
-    fecha_retiro: new Date().toISOString().slice(0, 16),
-    cantidad_bolsas_declaradas_Empresa: 0,
-    responsable_empresa: '',
-    datos_transporte: '',
-    observaciones: '',
     bolsas_ids: [],
+    observaciones: '',
   });
 
   // Escaneo en vivo con validación por API
   const handleScanBolsa = async (codigo: string) => {
-  setScannedError(null);
+    setScannedError(null);
 
-  // Limpia espacios y guiones para obtener los 13 dígitos continuos
-  const codigoLimpio = codigo.replace(/[-\s]/g, '').trim();
+    // Limpia espacios y guiones para obtener los 13 dígitos continuos
+    const codigoLimpio = codigo.replace(/[-\s]/g, '').trim();
 
-  try {
-    const res = await fetch(`/api/bolsas/buscar-para-despacho?codigo=${encodeURIComponent(codigoLimpio)}`);
+    try {
+      const res = await fetch(`/api/bolsas/buscar-para-despacho?codigo=${encodeURIComponent(codigoLimpio)}`);
 
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || 'Bolsa no encontrada o no disponible para despacho');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Bolsa no encontrada o no disponible para despacho');
+      }
+
+      const bolsa: Bolsa = await res.json();
+
+      if (bolsas.some((b) => b.id === bolsa.id)) {
+        setScannedError(`La bolsa con código ${bolsa.codigo_barra} ya fue escaneada.`);
+        return;
+      }
+
+      const nuevasBolsas = [...bolsas, bolsa];
+      setBolsas(nuevasBolsas);
+      setData('bolsas_ids', nuevasBolsas.map((b) => b.id));
+    } catch (err: any) {
+      setScannedError(err.message);
     }
-
-    const bolsa: Bolsa = await res.json();
-
-    if (bolsas.some((b) => b.id === bolsa.id)) {
-      setScannedError(`La bolsa con código ${bolsa.codigo_barra} ya fue escaneada.`);
-      return;
-    }
-
-    const nuevasBolsas = [...bolsas, bolsa];
-    setBolsas(nuevasBolsas);
-    setData('bolsas_ids', nuevasBolsas.map((b) => b.id));
-  } catch (err: any) {
-    setScannedError(err.message);
-  }
-};
+  };
 
   const handleRemoveBolsa = (id: number) => {
     const nuevasBolsas = bolsas.filter((b) => b.id !== id);
     setBolsas(nuevasBolsas);
     setData('bolsas_ids', nuevasBolsas.map((b) => b.id));
   };
-
-  const pesoTotalSistema = bolsas.reduce((acc, b) => acc + (b.peso ? Number(b.peso) : 0), 0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,9 +66,9 @@ export default function CreateRemitoSalida() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Despacho a DGM</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Nuevo Despacho Interno</h1>
           <p className="text-muted-foreground">
-            Escaneo de bolsas pesadas y conciliación contra remito oficial de retiro.
+            Escaneo de bolsas pesadas y generación de remito interno (PDF) del Hospital San Bernardo.
           </p>
         </div>
         <Button variant="outline" onClick={() => router.get('/remitos-salida')}>
@@ -89,7 +79,7 @@ export default function CreateRemitoSalida() {
       {/* 1. Lectura de Bolsas */}
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle className="text-xl">1. Lectura e Identificación de Bolsas (Sistema)</CardTitle>
+          <CardTitle className="text-xl">Lectura e Identificación de Bolsas (Sistema)</CardTitle>
           <CardDescription>
             Pase el lector sobre cada bolsa pesada disponible para salida.
           </CardDescription>
@@ -109,14 +99,7 @@ export default function CreateRemitoSalida() {
         </CardContent>
       </Card>
 
-      {/* 2. Resumen y Conciliación en Vivo */}
-      <ResumenConciliacion
-        cantidadSistema={bolsas.length}
-        pesoSistema={pesoTotalSistema}
-        cantidadDgm={Number(data.cantidad_bolsas_declaradas_Empresa)}
-      />
-
-      {/* 3. Formulario Datos de Remito DGM */}
+      {/* 2. Formulario de Emisión Interna */}
       <FormularioRemito
         data={data}
         setData={setData}

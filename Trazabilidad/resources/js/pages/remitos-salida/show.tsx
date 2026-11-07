@@ -1,181 +1,167 @@
-// resources/js/pages/remitos-salida/show.tsx
-
-import React from 'react';
-import { router } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import React, { FormEvent } from 'react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ArrowLeft, FileText, PackageCheck, AlertTriangle, CheckCircle2, User, Truck, Calendar } from 'lucide-react';
-import type { RemitoSalidaRetiro } from '@/features/remitos-salida';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ArrowLeft, Printer, Clock, CheckCircle2, AlertTriangle, XCircle, Package } from 'lucide-react';
+import { ResumenConciliacion } from '@/features/remitos-salida/components/ResumenConciliacion';
+import type { RemitoSalidaRetiro, EstadoRemitoSalida, ConciliarRemitoSalidaRetiroDTO } from '@/features/remitos-salida/types/remitoSalidaRetiro';
 
 interface Props {
-  remito: RemitoSalidaRetiro;
+    remito: RemitoSalidaRetiro;
 }
 
 export default function ShowRemitoSalida({ remito }: Props) {
-  const tieneIncidencia = !!remito.incidencia;
-  const cantSistema = remito.bolsas_count ?? remito.bolsas?.length ?? 0;
-  const pesoTotal = remito.peso_total_sistema ?? remito.bolsas?.reduce((acc, b) => acc + (b.peso ? Number(b.peso) : 0), 0) ?? 0;
+    const bolsas = remito.bolsas || [];
+    const pesoTotal = remito.peso_total_sistema || bolsas.reduce((acc, b) => acc + (Number(b.peso) || 0), 0);
 
-  return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      {/* Header y Acciones */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight">Remito N° {remito.numero_remito}</h1>
-            {tieneIncidencia ? (
-              <Badge variant="destructive" className="flex items-center gap-1">
-                <AlertTriangle className="h-3 w-3" /> Incidencia Registrada
-              </Badge>
-            ) : (
-              <Badge className="bg-green-600 hover:bg-green-700 flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3" /> Conciliado
-              </Badge>
-            )}
-          </div>
-          <p className="text-muted-foreground text-sm mt-1">
-            Detalle del despacho de residuos peligrosos a DGM.
-          </p>
-        </div>
-        <Button variant="outline" onClick={() => router.get('/remitos-salida')}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Volver al Historial
-        </Button>
-      </div>
+    // Formulario de Inertia sincronizado con el DTO que espera ResumenConciliacion
+    const { data, setData, post, processing, errors } = useForm<ConciliarRemitoSalidaRetiroDTO>({
+        numero_remito: remito.numero_remito || '',
+        fecha_retiro: remito.fecha_retiro || new Date().toISOString().slice(0, 16),
+        cantidad_bolsas_declaradas_Empresa: remito.cantidad_bolsas_declaradas_Empresa ?? bolsas.length,
+        responsable_empresa: remito.responsable_empresa || '',
+        datos_transporte: remito.datos_transporte || '',
+        observaciones: remito.observaciones || '',
+    });
 
-      {/* Alerta si tiene Incidencia asociada */}
-      {tieneIncidencia && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-5 w-5" />
-          <AlertTitle className="font-semibold text-base">Discrepancia en Conciliación de Retiro</AlertTitle>
-          <AlertDescription className="text-sm mt-1 space-y-1">
-            <p>{remito.incidencia?.descripcion}</p>
-            <p className="text-xs opacity-90">
-              Estado de la Incidencia: <strong>{remito.incidencia?.estado}</strong>
-            </p>
-          </AlertDescription>
-        </Alert>
-      )}
+    const handleConciliarSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        post(`/remitos-salida/${remito.id}/conciliar`);
+    };
 
-      {/* Datos del Remito y Transporte */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="shadow-sm">
-          <CardContent className="p-4 space-y-2">
-            <div className="flex items-center text-muted-foreground text-xs font-medium uppercase gap-1">
-              <Calendar className="h-4 w-4" /> Fecha y Hora de Retiro
-            </div>
-            <p className="text-lg font-semibold">
-              {new Date(remito.fecha_retiro).toLocaleString('es-AR', {
-                dateStyle: 'long',
-                timeStyle: 'short',
-              })}
-            </p>
-          </CardContent>
-        </Card>
+    const renderBadgeEstado = (estado: EstadoRemitoSalida) => {
+        switch (estado) {
+            case 'PENDIENTE_RETIRO':
+                return (
+                    <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50 gap-1">
+                        <Clock className="h-3 w-3" /> Pendiente Retiro
+                    </Badge>
+                );
+            case 'CONCILIADO':
+                return (
+                    <Badge className="bg-green-600 hover:bg-green-700 gap-1">
+                        <CheckCircle2 className="h-3 w-3" /> Conciliado
+                    </Badge>
+                );
+            case 'CON_INCIDENCIA':
+                return (
+                    <Badge variant="destructive" className="gap-1">
+                        <AlertTriangle className="h-3 w-3" /> Con Incidencia
+                    </Badge>
+                );
+            case 'ANULADO':
+                return (
+                    <Badge variant="secondary" className="gap-1">
+                        <XCircle className="h-3 w-3" /> Anulado
+                    </Badge>
+                );
+            default:
+                return <Badge variant="outline">{estado}</Badge>;
+        }
+    };
 
-        <Card className="shadow-sm">
-          <CardContent className="p-4 space-y-2">
-            <div className="flex items-center text-muted-foreground text-xs font-medium uppercase gap-1">
-              <Truck className="h-4 w-4" /> Responsable / Transporte
-            </div>
-            <p className="text-lg font-semibold">{remito.responsable_empresa}</p>
-            {remito.datos_transporte && (
-              <p className="text-xs text-muted-foreground">{remito.datos_transporte}</p>
-            )}
-          </CardContent>
-        </Card>
+    return (
+        <>
+            <Head title={`Remito Interno ${remito.numero_remito_interno}`} />
 
-        <Card className="shadow-sm">
-          <CardContent className="p-4 space-y-2">
-            <div className="flex items-center text-muted-foreground text-xs font-medium uppercase gap-1">
-              <User className="h-4 w-4" /> Despachado por (Hospital)
-            </div>
-            <p className="text-lg font-semibold">
-              {remito.usuario_despacha
-                ? `${remito.usuario_despacha.first_name} ${remito.usuario_despacha.last_name}`
-                : 'Usuario Sistema'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+            <div className="max-w-6xl mx-auto p-6 space-y-6">
+                {/* Encabezado Principal */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                            <Link href="/remitos-salida">
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <ArrowLeft className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                            <h1 className="text-2xl font-bold tracking-tight">
+                                Remito Interno #{remito.numero_remito_interno}
+                            </h1>
+                            {renderBadgeEstado(remito.estado)}
+                        </div>
+                        <p className="text-sm text-muted-foreground pl-11">
+                            Emitido el {new Date(remito.fecha_emision).toLocaleString('es-AR', { dateStyle: 'long', timeStyle: 'short' })}
+                        </p>
+                    </div>
 
-      {/* Resumen de Cantidades */}
-      <Card className="shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <PackageCheck className="h-5 w-5 text-primary" />
-            Resumen de Conciliación
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center border p-4 rounded-lg bg-muted/20">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase font-medium">Bolsas Según Sistema</p>
-              <p className="text-2xl font-bold">{cantSistema}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground uppercase font-medium">Bolsas Declaradas DGM</p>
-              <p className="text-2xl font-bold">{remito.cantidad_bolsas_declaradas_Empresa}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground uppercase font-medium">Peso Total Despachado</p>
-              <p className="text-2xl font-bold text-primary">{pesoTotal.toFixed(2)} kg</p>
-            </div>
-          </div>
+                    <Button
+                        variant="outline"
+                        className="gap-2"
+                        onClick={() => window.open(`/remitos-salida/${remito.id}/pdf`, '_blank')}
+                    >
+                        <Printer className="h-4 w-4 text-sky-600" />
+                        Imprimir PDF Interno
+                    </Button>
+                </div>
 
-          {remito.observaciones && (
-            <div className="mt-4 p-3 bg-card border rounded-md">
-              <p className="text-xs font-medium text-muted-foreground uppercase">Observaciones:</p>
-              <p className="text-sm mt-1">{remito.observaciones}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                {/* Sección de Conciliación (Formulario y Métricas) */}
+                <Card className="shadow-sm">
+                    <CardHeader>
+                        <CardTitle className="text-lg">Trazabilidad y Conciliación DGM</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ResumenConciliacion
+                            remito={remito}
+                            data={data}
+                            setData={setData}
+                            errors={errors}
+                            processing={processing}
+                            onSubmit={handleConciliarSubmit}
+                        />
+                    </CardContent>
+                </Card>
 
-      {/* Tabla de Bolsas Incluidas */}
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" />
-            Bolsas Asociadas al Remito ({cantSistema})
-          </CardTitle>
-          <CardDescription>
-            Listado individual de bolsas retiradas por el transporte.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!remito.bolsas || remito.bolsas.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">
-              No hay detalle individual de bolsas disponible.
-            </p>
-          ) : (
-            <div className="rounded-md border overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>Código de Barras</TableHead>
-                    <TableHead className="text-right">Peso Registrado (kg)</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {remito.bolsas.map((bolsa, index) => (
-                    <TableRow key={bolsa.id}>
-                      <TableCell className="font-medium text-muted-foreground">{index + 1}</TableCell>
-                      <TableCell className="font-mono font-bold text-primary">{bolsa.codigo_barra}</TableCell>
-                      <TableCell className="text-right font-semibold">
-                        {bolsa.peso != null ? Number(bolsa.peso).toFixed(2) : '0.00'} kg
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                {/* Tabla de Bolsas Incluidas */}
+                <Card className="shadow-sm">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-base font-semibold flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Package className="h-5 w-5 text-muted-foreground" />
+                                Bolsas Incluidas en el Despacho ({bolsas.length})
+                            </div>
+                            <span className="text-sm font-normal text-muted-foreground">
+                                Peso Total: <strong className="text-foreground">{pesoTotal.toFixed(2)} Kg</strong>
+                            </span>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Código de Barras</TableHead>
+                                    <TableHead>Tipo de Residuo</TableHead>
+                                    <TableHead className="text-right">Peso (Kg)</TableHead>
+                                    <TableHead className="text-center">Estado Bolsa</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {bolsas.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                            No hay bolsas asociadas a este remito.
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    bolsas.map((bolsa) => (
+                                        <TableRow key={bolsa.id}>
+                                            <TableCell className="font-mono font-bold">{bolsa.codigo_barra}</TableCell>
+                                            <TableCell>{bolsa.tipo_bolsa?.tipo_residuo || 'General'}</TableCell>
+                                            <TableCell className="text-right font-mono font-semibold">{Number(bolsa.peso).toFixed(2)} Kg</TableCell>
+                                            <TableCell className="text-center">
+                                                <Badge variant="outline" className="text-xs">
+                                                    {bolsa.estado}
+                                                </Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
             </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
+        </>
+    );
 }
