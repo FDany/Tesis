@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
 use App\Models\Tamanio;
+use Barryvdh\DomPDF\Facade\Pdf; 
 
 class RemitoRecepcionController extends Controller
 {
@@ -52,7 +53,10 @@ class RemitoRecepcionController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('remitos-recepcion/crear', [
+            'tiposBolsa' => TipoBolsa::all(),
+            'tamanios' => Tamanio::all(),
+        ]);
     }
 
     /**
@@ -118,7 +122,7 @@ class RemitoRecepcionController extends Controller
                     'codigo_barra'  => $codigo13Digitos,
                     'tipo_bolsa_id' => $validated['tipo_bolsa_id'],
                     'tamanio_id'    => $validated['tamanio_id'],
-                    'estado'        => 'no_recibido',
+                    'estado'        => 'Recibido',
                     'rem_rep_id'    => $remito->id,
                     'created_at'    => $now,
                     'updated_at'    => $now,
@@ -128,15 +132,66 @@ class RemitoRecepcionController extends Controller
             Bolsa::insert($bolsasData);
         });
 
-        return redirect()->back()->with('success', 'Remito registrado y bolsas generadas correctamente.');
+        // return redirect()->back()->with('success', 'Remito registrado y bolsas generadas correctamente.');
+
+
+        return redirect()
+            ->route('remitos-recepcion.index')
+            ->with('success', 'Remito registrado y bolsas generadas correctamente.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request, string $id): Response|RedirectResponse
     {
-        //
+        $esVisitaParcialDelIndice =
+            $request->header('X-Inertia-Partial-Component') === 'remitos-recepcion/index'
+            && in_array(
+                'remitoDetalle',
+                explode(',', (string) $request->header('X-Inertia-Partial-Data')),
+                true
+            );
+
+        if (!$esVisitaParcialDelIndice) {
+            return redirect()->route('remitos-recepcion.index');
+        }
+
+        $remito = RemitoRecepcion::with([
+            'tipoBolsa',
+            'tamanio',
+            'usuarioRecep',
+        ])->findOrFail($id);
+
+        $codigos = $remito->bolsas()
+            ->orderBy('id')
+            ->pluck('codigo_barra');
+
+
+        return Inertia::render('remitos-recepcion/index', [
+            'remitoDetalle' => [
+                'id' => $remito->id,
+                'fecha_recepcion' => $remito->fecha_recepcion,
+                'tipo_bolsa' => $remito->tipoBolsa ? [
+                    'tipo_residuo' => $remito->tipoBolsa->tipo_residuo,
+                    'color' => $remito->tipoBolsa->color,
+                    'proveedor' => $remito->tipoBolsa->proveedor,
+                ] : null,
+                'cantidad_declarada' => $remito->cantidad_declarada,
+                'cantidad_bolsas' => $codigos->count(),
+                'codigo_inicio' => $remito->codigo_inicio,
+                'codigo_fin' => $remito->codigo_fin,
+                'observaciones' => $remito->observaciones,
+                'usuario_recep' => $remito->usuarioRecep ? [
+                    'first_name' => $remito->usuarioRecep->first_name,
+                    'last_name' => $remito->usuarioRecep->last_name,
+                ] : null,
+                'tamanio' => $remito->tamanio ? [
+                    'nombre' => $remito->tamanio->nombre,
+                ] : null,
+                'bolsas' => $codigos,
+            ],
+        ]);
     }
 
     /**
@@ -161,5 +216,19 @@ class RemitoRecepcionController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function generarPdf(RemitoRecepcion $remito)
+    {
+        $remito->load([
+            'usuarioRecep',
+            'tipoBolsa',
+            'tamanio',
+            'bolsas' => fn ($query) => $query->orderBy('id'),
+        ]);
+
+        return Pdf::loadView('remitorecepcion.generarremitorecepcion', [
+            'remito' => $remito,
+        ])->download("remito-recepcion-{$remito->id}.pdf");
     }
 }

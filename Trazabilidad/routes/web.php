@@ -22,8 +22,13 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     Route::resource('tipos-bolsa',TipoBolsaController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('tamanios', TamanioController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('servicios', ServicioController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::resource('remitos-recepcion', RemitoRecepcionController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::resource('bolsas', BolsaController::class)->only(['index', 'store', 'update', 'destroy']);
+    // Route::resource('remitos-recepcion', RemitoRecepcionController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('bolsas', BolsaController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
+
+    Route::resource('remitos-recepcion', RemitoRecepcionController::class)->only(['index', 'create', 'show', 'store', 'update', 'destroy']);
+
+    Route::get('/remitos-recepcion/{remito}/pdf', [RemitoRecepcionController::class, 'generarPdf'])
+        ->name('remitos-recepcion.pdf');
 });
 
 require __DIR__.'/settings.php';

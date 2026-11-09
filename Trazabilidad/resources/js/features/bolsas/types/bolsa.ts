@@ -2,6 +2,10 @@ export interface Bolsa {
   id: number;
   codigo_barra: string;
   tipo_bolsa_id: number;
+  tipo_bolsa?: {
+    tipo_residuo: string;
+    color: string;
+  } | null;
   tamanio_id?: number | null;
   estado: string;
   peso?: number | null;

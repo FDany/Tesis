@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import type { TipoBolsa, CreateTipoBolsaDTO } from '../types/tipoBolsa';
 import {
@@ -11,6 +11,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+
+import { HexColorInput, HexColorPicker } from 'react-colorful';
+
 
 interface Props {
   isOpen: boolean;
@@ -69,6 +72,9 @@ export const TipoBolsaModalForm: React.FC<Props> = ({
     }
   };
 
+  const [colorPickerOpen, setColorPickerOpen] = useState(false);
+  const selectedColor = data.color || '#000000';
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-106.25">
@@ -85,6 +91,7 @@ export const TipoBolsaModalForm: React.FC<Props> = ({
             <Label htmlFor="tipo_residuo">Tipo / Flujo de Residuo</Label>
             <Input
               id="tipo_residuo"
+              autoComplete="off"
               placeholder="Ej: Patogénico, Peligroso, Común"
               value={data.tipo_residuo}
               onChange={(e) => setData('tipo_residuo', e.target.value)}
@@ -96,20 +103,113 @@ export const TipoBolsaModalForm: React.FC<Props> = ({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="color">Color</Label>
+          {/* <div className="space-y-2">
+            <Label htmlFor="color">
+              Color
+              </Label>
             <Input
               id="color"
-              placeholder="Ej: Rojo, Amarillo, Negro"
-              value={data.color}
+              type="color"
+              value={data.color || '#000000'}
               onChange={(e) => setData('color', e.target.value)}
+              className="absolute inset-0 size-full cursor-pointer opacity-0"
+              aria-label="Seleccionar color"
             />
-            {errors.color && (
-              <p className="text-sm font-medium text-destructive">
-                {errors.color}
-              </p>
-            )}
+          </div> */}
+
+
+          {/* <div className="space-y-2">
+            <div className="flex items-start gap-4">
+              <Label htmlFor="color" className="pt-2">
+                Color
+              </Label>
+
+              
+              <label
+                className="relative inline-flex size-10 cursor-pointer items-center justify-center rounded-full border"
+                aria-label="Seleccionar color"
+              >
+                <span
+                  className="size-full rounded-full"
+                  style={{ backgroundColor: data.color || '#000000' }}
+                />
+                <input
+                  id="color"
+                  type="color"
+                  value={data.color || '#000000'}
+                  onChange={(e) => setData('color', e.target.value)}
+                  className="absolute inset-0 size-full cursor-pointer opacity-0"
+                  aria-label="Seleccionar color"
+                />
+              </label>
+
+            </div>
+
+              {errors.color && (
+                <p className="text-sm font-medium text-destructive">
+                  {errors.color}
+                </p>
+              )}
+          </div> */}
+
+
+
+          <div className="flex items-start gap-4">
+            <span className="pt-2 text-sm font-medium">
+              Color
+            </span>
+
+            <div className="relative flex flex-col items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setColorPickerOpen((open) => !open)}
+                className="size-10 cursor-pointer rounded-full border"
+                style={{ backgroundColor: selectedColor }}
+                aria-label="Abrir selector de color"
+                aria-expanded={colorPickerOpen}
+              />
+
+
+              {colorPickerOpen && (
+                <div className="absolute left-full top-1/2 z-[60] ml-2 -translate-y-1/2 rounded-md border bg-background p-3 shadow-lg">
+                  <HexColorPicker
+                    color={selectedColor}
+                    onChange={(color) => setData('color', color)}
+                  />
+
+                  <HexColorInput
+                    id="color"
+                    name="color"
+                    autoComplete="off"
+                    color={selectedColor}
+                    onChange={(color) => setData('color', color.toUpperCase())}
+                    prefixed
+                    className="mt-2 w-full rounded-md border bg-background px-2 py-1 text-sm uppercase"
+                  />
+                </div>
+              )}
+            </div>
           </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
           <div className="space-y-2">
             <Label htmlFor="proveedor">Proveedor</Label>

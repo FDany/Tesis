@@ -75,11 +75,6 @@ const navItems: AppNavItem[] = [
         icon: Trash2,
     },
     {
-        title: 'Gestión de Residuos',
-        href: '/residuos',
-        icon: Trash2,
-    },
-    {
         title: 'Reportes',
         href: '/reportes',
         icon: BarChart3,
@@ -94,6 +89,11 @@ const navItems: AppNavItem[] = [
     {
         title: 'Nueva Carga',
         href: '/bolsas/create',
+        icon: Plus,
+    },
+    {
+        title: 'Crear Remito de Recepción',
+        href: '/remitos-recepcion/create',
         icon: Plus,
     },
 ];
