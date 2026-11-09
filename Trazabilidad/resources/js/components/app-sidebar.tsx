@@ -70,8 +70,23 @@ const navItems: AppNavItem[] = [
         icon: LayoutDashboard,
     },
     {
+        title: 'Gestión de Remitos de Salida',
+        href: '/remitos-salida',
+        icon: LayoutDashboard,
+    },
+    {
         title: 'Gestion de Bolsas',
         href: '/bolsas',
+        icon: Trash2,
+    },
+    {
+        title: 'Gestión de Incidencias',
+        href: '/incidencias',
+        icon: LayoutDashboard,
+    },
+    {
+        title: 'Gestión de Residuos',
+        href: '/residuos',
         icon: Trash2,
     },
     {
@@ -85,7 +100,6 @@ const navItems: AppNavItem[] = [
         icon: Settings,
         adminOnly: true,
     },
-
     {
         title: 'Nueva Carga',
         href: '/bolsas/create',

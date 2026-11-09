@@ -1,3 +1,5 @@
+import { TipoBolsa } from '@/features/tipos-bolsa/types/tipoBolsa';
+
 export interface Bolsa {
   id: number;
   codigo_barra: string;
@@ -15,6 +17,8 @@ export interface Bolsa {
   rem_sal_id?: number | null;
   created_at?: string;
   updated_at?: string;
+
+  tipo_bolsa?: TipoBolsa | null;
 }
 
 export type CreateBolsaDTO = Omit<Bolsa, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>;
