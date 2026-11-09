@@ -12,12 +12,13 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'fecha_hora',
     'usuario_registra',
     'bolsa_id',
+    'rem_sal_id',
     'codigo_no_registrado',
     'tipo_bolsa_id',
     'servicio_id',
     'tipo_incidencia',
-    'decripcion',
-    'acccion_adoptada',
+    'descripcion',
+    'accion_adoptada',
     'usuario_cierra',
     'fecha_resolucion',
     'estado',
@@ -31,7 +32,6 @@ class Incidencia extends Model
     protected $casts = [
         'fecha_hora' => 'datetime',
         'fecha_resolucion' => 'datetime',
-        'codigo_no_registrado' => 'integer',
     ];
 
     /**Relaciones eloquent*/
@@ -64,6 +64,11 @@ class Incidencia extends Model
     public function servicio(): BelongsTo
     {
         return $this->belongsTo(Servicio::class, 'servicio_id');
+    }
+
+    public function remitoSalidaRetiro(): BelongsTo
+    {
+        return $this->belongsTo(RemitoSalidaRetiro::class, 'rem_sal_id');
     }
 
     /**Evidencias o fotografías adjuntas a esta incidencia (Polimórfico).*/
