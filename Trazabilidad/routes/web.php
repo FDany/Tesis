@@ -36,7 +36,7 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
 
     // Módulo Incidencias
     Route::get('incidencias/crear', [IncidenciaController::class, 'create'])->name('incidencias.create');
-    Route::post('incidencias/{incidencia}/resolver', [IncidenciaController::class, 'resolver'])->name('incidencias.resolver');
+    Route::put('incidencias/{incidencia}/resolver', [IncidenciaController::class, 'resolver'])->name('incidencias.resolver');
     Route::resource('incidencias', IncidenciaController::class);
 
     // Endpoint API para la validación del escáner en vivo

@@ -57,7 +57,7 @@ export default function CreateIncidencia() {
     };
 
     return (
-        <>
+        <div>
             <Head title="Registrar Incidencia Manual" />
 
             <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -276,6 +276,6 @@ export default function CreateIncidencia() {
                     </CardContent>
                 </Card>
             </div>
-        </>
+        </div>
     );
 }
