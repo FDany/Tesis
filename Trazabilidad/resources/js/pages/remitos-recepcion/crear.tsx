@@ -218,11 +218,24 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
 
         setErrorBolsa('');
 
-        router.post('/remitos-recepcion', { ...vistaPrevia.remito }, {
-            onError: (errors) => {
-                setErrorBolsa(Object.values(errors).join(' '));
+        // router.post('/remitos-recepcion', { ...vistaPrevia.remito }, {
+        //     onError: (errors) => {
+        //         setErrorBolsa(Object.values(errors).join(' '));
+        //     },
+        // });
+
+        router.post(
+            '/remitos-recepcion',
+            {
+                ...vistaPrevia.remito,
+                codigos: vistaPrevia.bolsas.map((bolsa) => bolsa.codigo_barra),
             },
-        });
+            {
+                onError: (errors) => {
+                    setErrorBolsa(Object.values(errors).join(' '));
+                },
+            },
+        );
     };
 
 

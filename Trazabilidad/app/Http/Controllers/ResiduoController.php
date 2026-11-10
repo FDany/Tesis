@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\JsonResponse;
 
 class ResiduoController extends Controller
 {
@@ -21,6 +22,36 @@ class ResiduoController extends Controller
                 ->where('activo', true)
                 ->orderBy('nombre')
                 ->get(['id', 'nombre']),
+        ]);
+    }
+
+    
+    public function verificarBolsa(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'codigo' => ['required', 'string', 'regex:/^\d{13}$/'],
+        ]);
+
+        $bolsa = Bolsa::query()
+            ->where('codigo_barra', $validated['codigo'])
+            ->first();
+
+        if (! $bolsa) {
+            return response()->json([
+                'message' => 'No existe una bolsa con ese código.',
+            ], 404);
+        }
+
+        if ($bolsa->estado !== 'DISPONIBLE' || $bolsa->remitos_serv_id !== null) {
+            return response()->json([
+                'message' => "La bolsa {$bolsa->codigo_barra} no está disponible. Estado actual: {$bolsa->estado}.",
+            ], 422);
+        }
+
+        return response()->json([
+            'id' => $bolsa->id,
+            'codigo_barra' => $bolsa->codigo_barra,
+            'estado' => $bolsa->estado,
         ]);
     }
 

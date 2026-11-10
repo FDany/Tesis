@@ -12,6 +12,7 @@ use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
 use App\Models\Tamanio;
 use Barryvdh\DomPDF\Facade\Pdf; 
+use Illuminate\Validation\ValidationException;
 
 class RemitoRecepcionController extends Controller
 {
@@ -65,21 +66,32 @@ class RemitoRecepcionController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'codigos' => ['required', 'array', 'min:1', 'max:1000'],
+            'codigos.*' => [
+                'required',
+                'string',
+                'distinct:strict',
+                'regex:/^\d{13}$/',
+            ],
             'fecha_recepcion'    => 'required|date',
             'observaciones'      => 'nullable|string',
-            'codigo_inicio' => ['required', 'string', 'regex:/^\d{1,4}-\d{1,9}$/'],
-            'codigo_fin'    => ['required', 'string', 'regex:/^\d{1,4}-\d{1,9}$/'],
+            'codigo_inicio'      => ['required', 'string', 'regex:/^\d{1,4}-\d{1,9}$/'],
+            'codigo_fin'         => ['required', 'string', 'regex:/^\d{1,4}-\d{1,9}$/'],
             'tipo_bolsa_id'      => 'required|exists:tipos_bolsa,id',
-            'cantidad_declarada' => 'required|integer|min:1|max:1000',      //control de cantidad ingresada
-            'tamanio_id'         => 'required|exists:tamanios,id', // Validar que el tamaño exista en la tabla tamanios
+            'cantidad_declarada' => 'required|integer|min:1|max:1000', // control de cantidad ingresada
+            'tamanio_id'         => 'required|exists:tamanios,id', // Valida que el tamaño exista en la tabla tamanios
         ]);
+
+        // Validar que la cantidad declarada coincida con la cantidad de códigos proporcionados
+        $codigos = $validated['codigos'];
+        unset($validated['codigos']);
 
         // Extraer prefijos y correlativos del rango
         [$prefijoInicio, $correlativoInicio] = explode('-', $validated['codigo_inicio']);
-        [$prefijoFin, $correlativoFin]       = explode('-', $validated['codigo_fin']);
+        [$prefijoFin, $correlativoFin] = explode('-', $validated['codigo_fin']);
 
         $inicioInt = (int) $correlativoInicio;
-        $finInt    = (int) $correlativoFin;
+        $finInt = (int) $correlativoFin;
 
         // Compara los prefijos ignorando ceros iniciales: 3 y 0003 se consideran iguales.
         $prefijoInicioNormalizado = ltrim($prefijoInicio, '0') ?: '0';
@@ -105,7 +117,46 @@ class RemitoRecepcionController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($validated, $request, $prefijoInicio, $inicioInt, $finInt) {
+        if (count($codigos) !== (int) $validated['cantidad_declarada']) {
+            throw ValidationException::withMessages([
+                'codigos' => 'La cantidad de códigos debe coincidir con la cantidad declarada.',
+            ]);
+        }
+
+        $prefijoFormateado = str_pad($prefijoInicio, 4, '0', STR_PAD_LEFT);
+        $codigosEsperados = [];
+
+        // Generar los códigos esperados en el rango (de parte del controlador)
+        for ($i = $inicioInt; $i <= $finInt; $i++) {
+            $codigosEsperados[] = $prefijoFormateado
+                . str_pad((string) $i, 9, '0', STR_PAD_LEFT);
+        }
+
+        $codigosRecibidosOrdenados = $codigos;
+        sort($codigosRecibidosOrdenados, SORT_STRING);
+        sort($codigosEsperados, SORT_STRING);
+
+        // Valida los codigos generados por el controlador con los codigos recibidos de la vista
+        if ($codigosRecibidosOrdenados !== $codigosEsperados) {
+            throw ValidationException::withMessages([
+                'codigos' => 'Los códigos ingresados no coinciden con el rango declarado.',
+            ]);
+        }
+
+        DB::transaction(function () use ($validated, $codigos, $request) {
+            $codigosExistentes = Bolsa::query()
+                ->whereIn('codigo_barra', $codigos)
+                ->lockForUpdate()
+                ->pluck('codigo_barra')
+                ->all();
+
+            if ($codigosExistentes !== []) {
+                throw ValidationException::withMessages([
+                    'codigos' => 'Estos códigos de barra ya están registrados: '
+                        . implode(', ', $codigosExistentes),
+                ]);
+            }
+
             $validated['recep_usuario_id'] = $request->user()->id;
 
             $remito = RemitoRecepcion::create($validated);
@@ -113,16 +164,12 @@ class RemitoRecepcionController extends Controller
             $bolsasData = [];
             $now = now();
 
-            for ($i = $inicioInt; $i <= $finInt; $i++) {
-                $prefijoFormatted     = str_pad($prefijoInicio, 4, '0', STR_PAD_LEFT);
-                $correlativoFormatted = str_pad($i, 9, '0', STR_PAD_LEFT);
-                $codigo13Digitos      = $prefijoFormatted . $correlativoFormatted;
-
+            foreach ($codigos as $codigo13Digitos) {
                 $bolsasData[] = [
                     'codigo_barra'  => $codigo13Digitos,
                     'tipo_bolsa_id' => $validated['tipo_bolsa_id'],
                     'tamanio_id'    => $validated['tamanio_id'],
-                    'estado'        => 'Recibido',
+                    'estado'        => 'DISPONIBLE',
                     'rem_rep_id'    => $remito->id,
                     'created_at'    => $now,
                     'updated_at'    => $now,
@@ -133,7 +180,6 @@ class RemitoRecepcionController extends Controller
         });
 
         // return redirect()->back()->with('success', 'Remito registrado y bolsas generadas correctamente.');
-
 
         return redirect()
             ->route('remitos-recepcion.index')
