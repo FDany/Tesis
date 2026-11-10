@@ -7,13 +7,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 interface RemitoRecepcionTableProps {
   data: RemitoRecepcion[];
+  onVer: (id: number) => void;
 }
 
-export function RemitoRecepcionTable({ data }: RemitoRecepcionTableProps) {
+export function RemitoRecepcionTable({
+  data,
+  onVer,
+}: RemitoRecepcionTableProps) {
   return (
     <div className="rounded-md border">
       <Table>
@@ -25,13 +31,14 @@ export function RemitoRecepcionTable({ data }: RemitoRecepcionTableProps) {
             <TableHead>Cant. Declarada</TableHead>
             <TableHead>Rango Manuscrito</TableHead>
             <TableHead>Tamaño</TableHead>
+            <TableHead className="text-right">Ver</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {!data || data.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 className="py-6 text-center text-muted-foreground"
               >
                 No hay remitos de recepción registrados.
@@ -49,9 +56,12 @@ export function RemitoRecepcionTable({ data }: RemitoRecepcionTableProps) {
                 </TableCell>
                 <TableCell>
                   {remito.tipo_bolsa ? (
-                    <span>
-                      {remito.tipo_bolsa.tipo_residuo} ({remito.tipo_bolsa.color})
-                    </span>
+                    <Badge
+                      variant="outline"
+                      style={{ borderColor: remito.tipo_bolsa.color }}
+                    >
+                      {remito.tipo_bolsa.tipo_residuo}
+                    </Badge>
                   ) : (
                     '-'
                   )}
@@ -63,14 +73,27 @@ export function RemitoRecepcionTable({ data }: RemitoRecepcionTableProps) {
                   </code>
                 </TableCell>
                 <TableCell>
-                  {remito.tamanio?(
+                  {remito.tamanio ? (
                     <span>
-                        {remito.tamanio.nombre}
+                      {remito.tamanio.nombre}
                     </span>
-                  ):(
+                  ) : (
                     '-'
                   )}
                 </TableCell>
+
+                <TableCell className="text-right">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Ver detalle del remito ${remito.id}`}
+                    onClick={() => onVer(remito.id)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+
               </TableRow>
             ))
           )}

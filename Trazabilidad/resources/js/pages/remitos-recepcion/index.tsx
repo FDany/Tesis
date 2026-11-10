@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import {
+  RemitoRecepcionDetalleModal,
   RemitoRecepcionModalForm,
   RemitoRecepcionTable,
+  type RemitoDetalle,
   type RemitoRecepcion,
 } from '@/features/remitos-recepcion';
 import type { TipoBolsa } from '@/features/tipos-bolsa';
@@ -15,12 +17,14 @@ import Paginacion, {
 } from '@/components/Paginador';
 import CantFilas from '@/components/CantFilas';
 
+
 interface IndexProps {
   remitos: PaginacionData & { data: RemitoRecepcion[] };  //requiere una respuesta paginada cuyos elementos son remitos.
   tiposBolsa: TipoBolsa[];                      //arreglo de tipos de bolsa
   porPagina: number;                            //requiere un número con la cantidad de remitos que se muestran por página.
   opcionesPorPagina: number[];                  //requiere un arreglo de números con las cantidades que el selector puede ofrecer
   tamanios: Tamanio[];
+  remitoDetalle?: RemitoDetalle;
 }
 
 export default function Index({
@@ -28,7 +32,8 @@ export default function Index({
   tiposBolsa,
   porPagina,
   opcionesPorPagina,
-  tamanios
+  tamanios,
+  remitoDetalle,
 }: IndexProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -43,6 +48,24 @@ export default function Index({
         replace: true,
       },
     );
+  };
+
+  const [detalleOpen, setDetalleOpen] = useState(false);
+  const [remitoSeleccionadoId, setRemitoSeleccionadoId] = useState<number | null>(null);
+  const [cargandoDetalle, setCargandoDetalle] = useState(false);
+
+  const verDetalle = (id: number) => {
+    setRemitoSeleccionadoId(id);
+    setDetalleOpen(true);
+    setCargandoDetalle(true);
+
+    router.get(`/remitos-recepcion/${id}`, {}, {
+      only: ['remitoDetalle'],
+      preserveState: true,
+      preserveScroll: true,
+      preserveUrl: true,
+      onFinish: () => setCargandoDetalle(false),
+    });
   };
 
   return (
@@ -65,6 +88,24 @@ export default function Index({
           </Button>
         </div>
 
+        {/* Modal con el detalle del remito */}
+        <RemitoRecepcionDetalleModal
+          open={detalleOpen}
+          onOpenChange={(open) => {
+            setDetalleOpen(open);
+
+            if (!open) {
+              setRemitoSeleccionadoId(null);
+              setCargandoDetalle(false);
+            }
+          }}
+          remitoId={remitoSeleccionadoId}
+          cargando={cargandoDetalle}
+          detalle={remitoDetalle}
+        />
+
+
+
         {/* Limitador de cantidad de filas */}
         <CantFilas
           value={porPagina}
@@ -73,7 +114,7 @@ export default function Index({
         />
 
         {/* Tabla con la lista de registros */}
-        <RemitoRecepcionTable data={remitos.data} />
+        <RemitoRecepcionTable data={remitos.data} onVer={verDetalle} />
 
         {/* Paginacion */}
         <Paginacion pagination={remitos} />

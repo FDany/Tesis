@@ -91,21 +91,38 @@ export default function IncidenciaShow({ incidencia }: Props) {
                                 <CardContent>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         {incidencia.documentos.map((doc) => (
-                                            <div key={doc.id} className="border rounded-lg overflow-hidden bg-background">
-                                                <a
-                                                    href={`/storage/${doc.url_archivo}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    <img
-                                                        src={`/storage/${doc.url_archivo}`}
-                                                        alt={doc.nombre_archivo || 'Evidencia'}
-                                                        className="w-full h-48 object-cover hover:opacity-90 transition-opacity"
-                                                    />
-                                                </a>
+                                            <div
+                                                key={doc.id}
+                                                className="overflow-hidden rounded-lg border bg-background"
+                                            >
+
+                                                {doc.tipo_documento === 'pdf' ? (
+                                                    <a
+                                                        href={`/storage/${doc.url_archivo}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-2 p-4 text-sm text-primary hover:underline"
+                                                    >
+                                                        <FileText className="h-5 w-5 shrink-0" />
+                                                        Abrir PDF: {doc.nombre_archivo}
+                                                    </a>
+                                                ) : (
+                                                    <a
+                                                        href={`/storage/${doc.url_archivo}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        <img
+                                                            src={`/storage/${doc.url_archivo}`}
+                                                            alt={doc.nombre_archivo || 'Evidencia'}
+                                                            className="h-48 w-full object-cover transition-opacity hover:opacity-90"
+                                                        />
+                                                    </a>
+                                                )}
                                                 <div className="p-2 text-xs text-muted-foreground truncate border-t bg-muted/20">
                                                     {doc.nombre_archivo}
                                                 </div>
+                                                
                                             </div>
                                         ))}
                                     </div>
@@ -179,13 +196,13 @@ export default function IncidenciaShow({ incidencia }: Props) {
                                     </div>
                                 </div>
 
-                                {incidencia.usuario_cierra_user && (
+                                {incidencia.usuario_cierra && (
                                     <div className="flex items-center gap-3">
                                         <UserIcon className="h-4 w-4 text-green-600 shrink-0" />
                                         <div>
                                             <p className="text-xs text-muted-foreground">Resuelto por</p>
                                             <p className="font-medium">
-                                                {obtenerNombreUsuario(incidencia.usuario_cierra_user)}
+                                                {obtenerNombreUsuario(incidencia.usuario_cierra)}
                                             </p>
                                         </div>
                                     </div>
@@ -265,6 +282,6 @@ export default function IncidenciaShow({ incidencia }: Props) {
                     onOpenChange={setIsModalOpen}
                 />
             </div>
-        </AppLayout>
+        </AppLayout >
     );
 }

@@ -71,7 +71,7 @@ class IncidenciaController extends Controller
     {
         $validated = $request->validate([
             'tipo_incidencia'      => ['required', 'string', new Enum(TipoIncidencia::class)],
-            'descripcion'          => 'required|string|min:5|max:1000',
+            'descripcion'          => 'required|string|min:5|max:600',
             'bolsa_id'             => 'nullable|exists:bolsas,id',
             'codigo_no_registrado' => 'nullable|string|max:30',
             'servicio_id'          => 'nullable|exists:servicios,id',
@@ -143,7 +143,7 @@ class IncidenciaController extends Controller
     public function resolver(Request $request, Incidencia $incidencia): RedirectResponse
     {
         $validated = $request->validate([
-            'accion_adoptada' => 'required|string|min:5',
+            'accion_adoptada' => 'required|string|min:5|max:600',
             'estado'          => 'required|string|in:EN_ANALISIS,RESUELTA,CERRADA',
         ]);
 

@@ -105,6 +105,11 @@ const navItems: AppNavItem[] = [
         href: '/bolsas/create',
         icon: Plus,
     },
+    {
+        title: 'Crear Remito de Recepción',
+        href: '/remitos-recepcion/create',
+        icon: Plus,
+    },
 ];
 
 const footerNavItems: NavItem[] = [];

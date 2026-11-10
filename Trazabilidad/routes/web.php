@@ -9,6 +9,7 @@ use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\BolsaController;
 use App\Http\Controllers\RemitoSalidaRetiroController;
 use App\Http\Controllers\IncidenciaController;
+use App\Http\Controllers\ResiduoController;
 use App\Models\Bolsa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,17 +27,20 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     Route::resource('tipos-bolsa', TipoBolsaController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('tamanios', TamanioController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('servicios', ServicioController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::resource('remitos-recepcion', RemitoRecepcionController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::resource('bolsas', BolsaController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('remitos-recepcion', RemitoRecepcionController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::resource('bolsas', BolsaController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
 
-    // Módulo Remitos de Salida (Despacho Interno y Conciliación DGM)
+    Route::get('/remitos-recepcion/{remito}/pdf', [RemitoRecepcionController::class, 'generarPdf'])
+        ->name('remitos-recepcion.pdf');
+
+     // Módulo Remitos de Salida (Despacho Interno y Conciliación DGM)
     Route::resource('remitos-salida', RemitoSalidaRetiroController::class);
     Route::post('remitos-salida/{remito}/conciliar', [RemitoSalidaRetiroController::class, 'conciliar'])->name('remitos-salida.conciliar');
     Route::get('remitos-salida/{remito}/pdf', [RemitoSalidaRetiroController::class, 'descargarPdf'])->name('remitos-salida.pdf');
 
     // Módulo Incidencias
     Route::get('incidencias/crear', [IncidenciaController::class, 'create'])->name('incidencias.create');
-    Route::post('incidencias/{incidencia}/resolver', [IncidenciaController::class, 'resolver'])->name('incidencias.resolver');
+    Route::patch('incidencias/{incidencia}/resolver', [IncidenciaController::class,'resolver',])->name('incidencias.resolver');
     Route::resource('incidencias', IncidenciaController::class);
 
     // Endpoint API para la validación del escáner en vivo
@@ -69,6 +73,10 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
 
         return response()->json($bolsa);
     });
+
+    // Módulo Residuos
+    Route::get('residuos', [ResiduoController::class, 'create'])->name('residuos.create');
+    Route::post('residuos', [ResiduoController::class, 'store'])->name('residuos.store');
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

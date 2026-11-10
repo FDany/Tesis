@@ -52,10 +52,10 @@ export function IncidenciaFiltros({ filters }: Props) {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="TODOS">Todos los Tipos</SelectItem>
-          <SelectItem value="DISCREPANCIA_CONCILIACION_DGM">Discrepancia Conciliación DGM</SelectItem>
-          <SelectItem value="BOLSA_DAÑADA">Bolsa Dañada</SelectItem>
+          <SelectItem value="DIFERENCIA_CONCILIACION_DGM">Discrepancia Conciliación DGM</SelectItem>
+          <SelectItem value="BOLSA_DANADA">Bolsa Dañada</SelectItem>
           <SelectItem value="PESO_FUERA_DE_RANGO">Peso Fuera de Rango</SelectItem>
-          <SelectItem value="OTRO">Otro</SelectItem>
+          <SelectItem value="OTRA">Otra</SelectItem>
         </SelectContent>
       </Select>
 

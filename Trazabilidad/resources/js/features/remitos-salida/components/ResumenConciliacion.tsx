@@ -196,7 +196,7 @@ export function ResumenConciliacion({
                         <AlertDescription className="text-xs mt-1">
                             Existe una diferencia de <strong>{Math.abs(diferencia)} bolsa(s)</strong> entre el remito interno ({cantidadSistema}) y lo declarado por DGM ({cantidadDgm}). Se registrará una incidencia de tipo{' '}
                             <code className="rounded bg-destructive/20 px-1 py-0.5 font-mono font-semibold">
-                                DISCREPANCIA_CONCILIACION_DGM
+                                DIFERENCIA_CONCILIACION_DGM
                             </code>.
                         </AlertDescription>
                     </Alert>

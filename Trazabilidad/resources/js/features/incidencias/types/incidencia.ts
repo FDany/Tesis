@@ -41,12 +41,12 @@ export interface Incidencia {
   accion_adoptada?: string | null;
 
   // Cierre y resolución
-  usuario_cierra?: number | null;
+  usuario_cierra_id?: number | null;
   fecha_resolucion?: string | null;
   estado: 'ABIERTA' | 'EN_ANALISIS' | 'RESUELTA' | 'CERRADA' | string;
 
   // Relaciones cargadas desde Eloquent
-  usuario_cierra_user?: User;
+  usuario_cierra?: User | null;
   bolsa?: Bolsa | null;
   remito_salida_retiro?: RemitoSalidaRetiroRef | null;
   servicio?: Servicio | null;

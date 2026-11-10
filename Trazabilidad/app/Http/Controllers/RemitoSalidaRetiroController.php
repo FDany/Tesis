@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Validation\ValidationException;
 
 class RemitoSalidaRetiroController extends Controller
 {
@@ -41,12 +42,40 @@ class RemitoSalidaRetiroController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'bolsas_ids' => 'required|array|min:1',
-            'bolsas_ids.*' => 'exists:bolsas,id',
+            'bolsas_ids' => 'required|array|min:1',     // Validación de que se envíe un array de IDs de bolsas
+            'bolsas_ids.*' => ['required', 'integer', 'distinct', 'exists:bolsas,id'],  // Validación cada ID esté presente, sea entero, no se repita y corresponda a una bolsa existente
             'observaciones' => 'nullable|string',
         ]);
 
         return DB::transaction(function () use ($validated, $request) {
+
+            //
+            $bolsas = Bolsa::whereIn('id', $validated['bolsas_ids'])
+                ->lockForUpdate()   // Bloquea esas bolsas para que otra transacción no las modifique mientras se procesa este despacho.
+                ->get();            // Ejecuta la consulta y devuelve las bolsas encontradas como colección
+
+            // Validación adicional, nos aseguramos de que todas las bolsas solicitadas fueron encontradas
+            if ($bolsas->count() !== count($validated['bolsas_ids'])) {
+                throw ValidationException::withMessages([
+                    'bolsas_ids' => 'No se encontraron todas las bolsas seleccionadas.',
+                ]);
+            }
+
+            $bolsasNoDisponibles = $bolsas->filter(
+                fn (Bolsa $bolsa) =>
+                    $bolsa->estado !== 'PESADA'
+                    || $bolsa->peso === null
+                    || $bolsa->peso <= 0
+                    || $bolsa->rem_sal_id !== null
+            );
+
+            if ($bolsasNoDisponibles->isNotEmpty()) {
+                throw ValidationException::withMessages([
+                    'bolsas_ids' => 'Solo se pueden despachar bolsas pesadas, con peso y sin remito de salida.',
+                ]);
+            }
+
+
             // Generar correlativo interno automático (Ej: RSI-2026-00001)
             $anioActual = date('Y');
             $ultimoId = RemitoSalidaRetiro::max('id') ?? 0;
@@ -68,7 +97,7 @@ class RemitoSalidaRetiroController extends Controller
             // 2. Asociar bolsas y cambiar su estado
             Bolsa::whereIn('id', $validated['bolsas_ids'])->update([
                 'rem_sal_id' => $remito->id,
-                'estado' => 'despachada',
+                'estado' => 'DESPACHADA',
             ]);
 
             return redirect()->route('remitos-salida.show', $remito->id)
@@ -118,7 +147,7 @@ class RemitoSalidaRetiroController extends Controller
                     'fecha_hora' => now(),
                     'usuario_registra' => $request->user()->id,
                     'rem_sal_id' => $remito->id,
-                    'tipo_incidencia' => 'DISCREPANCIA_CONCILIACION_DGM',
+                    'tipo_incidencia' => 'DIFERENCIA_CONCILIACION_DGM',
                     'descripcion' => "Discrepancia en remito interno {$remito->numero_remito_interno} (DGM N° {$remito->numero_remito}): El sistema registró {$cantidadSistema} bolsas vs. {$cantidadDgm} declaradas por DGM. Diferencia: {$diferencia} bolsa(s).",
                     'estado' => 'ABIERTA',
                 ]);
