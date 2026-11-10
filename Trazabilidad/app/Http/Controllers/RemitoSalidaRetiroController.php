@@ -193,8 +193,9 @@ class RemitoSalidaRetiroController extends Controller
         ]);
 
         // Generar la vista Blade pasándole el modelo cargado
-        $pdf = Pdf::loadView('pdf.remito-salida-interno', compact('remito'))
-            ->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView('remitosalida.generarremitosalida', [
+            'remito' => $remito,
+        ]);
 
         // Transmitir en el navegador (stream) o descargar (download)
         return $pdf->stream("remito-salida-{$remito->numero_remito_interno}.pdf");

@@ -27,7 +27,7 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     Route::resource('tipos-bolsa', TipoBolsaController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('tamanios', TamanioController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('servicios', ServicioController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::resource('remitos-recepcion', RemitoRecepcionController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::resource('remitos-recepcion', RemitoRecepcionController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
     Route::resource('bolsas', BolsaController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
 
     Route::get('/remitos-recepcion/{remito}/pdf', [RemitoRecepcionController::class, 'generarPdf'])
@@ -43,7 +43,7 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     Route::patch('incidencias/{incidencia}/resolver', [IncidenciaController::class,'resolver',])->name('incidencias.resolver');
     Route::resource('incidencias', IncidenciaController::class);
 
-    // Endpoint API para la validación del escáner en vivo
+    // Endpoint API para la validación del escáner en tiempo real
     Route::get('api/bolsas/buscar-para-despacho', function (Request $request) {
         $codigo = $request->query('codigo');
 
@@ -77,6 +77,11 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     // Módulo Residuos
     Route::get('residuos', [ResiduoController::class, 'create'])->name('residuos.create');
     Route::post('residuos', [ResiduoController::class, 'store'])->name('residuos.store');
+
+    Route::get(
+        'api/bolsas/buscar-para-entrega',
+        [ResiduoController::class, 'verificarBolsa'],
+    )->name('residuos.verificar-bolsa');
 });
 
 require __DIR__.'/settings.php';
