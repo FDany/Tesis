@@ -33,7 +33,7 @@ type AppNavItem = NavItem & {
 const navItems: AppNavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: '/dashboard',
         icon: LayoutDashboard,
     },
     {
@@ -84,7 +84,7 @@ const navItems: AppNavItem[] = [
         href: '/incidencias',
         icon: LayoutDashboard,
     },
-    {
+    /*{
         title: 'Gestión de Residuos',
         href: '/residuos',
         icon: Trash2,
@@ -99,7 +99,7 @@ const navItems: AppNavItem[] = [
         href: '/configuracion',
         icon: Settings,
         adminOnly: true,
-    },
+    },*/
     {
         title: 'Nueva Carga',
         href: '/bolsas/create',

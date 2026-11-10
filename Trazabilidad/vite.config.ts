@@ -28,6 +28,12 @@ export default defineConfig({
             formVariants: true,
         }),
     ]),
+    resolve: {
+        dedupe: ['react', 'react-dom'],
+    },
+    optimizeDeps: {
+        include: ['recharts'],
+    },
     server: {
         watch: {
             ignored: [
