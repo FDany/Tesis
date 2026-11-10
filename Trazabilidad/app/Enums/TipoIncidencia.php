@@ -24,6 +24,10 @@ enum TipoIncidencia: string
     case DOCUMENTACION_FALTANTE = 'DOCUMENTACION_FALTANTE';
     case OTRA = 'OTRA';
 
+    // M-N: Daños y Peso
+    case BOLSA_DANADA = 'BOLSA_DANADA';
+    case PESO_FUERA_DE_RANGO = 'PESO_FUERA_DE_RANGO';
+
     /**
      * Retorna una etiqueta legible para mostrar en las vistas/tablas.
      */
@@ -41,7 +45,13 @@ enum TipoIncidencia: string
             self::DIFERENCIA_CONCILIACION_DGM => 'Diferencia de cantidad en retiro DGM',
             self::BOLSA_SIN_PESAJE => 'Bolsa pendiente de pesaje',
             self::DOCUMENTACION_FALTANTE => 'Documentación física o digital faltante',
+
+            self::BOLSA_DANADA => 'Bolsa dañada o comprometida',
+            self::PESO_FUERA_DE_RANGO => 'Peso de la bolsa fuera del rango esperado',
+
             self::OTRA => 'Otra incidencia / Evento no contemplado',
+
+            
         };
     }
 
@@ -57,6 +67,10 @@ enum TipoIncidencia: string
             self::BOLSA_SIN_SERVICIO->value => self::BOLSA_SIN_SERVICIO->label(),
             self::DIFERENCIA_PESO->value => self::DIFERENCIA_PESO->label(),
             self::DOCUMENTACION_FALTANTE->value => self::DOCUMENTACION_FALTANTE->label(),
+
+            self::BOLSA_DANADA->value => self::BOLSA_DANADA->label(),
+            self::PESO_FUERA_DE_RANGO->value => self::PESO_FUERA_DE_RANGO->label(),
+
             self::OTRA->value => self::OTRA->label(),
         ];
     }

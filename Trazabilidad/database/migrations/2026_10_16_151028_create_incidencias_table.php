@@ -23,8 +23,8 @@ return new class extends Migration
             $table->foreignId('servicio_id')->nullable()->constrained('servicios');
             //Detalle de la incidencia
             $table->string('tipo_incidencia');
-            $table->string('descripcion');
-            $table->string('accion_adoptada')->nullable();
+            $table->text('descripcion');
+            $table->text('accion_adoptada')->nullable();
             //Cierre y resolucion de la incidencia
             $table->foreignId('usuario_cierra')->nullable()->constrained('users');
             $table->timestamp('fecha_resolucion')->nullable();

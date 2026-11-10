@@ -27,7 +27,7 @@ interface Props {
 }
 
 export function ResolverIncidenciaModal({ incidencia, open, onOpenChange }: Props) {
-  const { data, setData, put, processing, errors, reset } = useForm({
+  const { data, setData, patch, processing, errors, reset } = useForm({
     accion_adoptada: '',
     estado: 'RESUELTA',
   });
@@ -46,7 +46,7 @@ export function ResolverIncidenciaModal({ incidencia, open, onOpenChange }: Prop
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    put(`/incidencias/${incidencia.id}/resolver`, {
+    patch(`/incidencias/${incidencia.id}/resolver`, {
       onSuccess: () => {
         reset();
         onOpenChange(false);

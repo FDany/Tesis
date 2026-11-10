@@ -9,6 +9,7 @@ use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\BolsaController;
 use App\Http\Controllers\RemitoSalidaRetiroController;
 use App\Http\Controllers\IncidenciaController;
+use App\Http\Controllers\ResiduoController;
 use App\Models\Bolsa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -39,7 +40,7 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
 
     // Módulo Incidencias
     Route::get('incidencias/crear', [IncidenciaController::class, 'create'])->name('incidencias.create');
-    Route::post('incidencias/{incidencia}/resolver', [IncidenciaController::class, 'resolver'])->name('incidencias.resolver');
+    Route::patch('incidencias/{incidencia}/resolver', [IncidenciaController::class,'resolver',])->name('incidencias.resolver');
     Route::resource('incidencias', IncidenciaController::class);
 
     // Endpoint API para la validación del escáner en vivo
@@ -72,6 +73,10 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
 
         return response()->json($bolsa);
     });
+
+    // Módulo Residuos
+    Route::get('residuos', [ResiduoController::class, 'create'])->name('residuos.create');
+    Route::post('residuos', [ResiduoController::class, 'store'])->name('residuos.store');
 });
 
 require __DIR__.'/settings.php';
