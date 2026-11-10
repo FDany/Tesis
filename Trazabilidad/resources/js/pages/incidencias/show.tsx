@@ -30,7 +30,7 @@ export default function IncidenciaShow({ incidencia }: Props) {
     };
 
     return (
-        <AppLayout>
+        <div>
             <Head title={`Incidencia #${incidencia.id}`} />
 
             <div className="space-y-6 p-6 max-w-5xl mx-auto">
@@ -122,7 +122,7 @@ export default function IncidenciaShow({ incidencia }: Props) {
                                                 <div className="p-2 text-xs text-muted-foreground truncate border-t bg-muted/20">
                                                     {doc.nombre_archivo}
                                                 </div>
-                                                
+
                                             </div>
                                         ))}
                                     </div>
@@ -282,6 +282,6 @@ export default function IncidenciaShow({ incidencia }: Props) {
                     onOpenChange={setIsModalOpen}
                 />
             </div>
-        </AppLayout >
+        </div>
     );
 }
