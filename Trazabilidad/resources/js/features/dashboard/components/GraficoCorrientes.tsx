@@ -59,7 +59,7 @@ export function GraficoCorrientes({ corrientes }: Props) {
         name: c.tipo_residuo,
         value: c.cantidad_total,
         peso: c.peso_total,
-        color: resolveColor(c.color),
+        color: c.color,
     }));
 
     return (

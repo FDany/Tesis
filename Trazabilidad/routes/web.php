@@ -19,9 +19,6 @@ Route::inertia('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
-});
-
-Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     Route::resource('users', UserController::class)->except(['show']);
     Route::resource('roles', RoleController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::inertia('bolsas/create', 'bolsas/Crear')->name('bolsas.create');
@@ -85,6 +82,10 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
         'api/bolsas/buscar-para-entrega',
         [ResiduoController::class, 'verificarBolsa'],
     )->name('residuos.verificar-bolsa');
+});
+
+Route::middleware(['auth', 'can:manage-administration'])->group(function () {
+
 });
 
 require __DIR__.'/settings.php';

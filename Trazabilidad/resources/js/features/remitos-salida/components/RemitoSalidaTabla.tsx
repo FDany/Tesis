@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Printer, Clock, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 import type { RemitoSalidaRetiro, EstadoRemitoSalida } from '@/features/remitos-salida/types/remitoSalidaRetiro';
+import { useAuth } from '@/hooks/use-auth';
 
 interface RemitoSalidaTablaProps {
     data: RemitoSalidaRetiro[];
 }
 
 export function RemitoSalidaTabla({ data }: RemitoSalidaTablaProps) {
+    const { can } = useAuth();
     /**
      * Renderiza la insignia visual según el estado del remito.
      */
@@ -99,24 +101,26 @@ export function RemitoSalidaTabla({ data }: RemitoSalidaTablaProps) {
                                 <TableCell className="text-center">
                                     <div className="flex items-center justify-center gap-1">
                                         {/* Botón Imprimir PDF Interno */}
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => window.open(`/remitos-salida/${remito.id}/pdf`, '_blank')}
-                                            title="Imprimir PDF Interno"
-                                        >
-                                            <Printer className="h-4 w-4 text-primary" />
-                                        </Button>
-
-                                        {/* Enlace directo con Link de Inertia a la vista show */}
-                                        <Link href={`/remitos-salida/${remito.id}`}>
+                                        {(can('imprimirPDF remitoSalida'))&&(
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                title="Ver Detalle y Conciliar"
+                                                onClick={() => window.open(`/remitos-salida/${remito.id}/pdf`, '_blank')}
+                                                title="Imprimir PDF Interno"
                                             >
-                                                <Eye className="h-4 w-4 text-muted-foreground" />
-                                            </Button>
+                                            <Printer className="h-4 w-4 text-primary" />
+                                        </Button>)}
+
+                                        {/* Enlace directo con Link de Inertia a la vista show */}
+                                        <Link href={`/remitos-salida/${remito.id}`}>
+                                            {can('ver detalleRemitoSalida') && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title="Ver Detalle y Conciliar"
+                                                >
+                                                    <Eye className="h-4 w-4 text-muted-foreground" />
+                                            </Button>)}
                                         </Link>
                                     </div>
                                 </TableCell>
