@@ -10,6 +10,8 @@ use App\Http\Controllers\BolsaController;
 use App\Http\Controllers\RemitoSalidaRetiroController;
 use App\Http\Controllers\IncidenciaController;
 use App\Http\Controllers\ResiduoController;
+use App\Http\Controllers\RecepcionDepositoController;
+use App\Http\Controllers\PesajeDepositoController;
 use App\Models\Bolsa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -78,10 +80,41 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     Route::get('residuos', [ResiduoController::class, 'create'])->name('residuos.create');
     Route::post('residuos', [ResiduoController::class, 'store'])->name('residuos.store');
 
+    // Validación del escáner en tiempo real para el módulo de residuos
     Route::get(
         'api/bolsas/buscar-para-entrega',
         [ResiduoController::class, 'verificarBolsa'],
     )->name('residuos.verificar-bolsa');
-});
+
+    // Módulo Recepción en Depósito
+    Route::post(
+        'recepciones-deposito',
+        [RecepcionDepositoController::class, 'store'],
+    )->name('recepciones-deposito.store');
+
+    // Vista de creación de recepción en depósito
+    Route::get(
+        'recepciones-deposito',
+        [RecepcionDepositoController::class, 'create'],
+    )->name('recepciones-deposito.create');
+
+    // Validacion del escaner en tiempo real para recepción en deposito
+    Route::get(
+        'api/bolsas/buscar-para-recepcion-deposito',
+        [RecepcionDepositoController::class, 'verificarBolsa'],
+    )->name('recepciones-deposito.verificar-bolsa');
+
+
+    // Módulo Pesaje en Depósito
+    Route::get(
+        'pesaje-deposito',
+        [PesajeDepositoController::class, 'create'],
+    )->name('pesaje-deposito.create');
+
+    Route::post(
+        'pesaje-deposito',
+        [PesajeDepositoController::class, 'store'],
+    )->name('pesaje-deposito.store');
+    });
 
 require __DIR__.'/settings.php';
