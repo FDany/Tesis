@@ -12,6 +12,7 @@ use App\Http\Controllers\IncidenciaController;
 use App\Http\Controllers\ResiduoController;
 use App\Http\Controllers\RecepcionDepositoController;
 use App\Http\Controllers\PesajeDepositoController;
+use App\Http\Controllers\DashboardController;
 use App\Models\Bolsa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +46,8 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     Route::patch('incidencias/{incidencia}/resolver', [IncidenciaController::class,'resolver',])->name('incidencias.resolver');
     Route::resource('incidencias', IncidenciaController::class);
 
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // Endpoint API para la validación del escáner en tiempo real
     Route::get('api/bolsas/buscar-para-despacho', function (Request $request) {
         $codigo = $request->query('codigo');

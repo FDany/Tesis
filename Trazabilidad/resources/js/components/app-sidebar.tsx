@@ -33,7 +33,7 @@ type AppNavItem = NavItem & {
 const navItems: AppNavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: '/dashboard',
         icon: LayoutDashboard,
     },
     {
