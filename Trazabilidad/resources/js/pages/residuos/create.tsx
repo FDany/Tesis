@@ -13,12 +13,14 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import type { Servicio } from '@/features/servicios/types/servicio';
+import { useAuth } from '@/hooks/use-auth';
 
 interface Props {
     servicios: Servicio[];
 }
 
 export default function CreateResiduo({ servicios }: Props) {
+    const { can } = useAuth();
     const { data, setData, post, processing, errors, reset } = useForm({
         servicio_id: '',
         retira_nombre: '',
@@ -285,9 +287,11 @@ export default function CreateResiduo({ servicios }: Props) {
                         )}
                     </section>
 
-                    <Button type="submit" disabled={processing || verificando}>
-                        {processing ? 'Guardando…' : 'Registrar entrega'}
-                    </Button>
+                    {can('registrar entregaBolsasServicio') && (
+                        <Button type="submit" disabled={processing || verificando}>
+                            {processing ? 'Guardando…' : 'Registrar entrega'}
+                        </Button>
+                    )}
                 </form>
             </div>
         </>

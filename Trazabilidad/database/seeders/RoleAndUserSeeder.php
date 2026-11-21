@@ -23,6 +23,10 @@ class RoleAndUserSeeder extends Seeder
             'name' => 'recepcion',
             'guard_name' => 'web',
         ]);
+        $depositoRole = Role::firstOrCreate([
+            'name' => 'deposito',
+            'guard_name' => 'web',
+        ]);
 
         // 2. Crear Usuario Administrador de Prueba
         $admin = User::firstOrCreate(
@@ -46,8 +50,19 @@ class RoleAndUserSeeder extends Seeder
             ]
         );
 
+        $deposito = User::firstOrCreate(
+            ['dni' => '11223344'],
+            [
+                'first_name' => 'Deposito',
+                'last_name' => 'Sistema',
+                'email' => 'deposito@ecogestion.com',
+                'password' => '11223344',
+            ]
+        );
+
         // 3. Asignar Roles de Spatie
         $admin->assignRole($adminRole);
         $recepcionista->assignRole($recepcionRole);
+        $deposito->assignRole($depositoRole);
     }
 }

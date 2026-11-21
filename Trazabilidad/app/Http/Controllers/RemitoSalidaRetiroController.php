@@ -193,7 +193,7 @@ class RemitoSalidaRetiroController extends Controller
         ]);
 
         // Generar la vista Blade pasándole el modelo cargado
-        $pdf = Pdf::loadView('remitosalida.generarremitosalida', [
+        $pdf = Pdf::loadView('pdfs.remitosalida.generarremitosalida', [
             'remito' => $remito,
         ]);
 

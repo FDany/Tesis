@@ -1,5 +1,14 @@
-import { Head, Link } from '@inertiajs/react';
-import { UserTable } from '@/pages/users/components/userTable';
+import { Head, Link, router } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
+
+import FlashMessage from '@/components/FlashMessage';
+import { Button } from '@/components/ui/button';
+import { UserTable } from '@/features/users/components/UserTable';
+import CantFilas from '@/components/CantFilas';
+
+import Paginacion, {
+    type PaginacionData,
+} from '@/components/Paginador';
 
 interface Role {
     id: number;
@@ -16,23 +25,29 @@ interface User {
 }
 
 interface IndexProps {
-    users: {
-        data: User[];
-        links: {
-            url: string | null;
-            label: string;
-            active: boolean;
-        }[];
-    };
-    flash: { success: string | null; error: string | null };
+    users: PaginacionData & { data: User[] };
+    porPagina: number;
+    opcionesPorPagina: number[];
 }
 
-export default function UsersIndex({ users, flash }: IndexProps) {
-    // const { flash } = usePage<IndexProps>().props;
+export default function UsersIndex({ users, porPagina, opcionesPorPagina }: IndexProps) {
+    const handlePorPaginaChange = (cantidad: number) => {
+        router.get(
+            '/users',
+            { por_pagina: cantidad },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
 
     return (
         <>
             <Head title="Usuarios" />
+            <FlashMessage />
+
             <div className="space-y-6 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
@@ -41,52 +56,25 @@ export default function UsersIndex({ users, flash }: IndexProps) {
                             Administra las cuentas y sus roles.
                         </p>
                     </div>
-                    <Link
-                        href="/users/create"
-                        className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-xs hover:bg-primary/90"
-                    >
-                        Crear usuario
-                    </Link>
+                    <Button asChild>
+                        <Link href="/users/create">
+                            <Plus className="size-4" />
+                            Nuevo usuario
+                        </Link>
+                    </Button>
                 </div>
 
-                {flash.success && (
-                    <p className="rounded-md bg-green-100 p-3 text-sm text-green-800">
-                        {flash.success}
-                    </p>
-                )}
-                {flash.error && (
-                    <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                        {flash.error}
-                    </p>
-                )}
-
+                {/* Limitador de cantidad de filas */}
+                <CantFilas
+                    value={porPagina}
+                    options={opcionesPorPagina}
+                    onChange={handlePorPaginaChange}
+                />
                 <UserTable users={users.data} />
 
-                <nav className="flex flex-wrap gap-2" aria-label="Paginación">
-                    {users.links.map((link, index) =>
-                        link.url ? (
-                            <Link
-                                key={index}
-                                href={link.url}
-                                className={`rounded border px-3 py-1 text-sm ${link.active ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
-                            >
-                                {link.label
-                                    .replaceAll('&laquo;', '«')
-                                    .replaceAll('&raquo;', '»')}
-                            </Link>
-                        ) : (
-                            <span
-                                key={index}
-                                className="rounded border px-3 py-1 text-sm text-muted-foreground"
-                            >
-                                {link.label
-                                    .replaceAll('&laquo;', '«')
-                                    .replaceAll('&raquo;', '»')}
-                            </span>
-                        ),
-                    )}
-                </nav>
+                {/* Paginacion */}
+                <Paginacion pagination={users} />
             </div>
         </>
-    )
+    );
 }

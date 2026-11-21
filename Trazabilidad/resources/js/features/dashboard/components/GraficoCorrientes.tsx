@@ -59,7 +59,7 @@ export function GraficoCorrientes({ corrientes }: Props) {
         name: c.tipo_residuo,
         value: c.cantidad_total,
         peso: c.peso_total,
-        color: resolveColor(c.color),
+        color: c.color,
     }));
 
     return (
@@ -130,7 +130,7 @@ export function GraficoCorrientes({ corrientes }: Props) {
                                 {corriente.por_tamanio && corriente.por_tamanio.length > 0 ? (
                                     corriente.por_tamanio.map((t, idx) => (
                                         <div key={idx} className="flex justify-between">
-                                            <span>Bolsas {t.nombre_tamanio}:</span>
+                                            <span>Bolsas (Tam. {t.nombre_tamanio}):</span>
                                             <strong className="text-foreground font-mono">{t.cantidad} ({t.peso_total} Kg)</strong>
                                         </div>
                                     ))
