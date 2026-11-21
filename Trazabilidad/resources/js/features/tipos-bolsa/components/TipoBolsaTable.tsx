@@ -11,6 +11,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2 } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 
 interface Props {
   tiposBolsa: TipoBolsa[];
@@ -23,6 +24,7 @@ export function TipoBolsaTable({
   onEdit,
   onDelete,
 }: Props) {
+  const { can } = useAuth();
   if (!tiposBolsa || tiposBolsa.length === 0) {
     return (
       <div className="p-8 text-center text-muted-foreground border rounded-lg bg-card">
@@ -56,22 +58,26 @@ export function TipoBolsaTable({
               </TableCell>
               <TableCell>{tipo.proveedor || '-'}</TableCell>
               <TableCell className="text-right space-x-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => onEdit(tipo)}
-                  title="Editar"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => onDelete(tipo.id)}
-                  title="Eliminar"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                {can('editar flujosResiduos') && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => onEdit(tipo)}
+                    title="Editar"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
+                {can('eliminar flujosResiduos') && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => onDelete(tipo.id)}
+                    title="Eliminar"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}

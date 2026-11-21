@@ -1,92 +1,37 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
 
-import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { FormEvent, useState } from 'react';
-
-import InputError from '@/components/input-error';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'; // ajusta la ruta según donde lo guardes
+import FlashMessage from '@/components/FlashMessage';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { RoleTable } from '@/features/roles-y-permisos/components/RoleTable';
+import type {
+    Role,
+    RolesIndexProps,
+} from '@/features/roles-y-permisos/types/rolYPermiso';
 
-type Role = {
-    id: number;
-    name: string;
-    users_count: number;
-};
+export default function RolesIndex({ roles }: RolesIndexProps) {
+    const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+    const [deleting, setDeleting] = useState(false);
 
-type PageProps = {
-    roles: Role[];
-    flash: {
-        success: string | null;
-        error: string | null;
-    };
-};
+    function confirmDeleteRole() {
+        if (!roleToDelete) return;
 
-export default function RolesIndex({ roles }: PageProps) {
-    const { flash } = usePage<PageProps>().props;
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [editingRole, setEditingRole] = useState<Role | null>(null);
-
-    const form = useForm({
-        name: '',
-    });
-
-    function openCreateDialog() {
-        setEditingRole(null);
-        form.reset();
-        form.clearErrors();
-        setDialogOpen(true);
-    }
-
-    function openEditDialog(role: Role) {
-        setEditingRole(role);
-        form.setData('name', role.name);
-        form.clearErrors();
-        setDialogOpen(true);
-    }
-
-    function submitRole(event: FormEvent) {
-        event.preventDefault();
-
-        const options = {
-            onSuccess: () => {
-                setDialogOpen(false);
-                form.reset();
-            },
-        };
-
-        if (editingRole) {
-            form.put(`/roles/${editingRole.id}`, options);
-            return;
-        }
-
-        form.post('/roles', options);
-    }
-
-    function deleteRole(role: Role) {
-        if (
-            !window.confirm(
-                `¿Seguro que deseas eliminar el rol "${role.name}"?`,
-            )
-        ) {
-            return;
-        }
-
-        router.delete(`/roles/${role.id}`, {
+        router.delete(`/roles/${roleToDelete.id}`, {
             preserveScroll: true,
+            onStart: () => setDeleting(true),
+            onFinish: () => {
+                setDeleting(false);
+                setRoleToDelete(null);
+            },
         });
     }
 
     return (
         <>
             <Head title="Gestión de roles" />
+            <FlashMessage />
 
             <div className="space-y-6 p-4">
                 <header className="flex flex-wrap items-center justify-between gap-4">
@@ -95,151 +40,34 @@ export default function RolesIndex({ roles }: PageProps) {
                             Gestión de roles
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            Administra los roles que se pueden asignar a los
+                            Administra los roles y permisos que se asignan a los
                             usuarios.
                         </p>
                     </div>
 
-                    <Button onClick={openCreateDialog}>
-                        <Plus />
-                        Nuevo rol
+                    <Button asChild>
+                        <Link href="/roles/create">
+                            <Plus className="size-4" />
+                            Nuevo rol
+                        </Link>
                     </Button>
                 </header>
 
-                {flash.success && (
-                    <p className="rounded-md bg-green-100 p-3 text-sm text-green-800">
-                        {flash.success}
-                    </p>
-                )}
-
-                {flash.error && (
-                    <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                        {flash.error}
-                    </p>
-                )}
-
-                <div className="overflow-x-auto rounded-lg border">
-                    <table className="w-full text-left text-sm">
-                        <thead className="bg-muted/50">
-                            <tr>
-                                <th className="p-3">Rol</th>
-                                <th className="p-3">Usuarios asignados</th>
-                                <th className="p-3">Acciones</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {roles.map((role) => (
-                                <tr key={role.id} className="border-t">
-                                    <td className="p-3 font-medium">
-                                        {role.name}
-                                    </td>
-                                    <td className="p-3">{role.users_count}</td>
-                                    <td className="p-3">
-                                        <div className="flex gap-2">
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                className="text-muted-foreground hover:text-foreground"
-                                                disabled={role.name === 'admin'}
-                                                onClick={() =>
-                                                    openEditDialog(role)
-                                                }
-                                                aria-label={`Editar rol ${role.name}`}
-                                                title="Editar"
-                                            >
-                                                <Pencil className="size-4" />
-                                            </Button>
-
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                                disabled={
-                                                    role.name === 'admin' ||
-                                                    role.users_count > 0
-                                                }
-                                                title={
-                                                    role.users_count > 0
-                                                        ? 'Primero quita el rol a todos sus usuarios.'
-                                                        : 'Eliminar'
-                                                }
-                                                aria-label={`Eliminar rol ${role.name}`}
-                                                onClick={() => deleteRole(role)}
-                                            >
-                                                <Trash2 className="size-4" />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-
-                            {roles.length === 0 && (
-                                <tr>
-                                    <td
-                                        colSpan={3}
-                                        className="p-6 text-center text-muted-foreground"
-                                    >
-                                        No hay roles registrados.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <RoleTable
+                    roles={roles}
+                    onDelete={(role) => setRoleToDelete(role)}
+                />
             </div>
 
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>
-                            {editingRole ? 'Editar rol' : 'Nuevo rol'}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {editingRole
-                                ? 'Modifica el nombre del rol.'
-                                : 'Ingresa el nombre del nuevo rol.'}
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <form onSubmit={submitRole} className="space-y-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="role-name">Nombre</Label>
-                            <Input
-                                id="role-name"
-                                value={form.data.name}
-                                onChange={(event) =>
-                                    form.setData('name', event.target.value)
-                                }
-                                autoFocus
-                                required
-                            />
-                            <InputError message={form.errors.name} />
-                        </div>
-
-                        <div className="flex justify-end gap-2">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setDialogOpen(false)}
-                                disabled={form.processing}
-                            >
-                                Cancelar
-                            </Button>
-
-                            <Button type="submit" disabled={form.processing}>
-                                {form.processing
-                                    ? 'Guardando...'
-                                    : editingRole
-                                      ? 'Guardar cambios'
-                                      : 'Crear rol'}
-                            </Button>
-                        </div>
-                    </form>
-                </DialogContent>
-            </Dialog>
+            <ConfirmDeleteDialog
+                open={Boolean(roleToDelete)}
+                onOpenChange={(open) => !open && setRoleToDelete(null)}
+                title={`¿Eliminar rol "${roleToDelete?.name}"?`}
+                description="Estás a punto de borrar este rol permanentemente. Esta acción no se puede deshacer."
+                confirmLabel="Sí, eliminar rol"
+                onConfirm={confirmDeleteRole}
+                processing={deleting}
+            />
         </>
     );
 }

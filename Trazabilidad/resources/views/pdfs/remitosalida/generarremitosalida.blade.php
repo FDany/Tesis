@@ -12,25 +12,31 @@
         body {
             font-family: Helvetica, Arial, sans-serif;
             font-size: 11px;
-            color: #1f2937;
+            color: #1e293b;
             line-height: 1.4;
         }
 
         .header {
             width: 100%;
-            border-bottom: 2px solid #0284c7;
+            border-bottom: 2px solid #4b92ce;
             padding-bottom: 8px;
             margin-bottom: 12px;
         }
 
         .header table {
             width: 100%;
+            border-collapse: collapse;
+        }
+
+        .logo-img {
+            max-height: 52px;
+            width: auto;
         }
 
         .title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: bold;
-            color: #0369a1;
+            color: #1e3a5f;
             text-transform: uppercase;
         }
 
@@ -45,19 +51,22 @@
             font-size: 10px;
             font-weight: bold;
             border-radius: 4px;
-            background-color: #e0f2fe;
-            color: #0369a1;
-            border: 1px solid #bae6fd;
+            background-color: #eef6fc;
+            color: #4b92ce;
+            border: 1px solid #c2e0f8;
         }
 
         .section-title {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             background-color: #f1f5f9;
+            color: #1e3a5f;
             padding: 4px 8px;
             margin-top: 12px;
             margin-bottom: 6px;
-            border-left: 3px solid #0284c7;
+            border-left: 4px solid #4b92ce;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .grid-table {
@@ -82,12 +91,13 @@
         }
 
         .data-table th {
-            background-color: #0284c7;
+            background-color: #4b92ce;
             color: #ffffff;
             font-size: 10px;
             text-align: left;
             padding: 6px;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .data-table td {
@@ -107,7 +117,7 @@
 
         .totals-card {
             float: right;
-            width: 220px;
+            width: 230px;
             background-color: #f8fafc;
             border: 1px solid #cbd5e1;
             border-radius: 4px;
@@ -128,7 +138,6 @@
 
         .signatures {
             margin-top: 35px;
-            /* Reducido de 60px a 35px para no cortar firmas abajo */
             width: 100%;
         }
 
@@ -160,17 +169,24 @@
 
 <body>
 
-    <!-- Cabecera Institucional -->
+    <!-- Cabecera Institucional con Logo HSB -->
     <div class="header">
         <table>
             <tr>
-                <td style="width: 65%;">
-                    <div class="title">Hospital San Bernardo</div>
-                    <div class="subtitle">Sistema EcoGestión - Control de Residuos Hospitalarios</div>
+                <td style="width: 55%; vertical-align: middle;">
+                    @php
+                        $logoPath = public_path('images/logo-hsb-horizontal.png');
+                    @endphp
+                    @if (file_exists($logoPath))
+                        <img src="data:image/png;base64,{{ base64_encode(file_get_contents($logoPath)) }}" class="logo-img" alt="Logo HSB">
+                    @else
+                        <div class="title">Hospital San Bernardo</div>
+                    @endif
+                    <div class="subtitle" style="margin-top: 3px;">Sistema EcoGestión — Control de Residuos Hospitalarios</div>
                     <div class="subtitle">Salta, Argentina</div>
                 </td>
-                <td style="width: 35%; text-align: right;">
-                    <div style="font-size: 14px; font-weight: bold; color: #0f172a;">REMITO INTERNO DE SALIDA</div>
+                <td style="width: 45%; text-align: right; vertical-align: middle;">
+                    <div style="font-size: 13px; font-weight: bold; color: #1e3a5f;">REMITO INTERNO DE SALIDA</div>
                     <div style="margin-top: 4px;">
                         <span class="badge">{{ $remito->numero_remito_interno }}</span>
                     </div>
@@ -195,7 +211,7 @@
         <tr>
             <td>
                 <span class="label">Estado Actual:</span>
-                <strong>{{ $remito->estado }}</strong>
+                <strong style="color: #4b92ce;">{{ $remito->estado }}</strong>
             </td>
             <td>
                 <span class="label">Vínculo DGM:</span>
@@ -229,9 +245,8 @@
                     <td>{{ $index + 1 }}</td>
                     <td><strong>{{ $bolsa->codigo_barra }}</strong></td>
                     <td>{{ $bolsa->tipoBolsa->tipo_residuo ?? 'Residuo Patogénico' }}</td>
-                    {{-- Acceso anidado a través del remito de entrega al servicio --}}
                     <td>{{ $bolsa->remitoEntregaServicio->servicio->nombre ?? 'Depósito Central' }}</td>
-                    <td style="text-align: right;">{{ number_format($bolsa->peso, 2, ',', '.') }} kg</td>
+                    <td style="text-align: right; font-weight: bold;">{{ number_format($bolsa->peso, 2, ',', '.') }} kg</td>
                 </tr>
             @empty
                 <tr>
@@ -253,9 +268,8 @@
                 </tr>
                 <tr>
                     <td class="label">Peso Total Acumulado:</td>
-                    <td style="text-align: right; font-weight: bold; font-size: 12px; color: #0369a1;">
-                        {{ number_format($remito->peso_total_sistema ?? $remito->bolsas->sum('peso'), 2, ',', '.') }}
-                        kg
+                    <td style="text-align: right; font-weight: bold; font-size: 12px; color: #1e3a5f;">
+                        {{ number_format($remito->peso_total_sistema ?? $remito->bolsas->sum('peso'), 2, ',', '.') }} kg
                     </td>
                 </tr>
             </table>

@@ -82,9 +82,7 @@ class TamanioController extends Controller
     {
         // Prevenimos eliminar registros que ya tengan bolsas asociadas
         if ($tamanio->bolsas()->exists()) {
-            return redirect()->back()->withErrors([
-                'error' => 'No se puede eliminar un tamaño de bolsa en uso por bolsas registradas',
-            ]);
+            return redirect()->back()->with('error', 'No se puede eliminar un tamaño de bolsa en uso por bolsas registradas');
         }
 
         $tamanio->delete();

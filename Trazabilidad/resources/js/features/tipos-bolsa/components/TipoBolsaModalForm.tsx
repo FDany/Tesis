@@ -124,7 +124,7 @@ export const TipoBolsaModalForm: React.FC<Props> = ({
                 Color
               </Label>
 
-              
+
               <label
                 className="relative inline-flex size-10 cursor-pointer items-center justify-center rounded-full border"
                 aria-label="Seleccionar color"
@@ -171,7 +171,7 @@ export const TipoBolsaModalForm: React.FC<Props> = ({
 
 
               {colorPickerOpen && (
-                <div className="absolute left-full top-1/2 z-[60] ml-2 -translate-y-1/2 rounded-md border bg-background p-3 shadow-lg">
+                <div className="absolute left-full top-1/2 z-60 ml-2 -translate-y-1/2 rounded-md border bg-background p-3 shadow-lg">
                   <HexColorPicker
                     color={selectedColor}
                     onChange={(color) => setData('color', color)}

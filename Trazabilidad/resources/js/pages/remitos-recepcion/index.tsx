@@ -17,6 +17,7 @@ import Paginacion, {
   type PaginacionData,
 } from '@/components/Paginador';
 import CantFilas from '@/components/CantFilas';
+import { useAuth } from '@/hooks/use-auth';
 
 type ParametrosListado = {
   buscar: string;
@@ -52,11 +53,14 @@ export default function Index({
   filtros,
   remitoDetalle,
 }: IndexProps) {
+  const { can } = useAuth();
+
   const [buscar, setBuscar] = useState(filtros.buscar ?? '');
   const [tipoBolsaId, setTipoBolsaId] = useState(filtros.tipo_bolsa_id ?? '');
   const [tamanioId, setTamanioId] = useState(filtros.tamanio_id ?? '');
   const [orden, setOrden] = useState(filtros.orden ?? 'fecha_recepcion');
   const [direccion, setDireccion] = useState(filtros.direccion ?? 'asc');
+
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -108,6 +112,7 @@ export default function Index({
     }
   };
 
+
   const handlePorPaginaChange = (cantidad: number) => {
     visitarListado({ por_pagina: cantidad });
   };
@@ -157,9 +162,11 @@ export default function Index({
               Gestión e ingreso de remitos y generación masiva de bolsas trazables.
             </p>
           </div>
-          <Button onClick={() => setModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Nuevo Remito
-          </Button>
+          {can('crear remitosRecepcion') && (
+            <Button onClick={() => setModalOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> Nuevo Remito
+            </Button>
+          )}
         </div>
 
         {/* Modal con el detalle del remito */}

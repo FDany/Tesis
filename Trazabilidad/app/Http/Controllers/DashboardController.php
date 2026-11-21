@@ -38,25 +38,25 @@ class DashboardController extends Controller
         $bolsasRecibidas = (clone $queryBolsas)->whereIn('estado', [
             'RECIBIDA',
             'DISPONIBLE',
-            'ENTREGADA_A_SERVICIO',
+            'ENTREGADA A SERVICIO',
             'UTILIZADA',
-            'INGRESADA_AL_DEPOSITO',
+            'INGRESADA AL DEPOSITO',
             'PESADA',
             'DESPACHADA',
-            'RETIRADA_POR_DGM',
-            'TRATADA_DISPOSICION_FINAL'
+            'RETIRADA POR DGM',
+            'TRATADA DISPOSICION FINAL'
         ])->count();
 
         $bolsasUtilizadas = (clone $queryBolsas)->whereIn('estado', [
             'UTILIZADA',
-            'INGRESADA_AL_DEPOSITO',
+            'INGRESADA AL DEPOSITO',
             'PESADA',
             'DESPACHADA',
-            'RETIRADA_POR_DGM',
-            'TRATADA_DISPOSICION_FINAL'
+            'RETIRADA POR DGM',
+            'TRATADA DISPOSICION FINAL'
         ])->count();
 
-        $bolsasRetiradas = (clone $queryBolsas)->where('estado', 'RETIRADA_POR_DGM')->count();
+        $bolsasRetiradas = (clone $queryBolsas)->where('estado', 'RETIRADA POR DGM')->count();
         $kilogramosGenerados = (float) (clone $queryBolsas)->whereNotNull('peso')->sum('peso');
         $pesoPromedio = $bolsasRecibidas > 0 ? $kilogramosGenerados / $bolsasRecibidas : 0;
 
@@ -158,7 +158,7 @@ class DashboardController extends Controller
                 DB::raw('COUNT(bolsas.id) as cantidad')
             )
             ->whereNull('bolsas.peso')
-            ->whereIn('bolsas.estado', ['INGRESADA_AL_DEPOSITO'])
+            ->whereIn('bolsas.estado', ['INGRESADA AL DEPOSITO'])
             ->groupBy('tipos_bolsa.tipo_residuo', 'tipos_bolsa.color')
             ->get();
 
@@ -169,7 +169,7 @@ class DashboardController extends Controller
                 'tipos_bolsa.color',
                 DB::raw('COUNT(bolsas.id) as cantidad')
             )
-            ->whereIn('bolsas.estado', ['INGRESADA_AL_DEPOSITO', 'PESADA'])
+            ->whereIn('bolsas.estado', ['INGRESADA AL DEPOSITO', 'PESADA'])
             ->whereNull('bolsas.rem_sal_id')
             ->groupBy('tipos_bolsa.tipo_residuo', 'tipos_bolsa.color')
             ->get();

@@ -7,12 +7,12 @@ import {
   type BolsaDetalle,
   FiltrosBolsas,
 } from '@/features/bolsas';
-
 import Paginacion, {
   type PaginacionData,
 } from '@/components/Paginador';
 import CantFilas from '@/components/CantFilas';
 import { FileSpreadsheet } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 
 
 interface Filtros {
@@ -39,6 +39,8 @@ export default function Index({
   estados,
   bolsaDetalle
 }: IndexProps) {
+
+  const { can } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
 
   // Inicializamos los estados con los valores provenientes
@@ -133,7 +135,7 @@ export default function Index({
       {
         por_pagina: cantidad,
         buscar, // Conservo la búsqueda actual
-        estado, // Conservo el filtro de estado actual
+        estado,  // Conservo el filtro de estado actual
         orden,
         direccion,
       },
@@ -194,10 +196,12 @@ export default function Index({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
-
-          {/* Búsqueda y filtros */}
-          <form onSubmit={aplicarFiltros} className="min-w-0 flex-1">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          {/* Formulario de búsqueda y filtros[cite: 7] */}
+          <form
+            onSubmit={aplicarFiltros}
+            className="min-w-0 flex-1"
+          >
             <FiltrosBolsas
               valores={{ buscar, estado }}
               estados={estados}
@@ -260,7 +264,7 @@ export default function Index({
         {/* Paginacion */}
         <Paginacion pagination={bolsas} />
 
-      </div>
+      </div >
     </>
   );
 }

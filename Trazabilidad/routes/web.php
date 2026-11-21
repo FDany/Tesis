@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TipoBolsaController;
 use App\Http\Controllers\RemitoRecepcionController;
@@ -21,11 +22,10 @@ Route::inertia('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
-});
-
-Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     Route::resource('users', UserController::class)->except(['show']);
-    Route::resource('roles', RoleController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('roles', RoleController::class)->except(['show']);
+    Route::resource('permisos', PermissionController::class)->except(['show', 'edit', 'create']);
+
     // Excel
     Route::get('/bolsas/export', [BolsaController::class, 'export'])->name('bolsas.export');
 
@@ -135,5 +135,9 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
         [PesajeDepositoController::class, 'store'],
     )->name('pesaje-deposito.store');
     });
+
+Route::middleware(['auth', 'can:manage-administration'])->group(function () {
+
+});
 
 require __DIR__.'/settings.php';

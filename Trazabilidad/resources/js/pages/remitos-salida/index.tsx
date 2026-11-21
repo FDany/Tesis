@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Eye, FileText, AlertTriangle, CheckCircle2, Printer, Clock, XCircle } from 'lucide-react';
 import type { RemitoSalidaRetiro, EstadoRemitoSalida } from '@/features/remitos-salida/types/remitoSalidaRetiro';
 import { RemitoSalidaFiltros } from '@/features/remitos-salida/components/RemitoSalidaFiltros';
+import { useAuth } from '@/hooks/use-auth';
 
 interface PaginatedRemitos {
   data: RemitoSalidaRetiro[];
@@ -24,10 +25,11 @@ interface Props {
 }
 
 export default function IndexRemitosSalida({ remitos, filtros }: Props) {
+  const { can } = useAuth();
 
   const [buscar, setBuscar] = useState(filtros.buscar ?? '');
   const [estado, setEstado] = useState(filtros.estado ?? '');
-
+  
   /**
    * Renderiza la insignia visual según el estado del remito.
    */
@@ -108,9 +110,11 @@ export default function IndexRemitosSalida({ remitos, filtros }: Props) {
             Gestión de despachos internos (PDF) y trazabilidad de conciliación con retiros DGM.
           </p>
         </div>
-        <Button onClick={() => router.get('/remitos-salida/create')} size="lg">
-          <Plus className="mr-2 h-5 w-5" /> Nuevo Despacho Interno
-        </Button>
+        {can('crear remitosSalida') && (
+          <Button onClick={() => router.get('/remitos-salida/create')} size="lg">
+            <Plus className="mr-2 h-5 w-5" /> Nuevo Despacho Interno
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col gap-3">
