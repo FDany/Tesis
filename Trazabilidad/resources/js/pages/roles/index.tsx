@@ -1,7 +1,7 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 
 import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -52,7 +52,7 @@ export default function RolesIndex({ roles }: PageProps) {
         setDialogOpen(true);
     }
 
-    function submitRole(event: React.FormEvent<HTMLFormElement>) {
+    function submitRole(event: FormEvent) {
         event.preventDefault();
 
         const options = {

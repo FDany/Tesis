@@ -1,3 +1,5 @@
+import { type FormEvent } from 'react';
+import { useForm } from '@inertiajs/react';
 import {
     Dialog,
     DialogContent,
@@ -5,7 +7,8 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Download, Mail } from 'lucide-react';
 
 export type RemitoDetalle = {
     id: number;
@@ -46,134 +49,192 @@ export function RemitoRecepcionDetalleModal({
     detalle,
 }: RemitoRecepcionDetalleModalProps) {
 
+    const { data, setData, post, processing, errors, reset, recentlySuccessful } = useForm({
+        email: '',
+    });
+
+    const handleEnviarCorreo = (e: FormEvent) => {
+        e.preventDefault();
+        if (!detalle) return;
+        post(`/remitos-recepcion/${detalle.id}/enviar-pdf`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                reset('email');
+                setTimeout(() => {
+                    onOpenChange(false);
+                }, 1000);
+            },
+        });
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-hidden">
                 <div className="min-h-0 max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain pr-2">
-                <DialogHeader className="items-start pr-10 text-left">
-                    <DialogTitle >
-                        Detalle del remito {remitoId !== null ? `#${remitoId}` : ''}
-                    </DialogTitle >
+                    <DialogHeader className="items-start pr-10 text-left">
+                        <DialogTitle >
+                            Detalle del remito {remitoId !== null ? `#${remitoId}` : ''}
+                        </DialogTitle >
 
-                    {detalle && detalle.id === remitoId && (
-                        <Button asChild variant="outline" className="w-auto self-start">
-                            <a href={`/remitos-recepcion/${detalle.id}/pdf`}>
-                                <Download />
-                                Descargar PDF
-                            </a>
-                        </Button>
-                    )}
-                </DialogHeader>
+                        {detalle && detalle.id === remitoId && (
+                            <div className="w-full space-y-3 pt-2">
+                                <Button asChild variant="outline" className="w-auto self-start">
+                                    <a href={`/remitos-recepcion/${detalle.id}/pdf`}>
+                                        <Download className="mr-1 h-4 w-4" />
+                                        Descargar PDF
+                                    </a>
+                                </Button>
 
-                {cargando ? (
-                    <p role="status">Cargando detalle del remito...</p>
-                ) : !detalle || detalle.id !== remitoId ? (
-                    <p role="alert">No se pudo cargar el detalle del remito.</p>
-                ) : (
-                    <div className="space-y-4">
-
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <p className="text-muted-foreground">Fecha de recepción</p>
-                                <p>
-                                    {new Date(
-                                        detalle.fecha_recepcion.replace(' ', 'T'),
-                                    ).toLocaleString('es-AR', {
-                                        dateStyle: 'short',
-                                        timeStyle: 'short',
-                                    })}
-                                </p>
-                            </div>
-
-                            <div>
-                                <p className="text-muted-foreground">Tipo de bolsa</p>
-                                <div>
-                                    {detalle.tipo_bolsa ? (
-                                        <div className="flex items-center gap-2">
-                                            <span
-                                                aria-label={`Color ${detalle.tipo_bolsa.color}`}
-                                                title={detalle.tipo_bolsa.color}
-                                                className="h-3 w-3 rounded-full border border-black/20"
-                                                style={{ backgroundColor: detalle.tipo_bolsa.color }}
-                                            />
-                                            <span>{detalle.tipo_bolsa.tipo_residuo}</span>
-                                        </div>
-                                    ) : (
-                                        <span>-</span>
+                                <form onSubmit={handleEnviarCorreo} className="rounded-lg border bg-muted/40 p-3 space-y-2">
+                                    <label htmlFor="email-destino" className="text-sm font-medium">
+                                        Enviar remito en PDF por correo:
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <Input
+                                            id="email-destino"
+                                            type="email"
+                                            placeholder="ejemplo@correo.com"
+                                            value={data.email}
+                                            onChange={(e) => setData('email', e.target.value)}
+                                            required
+                                            className="bg-background"
+                                        />
+                                        <Button type="submit" disabled={processing}>
+                                            <Mail className="mr-1 h-4 w-4" />
+                                            {processing ? 'Enviando...' : 'Enviar PDF'}
+                                        </Button>
+                                    </div>
+                                    {errors.email && (
+                                        <p className="text-sm text-destructive">{errors.email}</p>
                                     )}
+                                    {recentlySuccessful && (
+                                        <p className="text-sm text-green-600 font-medium">
+                                            ✓ Remito enviado con éxito
+                                        </p>
+                                    )}
+                                </form>
+                            </div>
+                        )}
+                    </DialogHeader>
+
+                    {cargando ? (
+                        <p role="status">Cargando detalle del remito...</p>
+                    ) : !detalle || detalle.id !== remitoId ? (
+                        <p role="alert">No se pudo cargar el detalle del remito.</p>
+                    ) : (
+                        <div className="space-y-4">
+
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p className="text-muted-foreground">Fecha de recepción</p>
+                                    {/* <p>
+                                        {new Date(
+                                            detalle.fecha_recepcion.replace(' ', 'T'),
+                                        ).toLocaleString('es-AR', {
+                                            dateStyle: 'short',
+                                            timeStyle: 'short',
+                                        })}
+                                    </p> */}
+                                    <p suppressHydrationWarning>
+                                        {new Date(
+                                            detalle.fecha_recepcion.replace(' ', 'T'),
+                                        ).toLocaleString('es-AR', {
+                                            dateStyle: 'short',
+                                            timeStyle: 'short',
+                                            hour12: false,
+                                        })}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p className="text-muted-foreground">Tipo de bolsa</p>
+                                    <div>
+                                        {detalle.tipo_bolsa ? (
+                                            <div className="flex items-center gap-2">
+                                                <span
+                                                    aria-label={`Color ${detalle.tipo_bolsa.color}`}
+                                                    title={detalle.tipo_bolsa.color}
+                                                    className="h-3 w-3 rounded-full border border-black/20"
+                                                    style={{ backgroundColor: detalle.tipo_bolsa.color }}
+                                                />
+                                                <span>{detalle.tipo_bolsa.tipo_residuo}</span>
+                                            </div>
+                                        ) : (
+                                            <span>-</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <p className="text-muted-foreground">Cantidad declarada</p>
+                                    <p>{detalle.cantidad_declarada}</p>
+                                </div>
+
+                                <div>
+                                    <p className="text-muted-foreground">Tamaño</p>
+                                    <p>{detalle.tamanio?.nombre ?? '-'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground">Rango de códigos</p>
+                                    <p>
+                                        <code>
+                                            {detalle.codigo_inicio} – {detalle.codigo_fin}
+                                        </code>
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p className="text-muted-foreground">Bolsas asociadas</p>
+                                    <p>
+                                        {detalle.cantidad_bolsas} / {detalle.cantidad_declarada}
+                                        {detalle.cantidad_bolsas !== detalle.cantidad_declarada && (
+                                            <span className="ml-2 text-destructive">
+                                                No coincide con lo declarado
+                                            </span>
+                                        )}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p className="text-muted-foreground">Proveedor</p>
+                                    <p>{detalle.tipo_bolsa?.proveedor ?? '-'}</p>
+                                </div>
+
+                                <div>
+                                    <p className="text-muted-foreground">Registrado por</p>
+                                    <p>
+                                        {detalle.usuario_recep
+                                            ? `${detalle.usuario_recep.first_name} ${detalle.usuario_recep.last_name}`
+                                            : '-'}
+                                    </p>
+                                </div>
+
+                                <div className="col-span-2">
+                                    <p className="text-muted-foreground">Observaciones</p>
+                                    <p className="whitespace-pre-wrap">{detalle.observaciones || '-'}</p>
                                 </div>
                             </div>
 
                             <div>
-                                <p className="text-muted-foreground">Cantidad declarada</p>
-                                <p>{detalle.cantidad_declarada}</p>
-                            </div>
+                                <h3 className="mb-2 font-medium">Códigos de barra</h3>
 
-                            <div>
-                                <p className="text-muted-foreground">Tamaño</p>
-                                <p>{detalle.tamanio?.nombre ?? '-'}</p>
-                            </div>
-                            <div>
-                                <p className="text-muted-foreground">Rango de códigos</p>
-                                <p>
-                                    <code>
-                                        {detalle.codigo_inicio} – {detalle.codigo_fin}
-                                    </code>
-                                </p>
-                            </div>
-
-                            <div>
-                                <p className="text-muted-foreground">Bolsas asociadas</p>
-                                <p>
-                                    {detalle.cantidad_bolsas} / {detalle.cantidad_declarada}
-                                    {detalle.cantidad_bolsas !== detalle.cantidad_declarada && (
-                                        <span className="ml-2 text-destructive">
-                                            No coincide con lo declarado
-                                        </span>
-                                    )}
-                                </p>
-                            </div>
-
-                            <div>
-                                <p className="text-muted-foreground">Proveedor</p>
-                                <p>{detalle.tipo_bolsa?.proveedor ?? '-'}</p>
-                            </div>
-
-                            <div>
-                                <p className="text-muted-foreground">Registrado por</p>
-                                <p>
-                                    {detalle.usuario_recep
-                                        ? `${detalle.usuario_recep.first_name} ${detalle.usuario_recep.last_name}`
-                                        : '-'}
-                                </p>
-                            </div>
-
-                            <div className="col-span-2">
-                                <p className="text-muted-foreground">Observaciones</p>
-                                <p className="whitespace-pre-wrap">{detalle.observaciones || '-'}</p>
+                                {detalle.bolsas.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground">
+                                        Este remito no tiene bolsas asociadas.
+                                    </p>
+                                ) : (
+                                    // <ul className="max-h-80 space-y-2 overflow-y-auto">
+                                    <ul className="space-y-2">
+                                        {detalle.bolsas.map((codigo) => (
+                                            <li key={codigo} className="rounded border px-3 py-2">
+                                                {codigo}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
                             </div>
                         </div>
-
-                        <div>
-                            <h3 className="mb-2 font-medium">Códigos de barra</h3>
-
-                            {detalle.bolsas.length === 0 ? (
-                                <p className="text-sm text-muted-foreground">
-                                    Este remito no tiene bolsas asociadas.
-                                </p>
-                            ) : (
-                                // <ul className="max-h-80 space-y-2 overflow-y-auto">
-                                <ul className="space-y-2">
-                                    {detalle.bolsas.map((codigo) => (
-                                        <li key={codigo} className="rounded border px-3 py-2">
-                                            {codigo}
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-                    </div>
-                )}
+                    )}
                 </div>
             </DialogContent>
         </Dialog>

@@ -85,7 +85,12 @@ const navItems: AppNavItem[] = [
     },
     {
         title: 'Entrega a servicios',
-        href: '/residuos',
+        href: '/remitos-entrega-servicio/create',
+        icon: Trash2,
+    },
+    {
+        title: 'Remitos de servicios',
+        href: '/remitos-entrega-servicio',
         icon: Trash2,
     },
     {

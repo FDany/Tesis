@@ -5,30 +5,21 @@ import {
   BolsaTable,
   type Bolsa,
   type BolsaDetalle,
+  FiltrosBolsas,
 } from '@/features/bolsas';
 
 import Paginacion, {
   type PaginacionData,
 } from '@/components/Paginador';
 import CantFilas from '@/components/CantFilas';
-
-import { Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-import { Label } from '@/components/ui/label';
+import { FileSpreadsheet } from 'lucide-react';
 
 
 interface Filtros {
   buscar: string;
   estado: string;
+  orden: string;
+  direccion: string;
 }
 
 interface IndexProps {
@@ -36,6 +27,7 @@ interface IndexProps {
   porPagina: number;                            //requiere un número con la cantidad de remitos que se muestran por página.
   opcionesPorPagina: number[];                 //requiere un arreglo de números con las cantidades que el selector puede ofrecer
   filtros: Filtros;
+  estados: string[];
   bolsaDetalle?: BolsaDetalle;
 }
 
@@ -44,6 +36,7 @@ export default function Index({
   porPagina,
   opcionesPorPagina,
   filtros,
+  estados,
   bolsaDetalle
 }: IndexProps) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -51,6 +44,66 @@ export default function Index({
   // Inicializamos los estados con los valores provenientes
   const [buscar, setBuscar] = useState(filtros?.buscar ?? '');
   const [estado, setEstado] = useState(filtros?.estado ?? '');
+
+  // Estados para el ordenamiento
+  const [orden, setOrden] = useState(filtros?.orden ?? 'created_at');
+  const [direccion, setDireccion] = useState(filtros?.direccion ?? 'desc');
+
+  // Función que alterna el orden y dispara Inertia
+  const ordenarPor = (campo: string) => {
+    let nuevaDireccion = 'asc';
+    if (orden === campo && direccion === 'asc') {
+      nuevaDireccion = 'desc';
+    }
+
+    setOrden(campo);
+    setDireccion(nuevaDireccion);
+
+    router.get(
+      '/bolsas',
+      {
+        buscar,
+        estado,
+        orden: campo,
+        direccion: nuevaDireccion,
+        por_pagina: porPagina,
+      },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+      }
+    );
+  };
+
+
+  const cambiarFiltro = (key: string, value: string) => {
+    if (key === 'buscar') {
+      setBuscar(value);
+      return;
+    }
+
+    if (key === 'estado') {
+      const nuevoEstado = value === 'todos' ? '' : value;
+      setEstado(nuevoEstado);
+
+      router.get(
+        '/bolsas',
+        {
+          buscar,
+          estado: nuevoEstado,
+          orden,
+          direccion,
+          por_pagina: porPagina,
+        },
+        {
+          preserveState: true,
+          preserveScroll: true,
+          replace: true,
+        },
+      );
+    }
+  };
 
 
   // Para procesar el formulario de búsqueda
@@ -61,6 +114,8 @@ export default function Index({
       {
         buscar,
         estado,
+        orden,
+        direccion,
         por_pagina: porPagina // Conservo la cantidad de filas seleccionada
       },
       {
@@ -78,10 +133,13 @@ export default function Index({
       {
         por_pagina: cantidad,
         buscar, // Conservo la búsqueda actual
-        estado  // Conservo el filtro de estado actual
+        estado, // Conservo el filtro de estado actual
+        orden,
+        direccion,
       },
       {
         preserveState: true,
+        preserveScroll: true,
         replace: true,
       },
     );
@@ -107,9 +165,17 @@ export default function Index({
     });
   };
 
-  // Modal de detalle de bolsa
+  // Excel
+  const handleExportExcel = () => {
+    const params = new URLSearchParams({
+      buscar: buscar || '',
+      estado: estado || '',
+      orden: orden || 'created_at',
+      direccion: direccion || 'desc',
+    }).toString();
 
-
+    window.location.href = `/bolsas/export?${params}`;
+  };
 
   return (
     <>
@@ -128,54 +194,35 @@ export default function Index({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          {/* Formulario de búsqueda y filtros[cite: 7] */}
-          <form
-            onSubmit={aplicarFiltros}
-            className="flex min-w-0 flex-1 flex-col items-center gap-4 rounded-md border bg-white p-4 sm:flex-row"
-          >
-            <Label htmlFor="buscar-bolsa" className="sr-only">
-              Código de barras
-            </Label>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
 
-            <Input
-              id="buscar-bolsa"
-              name="buscar"
-              type="text"
-              value={buscar}
-              onChange={(e) => setBuscar(e.target.value)}
-              placeholder="Buscar por código de barras..."
-              autoComplete="off"
-              className="pl-9"
+          {/* Búsqueda y filtros */}
+          <form onSubmit={aplicarFiltros} className="min-w-0 flex-1">
+            <FiltrosBolsas
+              valores={{ buscar, estado }}
+              estados={estados}
+              onChange={cambiarFiltro}
             />
-
-            <Select
-              name="estado"
-              autoComplete="off"
-              value={estado || 'todos'}
-              onValueChange={(value) => setEstado(value === 'todos' ? '' : value)}
-            >
-              <SelectTrigger className="w-full sm:w-[220px]">
-                <SelectValue placeholder="Todos los estados" />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value="todos">Todos los estados</SelectItem>
-                <SelectItem value="no_recibido">No recibido</SelectItem>
-                <SelectItem value="Recibido">Recibido</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button type="submit">
-              <Search aria-hidden="true" className="mr-2 size-4" />
-              Buscar
-            </Button>
+            <button type="submit" className="sr-only">
+              Buscar por código de barras
+            </button>
           </form>
 
-
+          {/* Excel */}
+          <div className="flex justify-start lg:justify-end lg:-translate-y-1.5">
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              aria-label="Exportar a Excel"
+              title="Exportar a Excel"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-white shadow transition-colors hover:bg-emerald-500"
+            >
+              <FileSpreadsheet className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
 
           {/* Limitador de cantidad de filas */}
-          <div className="flex justify-start lg:justify-end">
+          <div className="flex justify-start lg:justify-end lg:-translate-y-1.5">
             <CantFilas
               value={porPagina}
               options={opcionesPorPagina}
@@ -202,7 +249,13 @@ export default function Index({
         />
 
         {/* Tabla con la lista de registros */}
-        <BolsaTable data={bolsas.data} onVer={verDetalle} />
+        <BolsaTable
+          data={bolsas.data}
+          orden={orden}
+          direccion={direccion}
+          onVer={verDetalle}
+          onOrdenar={ordenarPor}
+        />
 
         {/* Paginacion */}
         <Paginacion pagination={bolsas} />

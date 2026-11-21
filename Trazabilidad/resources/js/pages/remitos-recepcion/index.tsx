@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Head, router } from '@inertiajs/react';
 import {
+  RemitoRecepcionFiltros,
   RemitoRecepcionDetalleModal,
   RemitoRecepcionModalForm,
   RemitoRecepcionTable,
@@ -17,6 +18,14 @@ import Paginacion, {
 } from '@/components/Paginador';
 import CantFilas from '@/components/CantFilas';
 
+type ParametrosListado = {
+  buscar: string;
+  tipo_bolsa_id: string;
+  tamanio_id: string;
+  orden: string;
+  direccion: string;
+  por_pagina: number;
+};
 
 interface IndexProps {
   remitos: PaginacionData & { data: RemitoRecepcion[] };  //requiere una respuesta paginada cuyos elementos son remitos.
@@ -24,6 +33,13 @@ interface IndexProps {
   porPagina: number;                            //requiere un número con la cantidad de remitos que se muestran por página.
   opcionesPorPagina: number[];                  //requiere un arreglo de números con las cantidades que el selector puede ofrecer
   tamanios: Tamanio[];
+  filtros: {
+    buscar: string;
+    tipo_bolsa_id: string;
+    tamanio_id: string;
+    orden: string;
+    direccion: string;
+  };
   remitoDetalle?: RemitoDetalle;
 }
 
@@ -33,15 +49,32 @@ export default function Index({
   porPagina,
   opcionesPorPagina,
   tamanios,
+  filtros,
   remitoDetalle,
 }: IndexProps) {
+  const [buscar, setBuscar] = useState(filtros.buscar ?? '');
+  const [tipoBolsaId, setTipoBolsaId] = useState(filtros.tipo_bolsa_id ?? '');
+  const [tamanioId, setTamanioId] = useState(filtros.tamanio_id ?? '');
+  const [orden, setOrden] = useState(filtros.orden ?? 'fecha_recepcion');
+  const [direccion, setDireccion] = useState(filtros.direccion ?? 'asc');
+
   const [modalOpen, setModalOpen] = useState(false);
 
-
-  const handlePorPaginaChange = (cantidad: number) => {
+  // Filtro, Busqueda y Ordenamiento
+  const visitarListado = (
+    cambios: Partial<ParametrosListado> = {},
+  ) => {
     router.get(
       '/remitos-recepcion',
-      { por_pagina: cantidad },
+      {
+        buscar,
+        tipo_bolsa_id: tipoBolsaId,
+        tamanio_id: tamanioId,
+        orden,
+        direccion,
+        por_pagina: porPagina,
+        ...cambios,
+      },
       {
         preserveState: true,
         preserveScroll: true,
@@ -49,6 +82,47 @@ export default function Index({
       },
     );
   };
+
+  const aplicarBusqueda = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    visitarListado();
+  };
+
+  const cambiarFiltro = (key: string, value: string) => {
+    if (key === 'buscar') {
+      setBuscar(value);
+      return;
+    }
+
+    if (key === 'tipo_bolsa_id') {
+      const nuevoValor = value === 'TODOS' ? '' : value;
+      setTipoBolsaId(nuevoValor);
+      visitarListado({ tipo_bolsa_id: nuevoValor });
+      return;
+    }
+
+    if (key === 'tamanio_id') {
+      const nuevoValor = value === 'TODOS' ? '' : value;
+      setTamanioId(nuevoValor);
+      visitarListado({ tamanio_id: nuevoValor });
+    }
+  };
+
+  const handlePorPaginaChange = (cantidad: number) => {
+    visitarListado({ por_pagina: cantidad });
+  };
+
+  const ordenarPor = (
+    campo: 'fecha_recepcion' | 'cantidad_declarada',
+  ) => {
+    const nuevaDireccion =
+      orden === campo && direccion === 'asc' ? 'desc' : 'asc';
+
+    setOrden(campo);
+    setDireccion(nuevaDireccion);
+    visitarListado({ orden: campo, direccion: nuevaDireccion });
+  };
+  // *****************************************************
 
   const [detalleOpen, setDetalleOpen] = useState(false);
   const [remitoSeleccionadoId, setRemitoSeleccionadoId] = useState<number | null>(null);
@@ -106,15 +180,41 @@ export default function Index({
 
 
 
-        {/* Limitador de cantidad de filas */}
-        <CantFilas
-          value={porPagina}
-          options={opcionesPorPagina}
-          onChange={handlePorPaginaChange}
-        />
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+          <form onSubmit={aplicarBusqueda} className="min-w-0 flex-1">
+            <RemitoRecepcionFiltros
+              valores={{
+                buscar,
+                tipo_bolsa_id: tipoBolsaId,
+                tamanio_id: tamanioId,
+              }}
+              tiposBolsa={tiposBolsa}
+              tamanios={tamanios}
+              onChange={cambiarFiltro}
+            />
+            <button type="submit" className="sr-only">
+              Buscar remito
+            </button>
+          </form>
+
+          <div className="flex justify-start lg:justify-end lg:-translate-y-1.5">
+            {/* Limitador de cantidad de filas */}
+            <CantFilas
+              value={porPagina}
+              options={opcionesPorPagina}
+              onChange={handlePorPaginaChange}
+            />
+          </div>
+        </div>
 
         {/* Tabla con la lista de registros */}
-        <RemitoRecepcionTable data={remitos.data} onVer={verDetalle} />
+        <RemitoRecepcionTable
+          data={remitos.data}
+          onVer={verDetalle}
+          orden={orden}
+          direccion={direccion}
+          onOrdenar={ordenarPor}
+        />
 
         {/* Paginacion */}
         <Paginacion pagination={remitos} />

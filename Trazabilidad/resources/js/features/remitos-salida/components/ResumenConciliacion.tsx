@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FormEvent } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,7 @@ interface Props {
     setData: (key: keyof ConciliarRemitoSalidaRetiroDTO, value: any) => void;
     errors: Partial<Record<keyof ConciliarRemitoSalidaRetiroDTO, string>>;
     processing: boolean;
-    onSubmit: (e: React.FormEvent) => void;
+    onSubmit: (e: FormEvent) => void;
 }
 
 export function ResumenConciliacion({

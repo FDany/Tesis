@@ -7,6 +7,9 @@ use Inertia\Inertia;
 use App\Models\Bolsa;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
+use App\Exports\BolsasExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class BolsaController extends Controller
 {
@@ -16,6 +19,19 @@ class BolsaController extends Controller
      */
     public function index(Request $request): Response
     {
+
+        // 1. Capturar y validar ordenamiento (Sección 3.1 de la guía)
+        $orden = $request->input('orden', 'created_at'); // Por defecto las más recientes
+        $direccion = $request->input('direccion', 'desc');
+
+        $camposPermitidos = ['codigo_barra', 'created_at', 'estado'];
+        if (!in_array($orden, $camposPermitidos, true)) {
+            $orden = 'created_at';
+        }
+        if (!in_array($direccion, ['asc', 'desc'], true)) {
+            $direccion = 'desc';
+        }
+        // **************************************************************
 
         $buscar = trim($request->input('buscar', ''));
         $estado = $request->input('estado', '');
@@ -27,14 +43,14 @@ class BolsaController extends Controller
             $porPagina = $opcionesPorPagina[0];
         }
 
-        $bolsas = Bolsa::with('tipoBolsa:id,tipo_residuo,color')->select([
+        $bolsas = Bolsa::with('tipoBolsa:id,tipo_residuo,color')
+            ->select([
                 'id',
                 'codigo_barra',
                 'estado',
                 'tipo_bolsa_id',
                 'created_at',
             ])
-
             // Condición dinámica para buscar por código de barra
             ->when($buscar !== '', function ($query) use ($buscar) {
                 $query->where('codigo_barra', 'like', "%{$buscar}%");
@@ -43,8 +59,7 @@ class BolsaController extends Controller
             ->when($request->filled('estado'), function ($query) use ($estado) {
                 $query->where('estado', $estado);
             })
-            ->orderBy('id','asc')
-            ->latest()
+            ->orderBy($orden, $direccion)
             ->paginate($porPagina)
             ->withQueryString();
 
@@ -56,7 +71,16 @@ class BolsaController extends Controller
             'filtros' => [
                 'buscar' => $buscar,
                 'estado' => $estado,
+                'orden' => $orden,          // Devuelve en orden
+                'direccion' => $direccion,  // Devuelve con direccion
             ],
+            'estados' => Bolsa::query()
+                ->whereNotNull('estado')
+                ->where('estado', '<>', '')
+                ->distinct()
+                ->orderBy('estado')
+                ->pluck('estado')
+                ->all(),
         ]);
     }
 
@@ -159,4 +183,30 @@ class BolsaController extends Controller
     {
         //
     }
+
+    public function export(Request $request)
+    {
+        $buscar = trim($request->input('buscar', ''));
+        $estado = $request->input('estado', '');
+        $orden = $request->input('orden', 'created_at');
+        $direccion = $request->input('direccion', 'desc');
+
+        $camposPermitidos = ['codigo_barra', 'created_at', 'estado'];
+        if (!in_array($orden, $camposPermitidos, true)) {
+            $orden = 'created_at';
+        }
+        if (!in_array($direccion, ['asc', 'desc'], true)) {
+            $direccion = 'desc';
+        }
+
+        $filtros = [
+            'buscar' => $buscar,
+            'estado' => $estado,
+            'orden' => $orden,
+            'direccion' => $direccion,
+        ];
+
+        return Excel::download(new BolsasExport($filtros), 'reporte_bolsas.xlsx');
+    }
+
 }

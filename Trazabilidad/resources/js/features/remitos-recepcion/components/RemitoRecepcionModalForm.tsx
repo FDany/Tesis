@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { FormEvent } from 'react';
 
 interface RemitoRecepcionModalFormProps {
   open: boolean;
@@ -45,7 +46,7 @@ export function RemitoRecepcionModalForm({
       observaciones: '',
     });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     post('/remitos-recepcion', {

@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import {
-  ScannerInput,
   TablaBolsasEscaneadas,
   FormularioRemito,
   type CreateRemitoSalidaRetiroDTO,
 } from '@/features/remitos-salida';
 import type { Bolsa } from '@/features/bolsas/types/bolsa';
+
+import { ScannerInput } from '@/features/bolsas';
 
 export default function CreateRemitoSalida() {
   const [bolsas, setBolsas] = useState<Bolsa[]>([]);
@@ -30,6 +31,7 @@ export default function CreateRemitoSalida() {
     try {
       const res = await fetch(`/api/bolsas/buscar-para-despacho?codigo=${encodeURIComponent(codigoLimpio)}`);
 
+      // Manejo de errores de la API
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Bolsa no encontrada o no disponible para despacho');
@@ -37,16 +39,20 @@ export default function CreateRemitoSalida() {
 
       const bolsa: Bolsa = await res.json();
 
+      // Verifica si la bolsa ya fue escaneada
       if (bolsas.some((b) => b.id === bolsa.id)) {
         setScannedError(`La bolsa con código ${bolsa.codigo_barra} ya fue escaneada.`);
-        return;
+        return false;
       }
 
       const nuevasBolsas = [...bolsas, bolsa];
       setBolsas(nuevasBolsas);
       setData('bolsas_ids', nuevasBolsas.map((b) => b.id));
+      return true;
+
     } catch (err: any) {
       setScannedError(err.message);
+      return false;
     }
   };
 
@@ -56,7 +62,7 @@ export default function CreateRemitoSalida() {
     setData('bolsas_ids', nuevasBolsas.map((b) => b.id));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     post('/remitos-salida');
   };

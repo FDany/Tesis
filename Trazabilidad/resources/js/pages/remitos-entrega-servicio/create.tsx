@@ -1,4 +1,13 @@
-import { useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import {
+    useEffect,
+    useRef,
+    useState,
+    type FormEvent,
+} from 'react';
+import {
+    RemitoEntregaServicioPreviewModal,
+    type RemitoEntregaServicioPreview,
+} from '@/features/remitos-entrega-servicio/components/RemitoEntregaServicioPreviewModal';
 import { Head, useForm } from '@inertiajs/react';
 import { toast } from 'sonner';
 
@@ -14,11 +23,17 @@ import {
 } from '@/components/ui/select';
 import type { Servicio } from '@/features/servicios/types/servicio';
 
+import { ScannerInput } from '@/features/bolsas';
+
 interface Props {
     servicios: Servicio[];
+    remitoEntregaServicio: RemitoEntregaServicioPreview | null;
 }
 
-export default function CreateResiduo({ servicios }: Props) {
+export default function CreateResiduo({
+    servicios,
+    remitoEntregaServicio,
+}: Props) {
     const { data, setData, post, processing, errors, reset } = useForm({
         servicio_id: '',
         retira_nombre: '',
@@ -26,27 +41,26 @@ export default function CreateResiduo({ servicios }: Props) {
         codigos: [] as string[],
     });
 
-    const [codigoActual, setCodigoActual] = useState('');
     const [errorEscaneo, setErrorEscaneo] = useState('');
 
-    const agregarCodigo = async () => {
-        const codigo = codigoActual.trim();
+    const agregarCodigo = async (codigoIngresado: string): Promise<boolean> => {
+        const codigo = codigoIngresado.trim();
 
-        if (verificacionEnCurso.current) return;
+        if (verificacionEnCurso.current) return false;
 
         if (!/^\d{13}$/.test(codigo)) {
             setErrorEscaneo('El código debe tener 13 dígitos.');
-            return;
+            return false;
         }
 
         if (data.codigos.includes(codigo)) {
             setErrorEscaneo('Ese código ya fue agregado.');
-            return;
+            return false;
         }
 
         if (data.codigos.length >= 1000) {
             setErrorEscaneo('No se pueden agregar más de 1000 bolsas.');
-            return;
+            return false;
         }
 
         verificacionEnCurso.current = true;
@@ -56,9 +70,7 @@ export default function CreateResiduo({ servicios }: Props) {
         try {
             const response = await fetch(
                 `/api/bolsas/buscar-para-entrega?codigo=${encodeURIComponent(codigo)}`,
-                {
-                    headers: { Accept: 'application/json' },
-                },
+                { headers: { Accept: 'application/json' } },
             );
 
             const resultado: unknown = await response.json();
@@ -85,25 +97,18 @@ export default function CreateResiduo({ servicios }: Props) {
             }
 
             setData('codigos', [...data.codigos, codigo]);
-            setCodigoActual('');
+            return true;
         } catch (error: unknown) {
             setErrorEscaneo(
-                error instanceof Error
-                    ? error.message
-                    : 'No se pudo validar la bolsa.',
+                error instanceof Error ? error.message : 'No se pudo validar la bolsa.',
             );
+            return false;
         } finally {
             verificacionEnCurso.current = false;
             setVerificando(false);
         }
     };
 
-    const manejarEnter = (event: KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            agregarCodigo();
-        }
-    };
 
     const quitarCodigo = (codigoAQuitar: string) => {
         setData(
@@ -112,19 +117,18 @@ export default function CreateResiduo({ servicios }: Props) {
         );
     };
 
-    const enviarFormulario = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const enviarFormulario = (e: FormEvent) => {
+        e.preventDefault();
 
         if (data.codigos.length === 0) {
             setErrorEscaneo('Agrega al menos una bolsa.');
             return;
         }
 
-        post('/residuos', {
+        post('/remitos-entrega-servicio', {
             preserveScroll: true,
             onSuccess: () => {
                 reset();
-                setCodigoActual('');
                 setErrorEscaneo('');
                 toast.success('Bolsas entregadas al servicio correctamente.');
             },
@@ -138,6 +142,15 @@ export default function CreateResiduo({ servicios }: Props) {
 
     const [verificando, setVerificando] = useState(false);
     const verificacionEnCurso = useRef(false);
+
+    // Modal de vista previa del remito
+    const [modalRemitoAbierto, setModalRemitoAbierto] = useState(false);
+
+    useEffect(() => {
+        if (remitoEntregaServicio) {
+            setModalRemitoAbierto(true);
+        }
+    }, [remitoEntregaServicio]);
 
     return (
         <>
@@ -221,27 +234,13 @@ export default function CreateResiduo({ servicios }: Props) {
 
                     <div className="space-y-2">
                         <Label htmlFor="codigo_barra">Código de barras</Label>
-                        <div className="flex gap-2">
-                            <Input
-                                id="codigo_barra"
-                                value={codigoActual}
-                                onChange={(event) => setCodigoActual(event.target.value)}
-                                onKeyDown={manejarEnter}
-                                placeholder="Escanea o escribe el código y presiona Enter"
-                                inputMode="numeric"
-                                autoComplete="off"
-                                disabled={verificando}
-                            />
-
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                onClick={agregarCodigo}
-                                disabled={verificando}
-                            >
-                                {verificando ? 'Validando…' : 'Agregar'}
-                            </Button>
-                        </div>
+                        <ScannerInput
+                            id="codigo_barra"
+                            onScan={agregarCodigo}
+                            disabled={verificando || processing}
+                            placeholder="Escanea o escribe el código y presiona Enter"
+                            buttonLabel={verificando ? 'Validando…' : 'Agregar'}
+                        />
 
                         {errorEscaneo && (
                             <p className="text-sm text-destructive">{errorEscaneo}</p>
@@ -290,6 +289,13 @@ export default function CreateResiduo({ servicios }: Props) {
                     </Button>
                 </form>
             </div>
+
+
+            <RemitoEntregaServicioPreviewModal
+                open={modalRemitoAbierto}
+                onOpenChange={setModalRemitoAbierto}
+                remito={remitoEntregaServicio}
+            />
         </>
     );
 }

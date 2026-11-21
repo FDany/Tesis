@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import type { TipoBolsa, CreateTipoBolsaDTO } from '../types/tipoBolsa';
 import {
@@ -50,7 +50,7 @@ export const TipoBolsaModalForm: React.FC<Props> = ({
     }
   }, [initialData, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     if (isEditing && initialData?.id) {

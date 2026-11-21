@@ -24,7 +24,7 @@ export default function CreatePesajeDeposito() {
         }
     };
 
-    const enviarFormulario = (event: FormEvent<HTMLFormElement>) => {
+    const enviarFormulario = (event: FormEvent) => {
         event.preventDefault();
 
         post('/pesaje-deposito', {

@@ -9,7 +9,7 @@ use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\BolsaController;
 use App\Http\Controllers\RemitoSalidaRetiroController;
 use App\Http\Controllers\IncidenciaController;
-use App\Http\Controllers\ResiduoController;
+use App\Http\Controllers\RemitoEntregaServicioController;
 use App\Http\Controllers\RecepcionDepositoController;
 use App\Http\Controllers\PesajeDepositoController;
 use App\Http\Controllers\DashboardController;
@@ -26,6 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     Route::resource('users', UserController::class)->except(['show']);
     Route::resource('roles', RoleController::class)->only(['index', 'store', 'update', 'destroy']);
+    // Excel
+    Route::get('/bolsas/export', [BolsaController::class, 'export'])->name('bolsas.export');
+
     Route::inertia('bolsas/create', 'bolsas/Crear')->name('bolsas.create');
     Route::resource('tipos-bolsa', TipoBolsaController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('tamanios', TamanioController::class)->only(['index', 'store', 'update', 'destroy']);
@@ -33,8 +36,13 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
     Route::resource('remitos-recepcion', RemitoRecepcionController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
     Route::resource('bolsas', BolsaController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
 
+    
+    // Remito de recepcion para generar pdf
     Route::get('/remitos-recepcion/{remito}/pdf', [RemitoRecepcionController::class, 'generarPdf'])
         ->name('remitos-recepcion.pdf');
+    // Remitos de recepcion envio email
+    Route::post('/remitos-recepcion/{remito}/enviar-pdf', [RemitoRecepcionController::class, 'enviarPdf'])
+        ->name('remitos-recepcion.enviar-pdf');
 
      // Módulo Remitos de Salida (Despacho Interno y Conciliación DGM)
     Route::resource('remitos-salida', RemitoSalidaRetiroController::class);
@@ -79,15 +87,23 @@ Route::middleware(['auth', 'can:manage-administration'])->group(function () {
         return response()->json($bolsa);
     });
 
-    // Módulo Residuos
-    Route::get('residuos', [ResiduoController::class, 'create'])->name('residuos.create');
-    Route::post('residuos', [ResiduoController::class, 'store'])->name('residuos.store');
+    // Módulo Remitos de Entrega al Servicio
 
-    // Validación del escáner en tiempo real para el módulo de residuos
+    Route::resource(
+        'remitos-entrega-servicio',
+        RemitoEntregaServicioController::class,
+    )->only(['index', 'create', 'store']);
+
+    // Validación del escáner en tiempo real para el módulo de remitos de entrega al servicio
     Route::get(
         'api/bolsas/buscar-para-entrega',
-        [ResiduoController::class, 'verificarBolsa'],
-    )->name('residuos.verificar-bolsa');
+        [RemitoEntregaServicioController::class, 'verificarBolsa'],
+    )->name('remitos-entrega-servicio.verificar-bolsa');
+    // Para descargar el remito de entrega al servicio en PDF
+    Route::get(
+        'remitos-entrega-servicio/{remito}/pdf',
+        [RemitoEntregaServicioController::class, 'descargarPdf'],
+    )->name('remitos-entrega-servicio.pdf');
 
     // Módulo Recepción en Depósito
     Route::post(

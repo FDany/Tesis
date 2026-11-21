@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { FormEvent, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import type { Tamanio, CreateTamanioDTO } from '../types/tamanio';
 import {
@@ -43,7 +43,7 @@ export const TamanioModalForm: React.FC<Props> = ({
     }
   }, [initialData, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     if (isEditing && initialData?.id) {

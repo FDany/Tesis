@@ -47,7 +47,12 @@ export function TipoBolsaTable({
             <TableRow key={tipo.id}>
               <TableCell className="font-semibold">{tipo.tipo_residuo}</TableCell>
               <TableCell>
-                <Badge variant="outline">{tipo.color}</Badge>
+                <Badge
+                  variant="outline"
+                  style={{ borderColor: tipo.color }}
+                >
+                  {tipo.color}
+                </Badge>
               </TableCell>
               <TableCell>{tipo.proveedor || '-'}</TableCell>
               <TableCell className="text-right space-x-2">

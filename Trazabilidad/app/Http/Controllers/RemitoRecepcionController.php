@@ -14,6 +14,11 @@ use App\Models\Tamanio;
 use Barryvdh\DomPDF\Facade\Pdf; 
 use Illuminate\Validation\ValidationException;
 
+//Email
+use App\Mail\RemitoRecepcionMail;
+use Illuminate\Support\Facades\Mail;
+
+
 class RemitoRecepcionController extends Controller
 {
     private const OPCIONES_POR_PAGINA = [5, 10, 20];
@@ -23,6 +28,24 @@ class RemitoRecepcionController extends Controller
 
     public function index(Request $request): Response
     {
+        // Ordern, filtro, busqueda
+        $orden = $request->input('orden', 'fecha_recepcion');
+        $direccion = $request->input('direccion', 'asc');
+
+        $camposPermitidos = ['fecha_recepcion', 'cantidad_declarada'];
+
+        if (!in_array($orden, $camposPermitidos, true)) {
+            $orden = 'fecha_recepcion';
+        }
+
+        if (!in_array($direccion, ['asc', 'desc'], true)) {
+            $direccion = 'asc';
+        }
+
+        $buscar = trim($request->input('buscar', ''));
+        $tipoBolsaId = (string) $request->input('tipo_bolsa_id', '');
+        $tamanioId = (string) $request->input('tamanio_id', '');
+        // *************************************************
 
         $opcionesPorPagina = self::OPCIONES_POR_PAGINA;
         $porPagina = (int) $request->input('por_pagina', $opcionesPorPagina[0]);
@@ -36,7 +59,19 @@ class RemitoRecepcionController extends Controller
             'tipoBolsa',
             'tamanio'
         ])
-            ->orderBy('fecha_recepcion')
+            ->when($buscar !== '', function ($query) use ($buscar) {
+                $query->where('id', $buscar);
+            })
+            ->when(
+                $tipoBolsaId !== '' && $tipoBolsaId !== 'TODOS',
+                fn ($query) => $query->where('tipo_bolsa_id', $tipoBolsaId)
+            )
+            ->when(
+                $tamanioId !== '' && $tamanioId !== 'TODOS',
+                fn ($query) => $query->where('tamanio_id', $tamanioId)
+            )
+            ->orderBy($orden, $direccion)
+            ->orderBy('id', 'asc')
             ->paginate($porPagina)
             ->withQueryString();
 
@@ -46,6 +81,13 @@ class RemitoRecepcionController extends Controller
             'porPagina' => $porPagina,
             'opcionesPorPagina' => $opcionesPorPagina,
             'tamanios' => Tamanio::all(),
+            'filtros' => [
+                'buscar' => $buscar,
+                'tipo_bolsa_id' => $tipoBolsaId,
+                'tamanio_id' => $tamanioId,
+                'orden' => $orden,
+                'direccion' => $direccion,
+            ],
         ]);
     }
 
@@ -276,5 +318,37 @@ class RemitoRecepcionController extends Controller
         return Pdf::loadView('remitorecepcion.generarremitorecepcion', [
             'remito' => $remito,
         ])->download("remito-recepcion-{$remito->id}.pdf");
+    }
+
+
+    
+
+    // Envio de mail
+    public function enviarPdf(Request $request, string|RemitoRecepcion $remito)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        // Resuelve el modelo si llega el ID o si viene resuelto por Route Model Binding
+        $remito = $remito instanceof RemitoRecepcion
+            ? $remito
+            : RemitoRecepcion::findOrFail($remito);
+
+        $remito->load([
+            'usuarioRecep',
+            'tipoBolsa',
+            'tamanio',
+            'bolsas' => fn ($query) => $query->orderBy('id'),
+        ]);
+
+        // 1. Renderiza el PDF en memoria con la vista existente
+        $pdf = Pdf::loadView('remitorecepcion.generarremitorecepcion', compact('remito'));
+        $pdfBytes = $pdf->output();
+
+        // 2. Envío mediante SMTP con la clase Mailable
+        Mail::to($validated['email'])->send(new RemitoRecepcionMail($remito, $pdfBytes));
+
+        return back()->with('success', 'Remito enviado correctamente a ' . $validated['email']);
     }
 }
