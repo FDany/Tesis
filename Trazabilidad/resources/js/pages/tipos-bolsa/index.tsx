@@ -5,6 +5,8 @@ import {
   TipoBolsaTable,
   type TipoBolsa
 } from '@/features/tipos-bolsa';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import FlashMessage from '@/components/FlashMessage';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
@@ -31,17 +33,34 @@ export function TiposBolsaPage({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTipo, setSelectedTipo] = useState<TipoBolsa | null>(null);
 
-  // 2. Eliminación adaptada a Inertia
+  // Estados para el diálogo de confirmación de eliminación
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [idToDelete, setIdToDelete] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // 2. Eliminación adaptada a Inertia con ConfirmDeleteDialog
   const handleDelete = (id: number) => {
     if (!id) return;
+    setIdToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
 
-    if (confirm('¿Estás seguro de que deseas eliminar este tipo de bolsa?')) {
-      router.delete(`/tipos-bolsa/${id}`, {
-        onError: () => {
-          alert('No se pudo eliminar el tipo de bolsa. Verifica que no tenga bolsas o remitos asociados.');
-        },
-      });
-    }
+  const ejecutarEliminacion = () => {
+    if (!idToDelete) return;
+
+    setIsDeleting(true);
+    router.delete(`/tipos-bolsa/${idToDelete}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        setIsDeleteModalOpen(false);
+        setIdToDelete(null);
+      },
+      onError: () => {
+        setIsDeleteModalOpen(false);
+        setIdToDelete(null);
+      },
+      onFinish: () => setIsDeleting(false),
+    });
   };
 
   const handleOpenCreateModal = () => {
@@ -73,6 +92,8 @@ export function TiposBolsaPage({
 
   return (
     <div className="p-6 space-y-6">
+      <FlashMessage />
+
       <div className="flex justify-between items-center">
         <div className='p-8'>
           <h1 className="text-2xl font-bold tracking-tight">
@@ -109,6 +130,19 @@ export function TiposBolsaPage({
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         initialData={selectedTipo}
+      />
+
+      <ConfirmDeleteDialog
+        open={isDeleteModalOpen}
+        onOpenChange={(open) => {
+          setIsDeleteModalOpen(open);
+          if (!open) setIdToDelete(null);
+        }}
+        title="¿Eliminar flujo de residuos?"
+        description="Estás a punto de borrar este flujo de residuos permanentemente. Esta acción no se puede deshacer."
+        confirmLabel="Sí, eliminar flujo"
+        onConfirm={ejecutarEliminacion}
+        processing={isDeleting}
       />
     </div>
   );

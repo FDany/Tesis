@@ -50,6 +50,12 @@ const navItems: AppNavItem[] = [
         permission: 'listar roles',
     },
     {
+        title: 'Permisos',
+        href: '/permisos',
+        icon: ShieldCheck,
+        permission: 'listar permisos',
+    },
+    {
         title: 'Gestión de Tamaños de Bolsa',
         href: '/tamanios',
         icon: Trash2,
@@ -93,7 +99,7 @@ const navItems: AppNavItem[] = [
         permission: 'listar incidencias',
     },
     {
-        title: 'Gestión de Residuos',
+        title: 'Gestión de Entrega de Bolsas a Servicios',
         href: '/residuos',
         icon: Trash2,
         permission: 'registrar entregaBolsasServicio',

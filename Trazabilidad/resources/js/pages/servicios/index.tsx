@@ -5,6 +5,8 @@ import {
   ServicioTable,
   type Servicio
 } from '@/features/servicios';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import FlashMessage from '@/components/FlashMessage';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
@@ -17,17 +19,34 @@ export const ServiciosPage: React.FC<Props> = ({ servicios }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedServicio, setSelectedServicio] = useState<Servicio | null>(null);
 
-  // 2. Eliminación adaptada a Inertia
+  // Estados para el diálogo de confirmación de eliminación
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [idToDelete, setIdToDelete] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
+  // 2. Eliminación adaptada a Inertia con ConfirmDeleteDialog
   const handleDelete = (id: number) => {
     if (!id) return;
+    setIdToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
 
-    if (confirm('¿Estás seguro de que deseas eliminar este servicio?')) {
-      router.delete(`/servicios/${id}`, {
-        onError: () => {
-          alert('No se pudo eliminar el servicio. Verifica que no tenga bolsas o remitos asociados.');
-        },
-      });
-    }
+  const ejecutarEliminacion = () => {
+    if (!idToDelete) return;
+
+    setIsDeleting(true);
+    router.delete(`/servicios/${idToDelete}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        setIsDeleteModalOpen(false);
+        setIdToDelete(null);
+      },
+      onError: () => {
+        setIsDeleteModalOpen(false);
+        setIdToDelete(null);
+      },
+      onFinish: () => setIsDeleting(false),
+    });
   };
 
   const handleOpenCreateModal = () => {
@@ -47,6 +66,8 @@ export const ServiciosPage: React.FC<Props> = ({ servicios }) => {
 
   return (
     <div className="p-6 space-y-6">
+      <FlashMessage />
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Gestión de Servicios</h1>
@@ -71,6 +92,19 @@ export const ServiciosPage: React.FC<Props> = ({ servicios }) => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         initialData={selectedServicio}
+      />
+
+      <ConfirmDeleteDialog
+        open={isDeleteModalOpen}
+        onOpenChange={(open) => {
+          setIsDeleteModalOpen(open);
+          if (!open) setIdToDelete(null);
+        }}
+        title="¿Eliminar servicio?"
+        description="Estás a punto de borrar este servicio permanentemente. Esta acción no se puede deshacer."
+        confirmLabel="Sí, eliminar servicio"
+        onConfirm={ejecutarEliminacion}
+        processing={isDeleting}
       />
     </div>
   );

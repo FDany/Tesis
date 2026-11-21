@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TipoBolsaController;
 use App\Http\Controllers\RemitoRecepcionController;
@@ -20,7 +21,8 @@ Route::inertia('/', 'welcome')->name('home');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
     Route::resource('users', UserController::class)->except(['show']);
-    Route::resource('roles', RoleController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('roles', RoleController::class)->except(['show']);
+    Route::resource('permisos', PermissionController::class)->except(['show', 'edit', 'create']);
     Route::inertia('bolsas/create', 'bolsas/Crear')->name('bolsas.create');
     Route::resource('tipos-bolsa', TipoBolsaController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('tamanios', TamanioController::class)->only(['index', 'store', 'update', 'destroy']);
