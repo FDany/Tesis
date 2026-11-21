@@ -11,17 +11,29 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
-    public function index(): Response
+    private const OPCIONES_POR_PAGINA = [5, 10, 20];
+
+    public function index(Request $request): Response
     {
+
+        $opcionesPorPagina = self::OPCIONES_POR_PAGINA;
+        $porPagina = (int) $request->input('por_pagina', $opcionesPorPagina[0]);
+
+        if (!in_array($porPagina, $opcionesPorPagina, true)) {
+            $porPagina = $opcionesPorPagina[0];
+        }
         return Inertia::render('users/index', [
             'users' => User::query()
                 ->with('roles:id,name')
                 ->orderBy('last_name')
                 ->orderBy('first_name')
-                ->paginate(20),
+                ->paginate($porPagina),
+            'porPagina' => $porPagina,
+            'opcionesPorPagina' => $opcionesPorPagina,
         ]);
     }
 
@@ -101,18 +113,12 @@ class UserController extends Controller
         return to_route('users.index')->with('success', 'Usuario actualizado.');
     }
 
-    public function destroy(Request $request, User $user): RedirectResponse
+    public function destroy(User $user): RedirectResponse
     {
-        if ($request->user()->is($user)) {
-            throw ValidationException::withMessages([
-                'user' => 'No puedes eliminar tu propia cuenta desde esta pantalla.',
-            ]);
-        }
+        Gate::authorize('delete', $user);
 
         if ($user->hasRole('admin') && User::role('admin')->count() <= 1) {
-            throw ValidationException::withMessages([
-                'user' => 'No se puede eliminar el último administrador.',
-            ]);
+            return to_route('users.index')->with('error', 'No se puede eliminar el último administrador.');
         }
 
         $user->delete();

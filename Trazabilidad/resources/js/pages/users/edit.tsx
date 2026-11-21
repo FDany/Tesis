@@ -1,26 +1,17 @@
 import { Head, Link } from '@inertiajs/react';
-import UserForm from '@/components/admin/user-form';
 
-type Role = {
-    id: number;
-    name: string;
-};
-
-type UserRecord = {
-    id: number;
-    first_name: string;
-    last_name: string;
-    dni: string;
-    email: string;
-    roles: Role[];
-};
+import {
+    UserForm,
+    type UserFormRecord,
+    type UserRoleOption,
+} from '@/features/users/components/UserForm';
 
 export default function UsersEdit({
     user,
     roles,
 }: {
-    user: UserRecord;
-    roles: Role[];
+    user: UserFormRecord;
+    roles: UserRoleOption[];
 }) {
     return (
         <>
