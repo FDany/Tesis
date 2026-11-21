@@ -11,7 +11,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
 use App\Models\Tamanio;
-use Barryvdh\DomPDF\Facade\Pdf; 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\ValidationException;
 
 class RemitoRecepcionController extends Controller
@@ -273,7 +273,7 @@ class RemitoRecepcionController extends Controller
             'bolsas' => fn ($query) => $query->orderBy('id'),
         ]);
 
-        return Pdf::loadView('remitorecepcion.generarremitorecepcion', [
+        return Pdf::loadView('pdfs.remitorecepcion.generarremitorecepcion', [
             'remito' => $remito,
         ])->download("remito-recepcion-{$remito->id}.pdf");
     }

@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 
+import FlashMessage from '@/components/FlashMessage';
 import {
     UserForm,
     type UserRoleOption,
@@ -9,6 +10,8 @@ export default function UsersCreate({ roles }: { roles: UserRoleOption[] }) {
     return (
         <>
             <Head title="Crear usuario" />
+            <FlashMessage />
+
             <div className="mx-auto max-w-2xl space-y-6 p-4">
                 <div>
                     <Link

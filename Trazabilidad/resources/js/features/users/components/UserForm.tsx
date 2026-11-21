@@ -1,4 +1,5 @@
 import { Link, useForm } from '@inertiajs/react';
+import { Mail } from 'lucide-react';
 
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,7 @@ type UserFormData = {
     last_name: string;
     dni: string;
     email: string;
-    password: string;
+    reset_password: boolean;
     roles: number[];
 };
 
@@ -42,7 +43,7 @@ export function UserForm({ user, roles }: UserFormProps) {
         last_name: user?.last_name ?? '',
         dni: user?.dni ?? '',
         email: user?.email ?? '',
-        password: '',
+        reset_password: false,
         roles: user?.roles?.map((role) => role.id) ?? [],
     });
 
@@ -146,23 +147,38 @@ export function UserForm({ user, roles }: UserFormProps) {
                 </div>
             </div>
 
-            <div className="space-y-1.5">
-                <Label htmlFor="password">
-                    {isEditing
-                        ? 'Nueva contraseña (dejar en blanco para no cambiar)'
-                        : 'Contraseña'}
-                </Label>
-                <Input
-                    id="password"
-                    type="password"
-                    value={form.data.password}
-                    onChange={(e) => form.setData('password', e.target.value)}
-                    placeholder="••••••••"
-                    autoComplete="new-password"
-                    required={!isEditing}
-                />
-                <InputError message={form.errors.password} />
-            </div>
+            {isEditing ? (
+                <div className="flex items-start space-x-3 rounded-lg border p-4">
+                    <Checkbox
+                        id="reset_password"
+                        checked={form.data.reset_password}
+                        onCheckedChange={(checked) =>
+                            form.setData('reset_password', checked === true)
+                        }
+                    />
+                    <div className="space-y-1 leading-none">
+                        <Label
+                            htmlFor="reset_password"
+                            className="cursor-pointer text-sm font-medium"
+                        >
+                            Restablecer contraseña y enviar nueva clave por correo
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                            Se generará una nueva contraseña temporal aleatoria y
+                            el usuario deberá cambiarla en su próximo inicio de
+                            sesión.
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50/70 p-3.5 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-200">
+                    <Mail className="mt-0.5 h-4 w-4 shrink-0" />
+                    <p>
+                        Se generará una contraseña temporal automáticamente y se
+                        enviará al correo electrónico registrado.
+                    </p>
+                </div>
+            )}
 
             <fieldset className="space-y-3 rounded-lg border p-4">
                 <legend className="px-1 text-sm font-medium">
@@ -221,7 +237,9 @@ export function UserForm({ user, roles }: UserFormProps) {
 
                 <Button type="submit" disabled={form.processing}>
                     {form.processing
-                        ? 'Guardando...'
+                        ? isEditing
+                            ? 'Guardando...'
+                            : 'Creando y enviando correo...'
                         : isEditing
                           ? 'Guardar cambios'
                           : 'Crear usuario'}

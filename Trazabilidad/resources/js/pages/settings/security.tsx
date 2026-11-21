@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import { useRef } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/heading';
@@ -11,6 +11,7 @@ import type { Props as ManagePasskeysProps } from '@/components/manage-passkeys'
 import ManagePasskeys from '@/components/manage-passkeys';
 import type { Props as ManageTwoFactorProps } from '@/components/manage-two-factor';
 import ManageTwoFactor from '@/components/manage-two-factor';
+import { ShieldAlert } from 'lucide-react';
 
 // oxfmt-ignore
 type Props = {
@@ -22,6 +23,11 @@ export default function Security(props: Props) {
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
+    const { auth } = usePage<{
+        auth?: { user?: { must_change_password?: boolean } | null };
+    }>().props;
+    const mustChangePassword = Boolean(auth?.user?.must_change_password);
+
     return (
         <>
             <Head title="Configuración de seguridad" />
@@ -29,6 +35,25 @@ export default function Security(props: Props) {
             <h1 className="sr-only">Configuración de seguridad</h1>
 
             <div className="space-y-6">
+                {mustChangePassword && (
+                    <div
+                        role="alert"
+                        className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800/70 dark:bg-amber-950/50 dark:text-amber-200"
+                    >
+                        <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+                        <div className="space-y-1">
+                            <p className="font-semibold">
+                                Cambio de contraseña obligatorio
+                            </p>
+                            <p className="text-amber-900/90 dark:text-amber-200/90">
+                                Estás utilizando una contraseña temporal. Por
+                                seguridad, debes establecer una contraseña
+                                personal antes de acceder al resto del sistema.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 <Heading
                     variant="small"
                     title="Cambiar contraseña"

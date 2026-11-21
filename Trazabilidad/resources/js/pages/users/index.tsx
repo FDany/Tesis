@@ -30,8 +30,6 @@ interface IndexProps {
     opcionesPorPagina: number[];
 }
 
-
-
 export default function UsersIndex({ users, porPagina, opcionesPorPagina }: IndexProps) {
     const handlePorPaginaChange = (cantidad: number) => {
         router.get(
