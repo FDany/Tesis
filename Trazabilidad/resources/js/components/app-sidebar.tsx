@@ -56,7 +56,7 @@ const navItems: AppNavItem[] = [
         permission: 'listar permisos',
     },
     {
-        title: 'Gestión de Tamaños de Bolsa',
+        title: 'Tamaños de bolsa',
         href: '/tamanios',
         icon: Trash2,
         permission: 'listar tamBolsas',
@@ -81,29 +81,54 @@ const navItems: AppNavItem[] = [
         permission: 'listar remitosRecepcion',
     },
     {
-        title: 'Gestión de Remitos de Salida',
-        href: '/remitos-salida',
+        title: 'Crear Remito de Recepción',
+        href: '/remitos-recepcion/create',
+        icon: Plus,
+    },
+    {
+        title: 'Remitos de recepción',
+        href: '/remitos-recepcion',
         icon: LayoutDashboard,
         permission: 'listar remitosSalida',
     },
     {
-        title: 'Gestion de Bolsas',
+        title: 'Bolsas',
         href: '/bolsas',
         icon: Trash2,
         permission: 'listar bolsas',
     },
     {
-        title: 'Gestión de Incidencias',
-        href: '/incidencias',
+        title: 'Servicios',
+        href: '/servicios',
         icon: LayoutDashboard,
         permission: 'listar incidencias',
     },
     {
-        title: 'Gestión de Entrega de Bolsas a Servicios',
+        title: 'Entrega a servicios',
         href: '/residuos',
         icon: Trash2,
         permission: 'registrar entregaBolsasServicio',
-    },/*
+    },
+    {
+        title: 'Recepción Depósito',
+        href: '/recepciones-deposito',
+        icon: Trash2,
+    },
+    {
+        title: 'Pesaje Depósito',
+        href: '/pesaje-deposito',
+        icon: Trash2,
+    },
+    {
+        title: 'Remitos de salida',
+        href: '/remitos-salida',
+        icon: LayoutDashboard,
+    },
+    {
+        title: 'Incidencias',
+        href: '/incidencias',
+        icon: LayoutDashboard,
+    },
     {
         title: 'Reportes',
         href: '/reportes',
@@ -114,17 +139,6 @@ const navItems: AppNavItem[] = [
         href: '/configuracion',
         icon: Settings,
         adminOnly: true,
-    },*/
-    {
-        title: 'Nueva Carga',
-        href: '/bolsas/create',
-        icon: Plus,
-    },
-    {
-        title: 'Crear Remito de Recepción',
-        href: '/remitos-recepcion/create',
-        icon: Plus,
-        permission: 'generar remitoRecepcion',
     },
 ];
 
