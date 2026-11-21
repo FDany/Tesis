@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { UserTable } from '@/pages/users/components/userTable';
+import { UserTable } from '@/features/users/components/UserTable';
 
 interface Role {
     id: number;

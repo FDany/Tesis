@@ -112,7 +112,7 @@ export function UserTable({ users }: UserTableProps) {
                                             <div className="flex justify-end gap-2">
                                                 <Button
                                                     asChild
-                                                    variant="ghost"
+                                                    variant="outline"
                                                     size="icon"
                                                 >
                                                     <Link
@@ -120,21 +120,20 @@ export function UserTable({ users }: UserTableProps) {
                                                         aria-label={`Editar usuario ${user.first_name} ${user.last_name}`}
                                                         title="Editar"
                                                     >
-                                                        <Edit className="size-4" />
+                                                        <Edit className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
                                                 <Button
                                                     type="button"
-                                                    variant="ghost"
+                                                    variant="destructive"
                                                     size="icon"
-                                                    className="text-destructive hover:text-destructive"
                                                     onClick={() =>
                                                         handleDelete(user.id)
                                                     }
                                                     aria-label={`Eliminar usuario ${user.first_name} ${user.last_name}`}
                                                     title="Eliminar"
                                                 >
-                                                    <Trash2 className="size-4" />
+                                                    <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>
