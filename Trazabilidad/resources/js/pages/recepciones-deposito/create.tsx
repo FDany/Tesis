@@ -98,7 +98,7 @@ export default function CreateRecepcionDeposito() {
         );
     };
 
-    const enviarFormulario = (event: FormEvent<HTMLFormElement>) => {
+    const enviarFormulario = (event: FormEvent) => {
         event.preventDefault();
 
         if (data.codigos.length === 0) {

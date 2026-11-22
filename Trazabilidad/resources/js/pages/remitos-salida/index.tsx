@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, type FormEvent } from 'react';
 import { router } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Eye, FileText, AlertTriangle, CheckCircle2, Printer, Clock, XCircle } from 'lucide-react';
 import type { RemitoSalidaRetiro, EstadoRemitoSalida } from '@/features/remitos-salida/types/remitoSalidaRetiro';
+import { RemitoSalidaFiltros } from '@/features/remitos-salida/components/RemitoSalidaFiltros';
 import { useAuth } from '@/hooks/use-auth';
 
 interface PaginatedRemitos {
@@ -17,10 +18,18 @@ interface PaginatedRemitos {
 
 interface Props {
   remitos: PaginatedRemitos;
+  filtros: {
+    buscar: string;
+    estado: string;
+  };
 }
 
-export default function IndexRemitosSalida({ remitos }: Props) {
-    const { can } = useAuth();
+export default function IndexRemitosSalida({ remitos, filtros }: Props) {
+  const { can } = useAuth();
+
+  const [buscar, setBuscar] = useState(filtros.buscar ?? '');
+  const [estado, setEstado] = useState(filtros.estado ?? '');
+  
   /**
    * Renderiza la insignia visual según el estado del remito.
    */
@@ -55,6 +64,42 @@ export default function IndexRemitosSalida({ remitos }: Props) {
     }
   };
 
+  const aplicarFiltros = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    router.get(
+      '/remitos-salida',
+      { buscar, estado },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+      },
+    );
+  };
+
+  const cambiarFiltro = (key: string, value: string) => {
+    if (key === 'buscar') {
+      setBuscar(value);
+      return;
+    }
+
+    if (key === 'estado') {
+      const nuevoEstado = value === 'TODOS' ? '' : value;
+      setEstado(nuevoEstado);
+
+      router.get(
+        '/remitos-salida',
+        { buscar, estado: nuevoEstado },
+        {
+          preserveState: true,
+          preserveScroll: true,
+          replace: true,
+        },
+      );
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Encabezado */}
@@ -70,6 +115,18 @@ export default function IndexRemitosSalida({ remitos }: Props) {
             <Plus className="mr-2 h-5 w-5" /> Nuevo Despacho Interno
           </Button>
         )}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <form onSubmit={aplicarFiltros}>
+          <RemitoSalidaFiltros
+            valores={{ buscar, estado }}
+            onChange={cambiarFiltro}
+          />
+          <button type="submit" className="sr-only">
+            Buscar remito
+          </button>
+        </form>
       </div>
 
       {/* Tabla de Remitos */}

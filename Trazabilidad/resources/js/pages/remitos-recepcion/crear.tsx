@@ -20,6 +20,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useState } from 'react';
+import { ScannerInput } from '@/features/bolsas';
 
 interface CrearProps {
     tiposBolsa: TipoBolsa[];
@@ -51,7 +52,6 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
 
     // Estado para los 2 tipos de carga de bolsas: por lote o individual
     const [modoCarga, setModoCarga] = useState<ModoCargaBolsas | null>(null);
-    const [codigoBolsa, setCodigoBolsa] = useState('');
     const [errorBolsa, setErrorBolsa] = useState('');
     //**************************************************************
 
@@ -107,19 +107,8 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
             return;
         }
 
-        // const prefijoFormateado = inicio[1].padStart(4, '0');
-        // const bolsas = Array.from({ length: cantidadEnRango }, (_, index) => ({
-        //     codigo_barra:
-        //         prefijoFormateado +
-        //         String(numeroInicio + index).padStart(9, '0'),
-        // }));
-
-        // setError('');
-        // setVistaPrevia({ remito: { ...formulario }, bolsas });
-
         setError('');
         setErrorBolsa('');
-        setCodigoBolsa('');
         setModoCarga(null);
         setVistaPrevia({ remito: { ...formulario }, bolsas: [] });
     };
@@ -155,10 +144,10 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
     );
 
 
-    const agregarBolsaIndividual = () => {
-        if (!vistaPrevia || modoCarga !== 'individual') return;
+    const agregarBolsaIndividual = (codigoIngresado: string): boolean => {
+        if (!vistaPrevia || modoCarga !== 'individual') return false;
 
-        const codigo = codigoBolsa.trim();
+        const codigo = codigoIngresado.trim();
         const inicio = vistaPrevia.remito.codigo_inicio.match(
             /^(\d{1,4})-(\d{1,9})$/,
         );
@@ -168,15 +157,14 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
 
         if (!inicio || !fin || !/^\d{13}$/.test(codigo)) {
             setErrorBolsa('Ingresa o escanea un código de barras válido de 13 dígitos.');
-            return;
+            return false;
         }
 
         const prefijo = inicio[1].padStart(4, '0');
         const numero = Number(codigo.slice(4));
         const numeroInicio = Number(inicio[2]);
         const numeroFin = Number(fin[2]);
-        const codigoEsperado =
-            prefijo + String(numero).padStart(9, '0');
+        const codigoEsperado = prefijo + String(numero).padStart(9, '0');
 
         if (
             codigo.slice(0, 4) !== prefijo ||
@@ -185,25 +173,25 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
             numero > numeroFin
         ) {
             setErrorBolsa('El código no pertenece al rango de este remito.');
-            return;
+            return false;
         }
 
         if (vistaPrevia.bolsas.some((bolsa) => bolsa.codigo_barra === codigo)) {
             setErrorBolsa('Ese código ya fue agregado.');
-            return;
+            return false;
         }
 
         if (vistaPrevia.bolsas.length >= Number(vistaPrevia.remito.cantidad_declarada)) {
             setErrorBolsa('Ya alcanzaste la cantidad declarada para este remito.');
-            return;
+            return false;
         }
 
         setVistaPrevia({
             ...vistaPrevia,
             bolsas: [...vistaPrevia.bolsas, { codigo_barra: codigo }],
         });
-        setCodigoBolsa('');
         setErrorBolsa('');
+        return true;
     };
 
     const guardarRemito = () => {
@@ -288,9 +276,6 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
 
                                         <SelectContent>
                                             {tiposBolsa.map((tipo) => (
-                                                // <SelectItem key={tipo.id} value={String(tipo.id)}>
-                                                //     {tipo.tipo_residuo} ({tipo.color})
-                                                // </SelectItem>
 
                                                 <SelectItem key={tipo.id} value={String(tipo.id)}>
                                                     <span className="flex items-center gap-2">
@@ -477,7 +462,6 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
                                 variant={modoCarga === 'individual' ? 'default' : 'outline'}
                                 onClick={() => {
                                     setErrorBolsa('');
-                                    setCodigoBolsa('');
                                     setModoCarga('individual');
                                     setVistaPrevia({ ...vistaPrevia, bolsas: [] });
                                 }}
@@ -485,11 +469,6 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
                                 Ingresar las bolsas una por una
                             </Button>
                         </div>
-
-
-
-
-
 
                         {modoCarga && (
                             <section className="space-y-4 rounded-md border p-4">
@@ -501,34 +480,16 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
 
                                 {/* Si el modo es individual, mostrar el input para agregar bolsas */}
                                 {modoCarga === 'individual' && (
-                                    <form
-                                        className="space-y-2"
-                                        onSubmit={(e) => {
-                                            e.preventDefault();
-                                            agregarBolsaIndividual();
-                                        }}
-                                    >
-                                        <Label htmlFor="codigo_bolsa_individual">
-                                            Código de barras
-                                        </Label>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="codigo_bolsa_individual">Código de barras</Label>
 
-                                        <div className="flex gap-2">
-                                            <Input
-                                                id="codigo_bolsa_individual"
-                                                name="codigo_bolsa_individual"
-                                                value={codigoBolsa}
-                                                onChange={(e) => setCodigoBolsa(e.target.value)}
-                                                placeholder="Escanea o escribe los 13 dígitos"
-                                                inputMode="numeric"
-                                                maxLength={13}
-                                                autoComplete="off"
-                                                autoFocus
-                                            />
-
-                                            <Button type="submit" disabled={cantidadAlcanzada}>
-                                                {cantidadAlcanzada ? 'Cantidad completa' : 'Agregar bolsa'}
-                                            </Button>
-                                        </div>
+                                        <ScannerInput
+                                            id="codigo_bolsa_individual"
+                                            onScan={agregarBolsaIndividual}
+                                            disabled={cantidadAlcanzada}
+                                            placeholder="Escanea o escribe los 13 dígitos"
+                                            buttonLabel={cantidadAlcanzada ? 'Cantidad completa' : 'Agregar bolsa'}
+                                        />
 
                                         <p className="text-sm text-muted-foreground">
                                             Agregadas: {vistaPrevia.bolsas.length} de{' '}
@@ -538,7 +499,7 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
                                         {errorBolsa && (
                                             <p className="text-sm text-destructive">{errorBolsa}</p>
                                         )}
-                                    </form>
+                                    </div>
                                 )}
 
                                 <Table>
@@ -573,14 +534,7 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
                         )}
 
 
-
-
                         <div className="flex justify-end">
-                            {/* <Button type="button" disabled>
-                                Guardar
-                            </Button> */}
-
-
                             <Button
                                 type="button"
                                 disabled={

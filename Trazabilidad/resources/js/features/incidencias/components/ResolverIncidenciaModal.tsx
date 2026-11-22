@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { FormEvent, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import {
   Dialog,
@@ -44,7 +44,7 @@ export function ResolverIncidenciaModal({ incidencia, open, onOpenChange }: Prop
 
   if (!incidencia) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     patch(`/incidencias/${incidencia.id}/resolver`, {
       onSuccess: () => {

@@ -16,15 +16,34 @@ class RemitoSalidaRetiroController extends Controller
     /**
      * Muestra el historial de remitos de salida.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $buscar = trim((string) $request->input('buscar', ''));
+        $estado = (string) $request->input('estado', '');
+
         $remitos = RemitoSalidaRetiro::with(['usuarioDespacha', 'incidencia'])
             ->withCount('bolsas')
+            ->when($buscar !== '', function ($query) use ($buscar) {
+                $query->where(function ($subquery) use ($buscar) {
+                    $subquery
+                        ->where('numero_remito_interno', 'like', "%{$buscar}%")
+                        ->orWhere('numero_remito', 'like', "%{$buscar}%");
+                });
+            })
+            ->when(
+                $estado !== '' && $estado !== 'TODOS',
+                fn ($query) => $query->where('estado', $estado)
+            )
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return Inertia::render('remitos-salida/index', [
             'remitos' => $remitos,
+            'filtros' => [
+                'buscar' => $buscar,
+                'estado' => $estado,
+            ],
         ]);
     }
 

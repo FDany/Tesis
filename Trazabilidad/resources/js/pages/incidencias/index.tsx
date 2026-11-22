@@ -27,10 +27,17 @@ interface Props {
     filters: {
         estado?: string;
         tipo_incidencia?: string;
+        registrado_por?: string;
     };
+    estados: string[];
 }
 
-export default function IncidenciasIndex({ incidencias, filters }: Props) {
+
+export default function IncidenciasIndex({
+    incidencias,
+    filters,
+    estados,
+}: Props) {
     const [selectedIncidencia, setSelectedIncidencia] = useState<Incidencia | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -55,23 +62,26 @@ export default function IncidenciasIndex({ incidencias, filters }: Props) {
 
             <div className="max-w-6xl mx-auto space-y-6 p-6">
                 {/* Encabezado */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Gestión de Incidencias</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Monitoreo y resolución de discrepancias en despachos y novedades del sistema.
-                        </p>
-                    </div>
+                <div className="space-y-4">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold tracking-tight">
+                                Gestión de Incidencias
+                            </h1>
+                            <p className="text-sm text-muted-foreground">
+                                Monitoreo y resolución de discrepancias en despachos y novedades del sistema.
+                            </p>
+                        </div>
 
-                    <div className="flex items-center gap-3">
-                        <IncidenciaFiltros filters={filters} />
                         <Link href="/incidencias/crear">
-                            <Button className="gap-2 bg-sky-600 hover:bg-sky-700 text-white shrink-0">
+                            <Button className="gap-2 bg-sky-600 text-white hover:bg-sky-700 shrink-0">
                                 <Plus className="h-4 w-4" />
                                 Nueva Incidencia
                             </Button>
                         </Link>
                     </div>
+
+                    <IncidenciaFiltros filters={filters} estados={estados} />
                 </div>
 
                 {/* Tarjeta de la Tabla */}

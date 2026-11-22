@@ -41,14 +41,41 @@ class IncidenciaController extends Controller
             $query->where('tipo_incidencia', $request->tipo_incidencia);
         }
 
+        // Vusqueda por nombre, apellido o ambos
+        $registradoPor = trim((string) $request->input('registrado_por', ''));
+        if ($registradoPor !== '') {
+            $terminos = preg_split('/\s+/', $registradoPor, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+            $query->whereHas('usuarioRegistra', function ($usuarioQuery) use ($terminos) {
+                foreach ($terminos as $termino) {
+                    $usuarioQuery->where(function ($nombreQuery) use ($termino) {
+                        $nombreQuery
+                            ->where('first_name', 'like', "%{$termino}%")
+                            ->orWhere('last_name', 'like', "%{$termino}%");
+                    });
+                }
+            });
+        }
+
         $incidencias = $query->latest('fecha_hora')
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('incidencias/index', [
             'incidencias'  => $incidencias,
-            'filters'      => $request->only(['estado', 'tipo_incidencia']),
+            'filters'      => $request->only([
+                'estado', 
+                'tipo_incidencia',
+                'registrado_por',
+            ]),
             'tiposManuales' => TipoIncidencia::tiposManuales(),
+            'estados' => Incidencia::query()
+                ->whereNotNull('estado')
+                ->where('estado', '<>', '')
+                ->distinct()
+                ->orderBy('estado')
+                ->pluck('estado')
+                ->all(),
         ]);
     }
 

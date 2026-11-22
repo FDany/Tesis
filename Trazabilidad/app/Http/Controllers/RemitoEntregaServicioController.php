@@ -13,15 +13,64 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\JsonResponse;
 
-class ResiduoController extends Controller
+use Barryvdh\DomPDF\Facade\Pdf;
+
+class RemitoEntregaServicioController extends Controller
 {
-    public function create(): Response
+    private const OPCIONES_POR_PAGINA = [5, 10, 20];
+    
+    public function index(Request $request): Response
     {
-        return Inertia::render('residuos/create', [
+        $buscar = trim((string) $request->input('buscar', ''));
+        $retiraNombre = trim((string) $request->input('retira_nombre', ''));
+        $servicioId = (string) $request->input('servicio_id', '');
+
+        $opcionesPorPagina = self::OPCIONES_POR_PAGINA;
+        $porPagina = (int) $request->input('por_pagina', $opcionesPorPagina[0]);
+
+        if (!in_array($porPagina, $opcionesPorPagina, true)) {
+            $porPagina = $opcionesPorPagina[0];
+        }
+
+        $remitos = RemitoEntregaServicio::with(['servicio', 'usuarioEntrega'])
+            ->when($buscar !== '', function ($query) use ($buscar) {
+                $query->where('id', $buscar);
+            })
+            ->when($retiraNombre !== '', function ($query) use ($retiraNombre) {
+                $query->where('retira_nombre', 'like', "%{$retiraNombre}%");
+            })
+            ->when(
+                $servicioId !== '' && $servicioId !== 'TODOS',
+                fn ($query) => $query->where('servicio_id', $servicioId)
+            )
+            ->orderByDesc('fecha_entrega')
+            ->paginate($porPagina)
+            ->withQueryString();
+
+        return Inertia::render('remitos-entrega-servicio/index', [
+            'remitos' => $remitos,
+            'porPagina' => $porPagina,
+            'opcionesPorPagina' => $opcionesPorPagina,
+            'servicios' => Servicio::query()
+                ->orderBy('nombre')
+                ->get(['id', 'nombre']),
+            'filtros' => [
+                'buscar' => $buscar,
+                'retira_nombre' => $retiraNombre,
+                'servicio_id' => $servicioId,
+            ],
+        ]);
+    }
+
+
+    public function create(Request $request): Response
+    {
+        return Inertia::render('remitos-entrega-servicio/create', [
             'servicios' => Servicio::query()
                 ->where('activo', true)
                 ->orderBy('nombre')
                 ->get(['id', 'nombre']),
+                'remitoEntregaServicio' => $request->session()->get('remitoEntregaServicio'),
         ]);
     }
 
@@ -126,8 +175,30 @@ class ResiduoController extends Controller
             }
 
             return redirect()
-                ->route('residuos.create')
-                ->with('success', 'Bolsas entregadas al servicio correctamente.');
+                ->route('remitos-entrega-servicio.create')
+                ->with('success', 'Bolsas entregadas al servicio correctamente.')
+                ->with('remitoEntregaServicio', [
+                    'id' => $remito->id,
+                    'fecha_entrega' => $remito->fecha_entrega->format('d/m/Y H:i'),
+                    'servicio' => $servicio->nombre,
+                    'retira_nombre' => $remito->retira_nombre,
+                    'entregado_cargo' => $remito->entregado_cargo,
+                    'cantidad_bolsas_dadas' => $bolsas->count(),
+                    'codigos' => $bolsas->pluck('codigo_barra')->values()->all(),
+                ]);
         });
+    }
+
+    public function descargarPdf(RemitoEntregaServicio $remito)
+    {
+        $remito->load([
+            'usuarioEntrega',
+            'servicio',
+            'bolsas' => fn ($query) => $query->orderBy('id'),
+        ]);
+
+        return Pdf::loadView('remitoentregaservicio.generarremitoentregaservicio', [
+            'remito' => $remito,
+        ])->download("remito-entrega-servicio-{$remito->id}.pdf");
     }
 }

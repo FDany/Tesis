@@ -16,13 +16,13 @@ class TiposBolsaSeeder extends Seeder
         TipoBolsa::firstOrCreate([
             'id' => 1,
             'tipo_residuo' => 'Residuos Biocontaminados',
-            'color' => 'Rojo',
+            'color' => '#FF0000',
             'proveedor' => 'DGM',
         ]);
         TipoBolsa::firstOrCreate([
             'id' => 2,
             'tipo_residuo' => 'Residuos Quimicos',
-            'color' => 'Amarillo',
+            'color' => '#FFFF00',
             'proveedor' => 'DGM',
         ]);
     }

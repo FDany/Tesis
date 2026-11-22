@@ -10,15 +10,22 @@ import {
 import { Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { EncabezadoOrdenable } from '@/components/EncabezadoOrdenable';
 
 interface RemitoRecepcionTableProps {
   data: RemitoRecepcion[];
   onVer: (id: number) => void;
+  orden: string;
+  direccion: string;
+  onOrdenar: (campo: 'fecha_recepcion' | 'cantidad_declarada') => void;
 }
 
 export function RemitoRecepcionTable({
   data,
   onVer,
+  orden,
+  direccion,
+  onOrdenar
 }: RemitoRecepcionTableProps) {
   return (
     <div className="rounded-md border">
@@ -26,9 +33,21 @@ export function RemitoRecepcionTable({
         <TableHeader>
           <TableRow>
             <TableHead>ID / Remito</TableHead>
-            <TableHead>Fecha Recepción</TableHead>
+            <EncabezadoOrdenable
+              campo="fecha_recepcion"
+              etiqueta="Fecha Recepción"
+              ordenActual={orden}
+              direccionActual={direccion}
+              onOrdenar={onOrdenar}
+            />
             <TableHead>Tipo de Bolsa</TableHead>
-            <TableHead>Cant. Declarada</TableHead>
+            <EncabezadoOrdenable
+              campo="cantidad_declarada"
+              etiqueta="Cant. Declarada"
+              ordenActual={orden}
+              direccionActual={direccion}
+              onOrdenar={onOrdenar}
+            />
             <TableHead>Rango Manuscrito</TableHead>
             <TableHead>Tamaño</TableHead>
             <TableHead className="text-right">Ver</TableHead>
@@ -48,10 +67,17 @@ export function RemitoRecepcionTable({
             data.map((remito) => (
               <TableRow key={remito.id}>
                 <TableCell className="font-medium">#{remito.id}</TableCell>
-                <TableCell>
+                {/* <TableCell>
                   {new Date(remito.fecha_recepcion.replace(' ', 'T')).toLocaleString('es-AR', {
                     dateStyle: 'short',
                     timeStyle: 'short',
+                  })}
+                </TableCell> */}
+                <TableCell suppressHydrationWarning>
+                  {new Date(remito.fecha_recepcion.replace(' ', 'T')).toLocaleString('es-AR', {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                    hour12: false,
                   })}
                 </TableCell>
                 <TableCell>

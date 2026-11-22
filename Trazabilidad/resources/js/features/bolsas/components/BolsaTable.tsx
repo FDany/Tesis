@@ -8,23 +8,59 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
+
+import { EncabezadoOrdenable } from '@/components/EncabezadoOrdenable';
 
 
 interface BolsaTableProps {
   data: Bolsa[];
+  orden: string;
+  direccion: string;
   onVer: (id: number) => void;
+  onOrdenar: (campo: string) => void;
 }
 
-export function BolsaTable({ data, onVer }: BolsaTableProps) {
+export function BolsaTable({
+  data,
+  orden,
+  direccion,
+  onVer,
+  onOrdenar
+}: BolsaTableProps) {
+  
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Codigo de Bolsa</TableHead>
+            <EncabezadoOrdenable
+              campo="codigo_barra"
+              etiqueta="Código de Bolsa"
+              ordenActual={orden}
+              direccionActual={direccion}
+              onOrdenar={onOrdenar}
+            />
+
+            {/* Relación externa: no se ordena directamente */}
             <TableHead>Tipo de bolsa</TableHead>
-            <TableHead>Fecha de creación</TableHead>
-            <TableHead>Estado</TableHead>
+
+            <EncabezadoOrdenable
+              campo="created_at"
+              etiqueta="Fecha de creación"
+              ordenActual={orden}
+              direccionActual={direccion}
+              onOrdenar={onOrdenar}
+            />
+
+            <EncabezadoOrdenable
+              campo="estado"
+              etiqueta="Estado"
+              ordenActual={orden}
+              direccionActual={direccion}
+              onOrdenar={onOrdenar}
+            />
+
             <TableHead>Trazabilidad</TableHead>
           </TableRow>
         </TableHeader>
@@ -41,7 +77,9 @@ export function BolsaTable({ data, onVer }: BolsaTableProps) {
           ) : (
             data.map((bolsa) => (
               <TableRow key={bolsa.codigo_barra}>
-                <TableCell className="font-medium"> #{bolsa.codigo_barra} </TableCell>
+                <TableCell className="font-medium">
+                  #{bolsa.codigo_barra}
+                </TableCell>
 
                 <TableCell>
                   {bolsa.tipo_bolsa ? (
@@ -60,11 +98,15 @@ export function BolsaTable({ data, onVer }: BolsaTableProps) {
 
                 <TableCell>
                   {bolsa.created_at
-                    ? new Date(bolsa.created_at.replace(' ', 'T')).toLocaleDateString('es-AR')
+                    ? new Date(
+                      bolsa.created_at.replace(' ', 'T'),
+                    ).toLocaleDateString('es-AR')
                     : '—'}
                 </TableCell>
 
-                <TableCell className="font-semibold"> {bolsa.estado} </TableCell>
+                <TableCell className="font-semibold">
+                  {bolsa.estado}
+                </TableCell>
 
                 <TableCell>
                   <Button
