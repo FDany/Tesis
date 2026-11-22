@@ -96,7 +96,7 @@ class RemitoRecepcionController extends Controller
      */
     public function create()
     {
-        return Inertia::render('remitos-recepcion/crear', [
+        return Inertia::render('remitos-recepcion/create', [
             'tiposBolsa' => TipoBolsa::all(),
             'tamanios' => Tamanio::all(),
         ]);
@@ -321,7 +321,7 @@ class RemitoRecepcionController extends Controller
     }
 
 
-    
+
 
     // Envio de mail
     public function enviarPdf(Request $request, string|RemitoRecepcion $remito)

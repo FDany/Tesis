@@ -43,7 +43,7 @@ const navItems: AppNavItem[] = [
         icon: Users,
         adminOnly: true,
         permission: 'listar usuarios',
-        
+
     },
     {
         title: 'Roles',
@@ -72,18 +72,6 @@ const navItems: AppNavItem[] = [
         permission: 'listar flujosResiduos',
     },
     {
-        title: 'Nueva Carga',
-        href: '/bolsas/create',
-        icon: Plus,
-        permission: 'crear bolsas',
-    },
-    {
-        title: 'Crear Remito de Recepción',
-        href: '/remitos-recepcion/create',
-        icon: Plus,
-        permission: 'crear remitosRecepcion',
-    },
-    {
         title: 'Remitos de recepción',
         href: '/remitos-recepcion',
         icon: LayoutDashboard,
@@ -100,12 +88,6 @@ const navItems: AppNavItem[] = [
         href: '/servicios',
         icon: LayoutDashboard,
         permission: 'listar servicios',
-    },
-    {
-        title: 'Entrega a servicios',
-        href: '/remitos-entrega-servicio/create',
-        icon: Trash2,
-        permission: 'registrar entregaBolsasServicio',
     },
     {
         title: 'Remitos de servicios',
@@ -137,6 +119,18 @@ const navItems: AppNavItem[] = [
         icon: LayoutDashboard,
         permission: 'listar incidencias',
     },
+    /*{
+        title: 'Nueva Carga',
+        href: '/bolsas/create',
+        icon: Plus,
+        permission: 'crear bolsas',
+    },
+    /*{
+        title: 'Crear Remito de Recepción',
+        href: '/remitos-recepcion/create',
+        icon: Plus,
+        permission: 'crear remitosRecepcion',
+    },*/
     {
         title: 'Reportes',
         href: '/reportes',
