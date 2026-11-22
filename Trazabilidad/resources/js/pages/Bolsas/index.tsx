@@ -196,8 +196,8 @@ export default function Index({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          {/* Formulario de búsqueda y filtros[cite: 7] */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+          {/* Formulario de búsqueda y filtros */}
           <form
             onSubmit={aplicarFiltros}
             className="min-w-0 flex-1"

@@ -342,11 +342,11 @@ class RemitoRecepcionController extends Controller
             'bolsas' => fn ($query) => $query->orderBy('id'),
         ]);
 
-        // 1. Renderiza el PDF en memoria con la vista existente
-        $pdf = Pdf::loadView('remitorecepcion.generarremitorecepcion', compact('remito'));
+        // Renderiza el PDF en memoria con la vista existente
+        $pdf = Pdf::loadView('pdfs.remitorecepcion.generarremitorecepcion', compact('remito'));
         $pdfBytes = $pdf->output();
 
-        // 2. Envío mediante SMTP con la clase Mailable
+        // Envío mediante SMTP con la clase Mailable
         Mail::to($validated['email'])->send(new RemitoRecepcionMail($remito, $pdfBytes));
 
         return back()->with('success', 'Remito enviado correctamente a ' . $validated['email']);

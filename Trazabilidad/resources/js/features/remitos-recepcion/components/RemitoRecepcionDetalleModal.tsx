@@ -1,4 +1,4 @@
-import { type FormEvent } from 'react';
+import { type FormEvent, useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import {
     Dialog,
@@ -46,8 +46,28 @@ export function RemitoRecepcionDetalleModal({
     onOpenChange,
     remitoId,
     cargando,
-    detalle,
+    detalle: detalleProp,
 }: RemitoRecepcionDetalleModalProps) {
+
+    // Guarda el detalle en memoria para evitar que se vacíe si Inertia recarga props en segundo plano
+    const [detalleLocal, setDetalleLocal] = useState<RemitoDetalle | undefined>(detalleProp);
+
+    // Sirve para actualizar los datos cuando se abre distintos remitos,
+    // Confirma que los datos correspondan al remito correcto y 
+    // Protege los datos cuando envías el mail,
+    useEffect(() => {
+        if (detalleProp && detalleProp.id === remitoId) {       // Garantiza que solo se guarden los datos si realmente pertenecen al remito que el usuario tiene abierto en pantalla
+            setDetalleLocal(detalleProp);
+        }
+    }, [detalleProp, remitoId]);
+    // Utiliza el detalle activo evitando que la UI colapse tras enviar el mail (error que sucedia cuando no cargaba bien la vista del remito)
+    const detalle = (detalleProp && detalleProp.id === remitoId)
+        ? detalleProp
+        : (detalleLocal && detalleLocal.id === remitoId)
+            ? detalleLocal
+            : undefined;
+
+    
 
     const { data, setData, post, processing, errors, reset, recentlySuccessful } = useForm({
         email: '',
@@ -58,11 +78,14 @@ export function RemitoRecepcionDetalleModal({
         if (!detalle) return;
         post(`/remitos-recepcion/${detalle.id}/enviar-pdf`, {
             preserveScroll: true,
+            preserveState: true,
             onSuccess: () => {
                 reset('email');
-                setTimeout(() => {
-                    onOpenChange(false);
-                }, 1000);
+
+                // Sirve para cerrar el modal cuando se envia el mail, con delay de 1 seg
+                // setTimeout(() => {
+                //     onOpenChange(false);
+                // }, 1000);
             },
         });
     };
@@ -127,14 +150,6 @@ export function RemitoRecepcionDetalleModal({
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
                                     <p className="text-muted-foreground">Fecha de recepción</p>
-                                    {/* <p>
-                                        {new Date(
-                                            detalle.fecha_recepcion.replace(' ', 'T'),
-                                        ).toLocaleString('es-AR', {
-                                            dateStyle: 'short',
-                                            timeStyle: 'short',
-                                        })}
-                                    </p> */}
                                     <p suppressHydrationWarning>
                                         {new Date(
                                             detalle.fecha_recepcion.replace(' ', 'T'),
