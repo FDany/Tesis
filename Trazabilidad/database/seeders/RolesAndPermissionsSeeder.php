@@ -57,6 +57,10 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'generar remitoRecepcion']);
         Permission::create(['name' => 'registrar entregaBolsasServicio']);
 
+        Permission::create(['name' => 'registrar recepcionDeposito']);
+        Permission::create(['name' => 'registrar pesajeBolsa']);
+
+
         //Crear Roles
         $superAdminRole = Role::firstOrCreate(['name' => 'admin',]);
         $adminRole = Role::firstOrCreate(['name' => 'admin-prueba',]);
@@ -84,7 +88,9 @@ class RolesAndPermissionsSeeder extends Seeder
         $depositoRole->givePermissionTo([
             'ver dashboard',
             'listar bolsas', 'ver detalleBolsa',
-            'listar remitosSalida', 'crear remitosSalida', 'ver detalleRemitoSalida', 'imprimirPDF remitoSalida',
+            'listar remitosSalida', 'crear remitosSalida', 
+            'ver detalleRemitoSalida', 'imprimirPDF remitoSalida',
+            'registrar recepcionDeposito', 'registrar pesajeBolsa', 
         ]);
 
         //Crear Usuarios y asignar roles

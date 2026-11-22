@@ -18,6 +18,11 @@ return new class extends Migration
             $table->foreignId('tamanio_id')->constrained('tamanios');
             $table->string('estado');
             $table->float('peso')->nullable();
+
+            $table->foreignId('pesa_usuario_id')
+                ->nullable()
+                ->constrained('users');
+
             $table->foreignId('rem_rep_id')->constrained('remitos_recepcion');
             $table->foreignId('remitos_serv_id')->nullable()->constrained('remitos_entrega_servicios');
             $table->foreignId('recep_dep_id')->nullable()->constrained('recepciones_deposito');

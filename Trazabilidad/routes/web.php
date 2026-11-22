@@ -106,35 +106,57 @@ Route::middleware(['auth', 'verified'])->group(function () {
     )->name('remitos-entrega-servicio.pdf');
 
     // Módulo Recepción en Depósito
-    Route::post(
-        'recepciones-deposito',
-        [RecepcionDepositoController::class, 'store'],
-    )->name('recepciones-deposito.store');
+    // Route::post(
+    //     'recepciones-deposito',
+    //     [RecepcionDepositoController::class, 'store'],
+    // )->name('recepciones-deposito.store');
 
     // Vista de creación de recepción en depósito
-    Route::get(
-        'recepciones-deposito',
-        [RecepcionDepositoController::class, 'create'],
-    )->name('recepciones-deposito.create');
+    // Route::get(
+    //     'recepciones-deposito',
+    //     [RecepcionDepositoController::class, 'create'],
+    // )->name('recepciones-deposito.create');
 
     // Validacion del escaner en tiempo real para recepción en deposito
-    Route::get(
-        'api/bolsas/buscar-para-recepcion-deposito',
-        [RecepcionDepositoController::class, 'verificarBolsa'],
-    )->name('recepciones-deposito.verificar-bolsa');
-
-
-    // Módulo Pesaje en Depósito
-    Route::get(
-        'pesaje-deposito',
-        [PesajeDepositoController::class, 'create'],
-    )->name('pesaje-deposito.create');
-
-    Route::post(
-        'pesaje-deposito',
-        [PesajeDepositoController::class, 'store'],
-    )->name('pesaje-deposito.store');
+    // Route::get(
+    //     'api/bolsas/buscar-para-recepcion-deposito',
+    //     [RecepcionDepositoController::class, 'verificarBolsa'],
+    // )->name('recepciones-deposito.verificar-bolsa');
+    Route::middleware('can:registrar recepcionDeposito')->group(function () {
+        Route::post(
+            'recepciones-deposito',
+            [RecepcionDepositoController::class, 'store'],
+        )->name('recepciones-deposito.store');
+        Route::get(
+            'recepciones-deposito',
+            [RecepcionDepositoController::class, 'create'],
+        )->name('recepciones-deposito.create');
+        Route::get(
+            'api/bolsas/buscar-para-recepcion-deposito',
+            [RecepcionDepositoController::class, 'verificarBolsa'],
+        )->name('recepciones-deposito.verificar-bolsa');
     });
+    // Módulo Pesaje en Depósito
+    // Route::get(
+    //     'pesaje-deposito',
+    //     [PesajeDepositoController::class, 'create'],
+    // )->name('pesaje-deposito.create');
+
+    // Route::post(
+    //     'pesaje-deposito',
+    //     [PesajeDepositoController::class, 'store'],
+    // )->name('pesaje-deposito.store');
+    Route::middleware('can:registrar pesajeBolsa')->group(function () {
+        Route::get(
+            'pesaje-deposito',
+            [PesajeDepositoController::class, 'create'],
+        )->name('pesaje-deposito.create');
+        Route::post(
+            'pesaje-deposito',
+            [PesajeDepositoController::class, 'store'],
+        )->name('pesaje-deposito.store');
+    });
+});
 
 Route::middleware(['auth', 'can:manage-administration'])->group(function () {
 
