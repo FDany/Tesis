@@ -64,4 +64,11 @@ class User extends Authenticatable // implements MustVerifyEmail, PasskeyUser
             get: fn() => trim("{$this->first_name} {$this->last_name}"),
         );
     }
+
+    // Por si se necesita ver todas las bolsas que un usuario las peso
+    
+    // public function bolsasPesadas(): HasMany  
+    // {  
+    //     return $this->hasMany(Bolsa::class, 'pesa_usuario_id');  
+    // }  
 }

@@ -23,6 +23,8 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('users');
 
+            $table->timestamp('fecha_pesaje')->nullable();  
+
             $table->foreignId('rem_rep_id')->constrained('remitos_recepcion');
             $table->foreignId('remitos_serv_id')->nullable()->constrained('remitos_entrega_servicios');
             $table->foreignId('recep_dep_id')->nullable()->constrained('recepciones_deposito');

@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'tamanio_id',
     'estado',
     'peso',
+    'pesa_usuario_id',
+    'fecha_pesaje',
     'rem_rep_id',
     'remitos_serv_id',
     'recep_dep_id',
@@ -27,6 +29,7 @@ class Bolsa extends Model
 
     protected $casts = [
         'peso' => 'float',
+        'fecha_pesaje' => 'datetime',
     ];
 
     /** Relaciones Eloquent */
@@ -78,4 +81,10 @@ class Bolsa extends Model
     {
         return $this->hasMany(Incidencia::class, 'bolsa_id');
     }
+
+    /* Usuario que registró el pesaje de la bolsa en depósito. */  
+    public function pesaUsuario(): BelongsTo  
+    {  
+        return $this->belongsTo(User::class, 'pesa_usuario_id');  
+    }  
 }
