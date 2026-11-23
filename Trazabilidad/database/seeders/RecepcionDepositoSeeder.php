@@ -17,21 +17,21 @@ class RecepcionDepositoSeeder extends Seeder
         RecepcionDeposito::firstOrCreate([  
             'id' => 1,  
             'fecha_hora' => '2026-11-05 18:30:00',  
-            'recibe_usuario_id' => 3, // usuario deposito  
+            'recibe_usuario_id' => 4, // usuario deposito  
         ]);  
   
         // Tanda 2: bolsas que salieron en el remito 3 (con incidencia)  
         RecepcionDeposito::firstOrCreate([  
             'id' => 2,  
             'fecha_hora' => '2026-11-05 19:00:00',  
-            'recibe_usuario_id' => 3,  
+            'recibe_usuario_id' => 4,  
         ]);  
   
         // Tanda 3: bolsas pesadas el 06-11, aún en depósito  
         RecepcionDeposito::firstOrCreate([  
             'id' => 3,  
             'fecha_hora' => '2026-11-06 07:30:00',  
-            'recibe_usuario_id' => 3,  
+            'recibe_usuario_id' => 4,  
         ]);  
     }
 }

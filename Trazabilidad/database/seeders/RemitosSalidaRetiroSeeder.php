@@ -54,7 +54,7 @@ class RemitosSalidaRetiroSeeder extends Seeder
             'numero_remito_interno' => 'RSI-2026-00003',
             'fecha_emision' => '2026-11-05 21:00:00',
             'cantidad_bolsas_sistema' => 3,
-            'usuario_despacha_id' => 3,
+            'usuario_despacha_id' => 4,
             'estado' => 'CON_INCIDENCIA',
             'numero_remito' => '0001-00000002',
             'fecha_retiro' => '2026-11-06 01:18:00',
