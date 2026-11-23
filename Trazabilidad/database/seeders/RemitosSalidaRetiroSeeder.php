@@ -18,7 +18,7 @@ class RemitosSalidaRetiroSeeder extends Seeder
             'numero_remito_interno' => 'RSI-2026-00001',
             'fecha_emision' => '2026-11-05 10:00:00',
             'cantidad_bolsas_sistema' => 1,
-            'usuario_despacha_id' => 3,
+            'usuario_despacha_id' => 4,
             'estado' => 'PENDIENTE_RETIRO',
             'numero_remito' => null,
             'fecha_retiro' => null,
@@ -36,7 +36,7 @@ class RemitosSalidaRetiroSeeder extends Seeder
             'numero_remito_interno' => 'RSI-2026-00002',
             'fecha_emision' => '2026-11-05 20:00:00',
             'cantidad_bolsas_sistema' => 1,
-            'usuario_despacha_id' => 3,
+            'usuario_despacha_id' => 4,
             'estado' => 'CONCILIADO',
             'numero_remito' => '0001-00000001',
             'fecha_retiro' => '2026-11-06 01:17:00',
@@ -44,7 +44,7 @@ class RemitosSalidaRetiroSeeder extends Seeder
             'responsable_empresa' => 'Juan Gomez',
             'datos_transporte' => 'Patente AB 123 CD - Transporte San Bernardo',
             'observaciones' => 'Retiro efectuado sin observaciones.',
-            'created_at' => '2026-11-05 22:18:19',
+            'created_at' => '2026-11-05 20:00:00',
             'updated_at' => '2026-11-06 01:17:00',
         ]);
 
@@ -62,7 +62,7 @@ class RemitosSalidaRetiroSeeder extends Seeder
             'responsable_empresa' => 'Daniel Perez',
             'datos_transporte' => 'Patente XY 987 ZW',
             'observaciones' => 'El chofer declaró una bolsa menos respecto al remito interno.',
-            'created_at' => '2026-11-05 22:19:35',
+            'created_at' => '2026-11-05 21:00:00',
             'updated_at' => '2026-11-06 01:18:00',
         ]);
     }

@@ -196,8 +196,10 @@ class BolsaController extends Controller
                             ?? $bolsa->remitoSalidaRetiro?->fecha_emision,  
                         'sector' => 'Hospital',  
                         'responsable' => 'DGM',  
-                        'documento' => $bolsa->remitoSalidaRetiro?->numero_remito  
-                            ? 'Remito N° '.$bolsa->remitoSalidaRetiro->numero_remito  
+                        'documento' => $bolsa->remitoSalidaRetiro
+                            // ?->numero_remito  
+                            ? 'Remito N° '.($bolsa->remitoSalidaRetiro->numero_remito
+                                ?? $bolsa->remitoSalidaRetiro->numero_remito_interno) 
                             : null,  
                     ],
                     [  
