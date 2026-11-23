@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
@@ -7,10 +8,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
+import { home } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import PasskeyVerify from '@/components/passkey-verify';
 
 type Props = {
     status?: string;
@@ -20,9 +20,13 @@ type Props = {
 export default function Login({ status, canResetPassword }: Props) {
     return (
         <>
-            <Head title="Ingresar" />
+            <Head title="Iniciar sesión" />
 
-            <PasskeyVerify />
+            {status && (
+                <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 text-center text-sm font-medium text-green-700 dark:border-green-900/50 dark:bg-green-950/50 dark:text-green-400">
+                    {status}
+                </div>
+            )}
 
             <Form
                 {...store.form()}
@@ -31,18 +35,19 @@ export default function Login({ status, canResetPassword }: Props) {
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
+                        <div className="grid gap-5">
                             <div className="grid gap-2">
                                 <Label htmlFor="dni">DNI</Label>
                                 <Input
                                     id="dni"
                                     type="text"
+                                    inputMode="numeric"
                                     name="dni"
                                     required
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="username"
-                                    placeholder="DNI"
+                                    placeholder="Ingresa tu número de DNI"
                                 />
                                 <InputError message={errors.dni} />
                             </div>
@@ -53,7 +58,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
-                                            className="ml-auto text-sm"
+                                            className="ml-auto text-xs text-neutral-600 hover:text-[#296b8b] dark:text-neutral-400"
                                             tabIndex={5}
                                         >
                                             ¿Olvidaste tu contraseña?
@@ -66,52 +71,55 @@ export default function Login({ status, canResetPassword }: Props) {
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Contraseña"
+                                    placeholder="••••••••"
                                 />
                                 <InputError message={errors.password} />
                             </div>
 
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2.5">
                                 <Checkbox
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Recordarme</Label>
+                                <Label
+                                    htmlFor="remember"
+                                    className="cursor-pointer text-sm font-normal text-neutral-600 dark:text-neutral-400"
+                                >
+                                    Mantener sesión iniciada
+                                </Label>
                             </div>
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="mt-2 w-full bg-[#296b8b] text-white hover:bg-[#215772] dark:bg-[#296b8b] dark:text-white dark:hover:bg-[#327da1]"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
                             >
-                                {processing && <Spinner />}
-                                Ingresar
+                                {processing && <Spinner className="mr-2" />}
+                                Ingresar al sistema
                             </Button>
                         </div>
 
-                        <div className="text-center text-sm text-muted-foreground">
-                            ¿No tienes una cuenta?{' '}
-                            <TextLink href={register()} tabIndex={5}>
-                                Registrarme
+                        <div className="border-t border-neutral-100 pt-4 text-center dark:border-neutral-800">
+                            <TextLink
+                                href={home()}
+                                className="inline-flex items-center gap-1.5 text-xs text-neutral-500 no-underline hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                                tabIndex={6}
+                            >
+                                <ArrowLeft className="h-3.5 w-3.5" />
+                                Volver al inicio
                             </TextLink>
                         </div>
                     </>
                 )}
             </Form>
-
-            {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
         </>
     );
 }
 
 Login.layout = {
-    title: 'Ingresa a tu cuenta',
-    description: 'Escribe tu DNI y contraseña para continuar.',
+    title: 'EcoGestión',
+    description: 'Ingresa tu DNI y contraseña para acceder al sistema.',
 };

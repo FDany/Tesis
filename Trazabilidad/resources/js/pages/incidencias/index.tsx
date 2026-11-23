@@ -13,6 +13,7 @@ import { IncidenciaTabla } from '@/features/incidencias/components/IncidenciaTab
 import { CheckSquare, Eye, AlertCircle, Plus, Building2, Package, FileText } from 'lucide-react';
 import type { Incidencia } from '@/features/incidencias/types/incidencia';
 import type { User } from '@/types/auth';
+import { useAuth } from '@/hooks/use-auth';
 
 interface PaginatedData<T> {
     data: T[];
@@ -55,10 +56,12 @@ export default function IncidenciasIndex({
 
         return fullName || 'Sistema';
     };
+    const { can } = useAuth();
 
     return (
+
         <div>
-            <Head title="Gestión de Incidencias" />
+            <Head title="Incidencias" />
 
             <div className="max-w-6xl mx-auto space-y-6 p-6">
                 {/* Encabezado */}
@@ -73,12 +76,13 @@ export default function IncidenciasIndex({
                             </p>
                         </div>
 
-                        <Link href="/incidencias/crear">
-                            <Button className="gap-2 bg-sky-600 text-white hover:bg-sky-700 shrink-0">
-                                <Plus className="h-4 w-4" />
-                                Nueva Incidencia
-                            </Button>
-                        </Link>
+                        {(can('crear incidencias')) && (
+                            <Button asChild>
+                                <Link href="/incidencias/create">
+                                    <Plus className="h-4 w-4" />
+                                    Nueva Incidencia
+                                </Link>
+                            </Button>)}
                     </div>
 
                     <IncidenciaFiltros filters={filters} estados={estados} />

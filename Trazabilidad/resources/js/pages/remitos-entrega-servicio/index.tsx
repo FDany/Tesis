@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, Link } from '@inertiajs/react';
 import CantFilas from '@/components/CantFilas';
 import Paginacion, {
     type PaginacionData,
@@ -8,6 +8,9 @@ import type { RemitoEntregaServicio } from '@/features/remitos-entrega-servicio/
 import { useState, type FormEvent } from 'react';
 import { RemitoEntregaServicioFiltros } from '@/features/remitos-entrega-servicio/components/RemitoEntregaServicioFiltros';
 import type { Servicio } from '@/features/servicios';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth'
 
 interface Props {
     remitos: PaginacionData & { data: RemitoEntregaServicio[] };
@@ -85,6 +88,8 @@ export default function RemitosEntregaServicioIndex({
         visitarListado({ por_pagina: cantidad });
     };
 
+    const { can } = useAuth();
+
     return (
         <>
             <Head title="Remitos de Entrega a Servicios" />
@@ -99,6 +104,13 @@ export default function RemitosEntregaServicioIndex({
                             Historial de bolsas entregadas a los servicios.
                         </p>
                     </div>
+                    {(can('crear remitosEntregaServicio')) && (
+                        <Button asChild>
+                            <Link href="/remitos-entrega-servicio/create">
+                                <Plus className="size-4" />
+                                Nueva Entrega a Servicio
+                            </Link>
+                        </Button>)}
                 </div>
 
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-end">

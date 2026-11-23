@@ -11,6 +11,7 @@ import { Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EncabezadoOrdenable } from '@/components/EncabezadoOrdenable';
+import { useAuth } from '@/hooks/use-auth'
 
 interface RemitoRecepcionTableProps {
   data: RemitoRecepcion[];
@@ -27,6 +28,7 @@ export function RemitoRecepcionTable({
   direccion,
   onOrdenar
 }: RemitoRecepcionTableProps) {
+    const { can } = useAuth();
   return (
     <div className="rounded-md border">
       <Table>
@@ -109,7 +111,8 @@ export function RemitoRecepcionTable({
                 </TableCell>
 
                 <TableCell className="text-right">
-                  <Button
+                  {(can('verDetalle remitosRecepcion'))&&(
+                    <Button
                     type="button"
                     variant="ghost"
                     size="icon"
@@ -117,7 +120,7 @@ export function RemitoRecepcionTable({
                     onClick={() => onVer(remito.id)}
                   >
                     <Eye className="h-4 w-4" />
-                  </Button>
+                  </Button>)}
                 </TableCell>
 
               </TableRow>

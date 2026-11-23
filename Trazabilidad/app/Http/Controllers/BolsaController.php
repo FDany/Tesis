@@ -2,36 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use App\Models\Bolsa;
-use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 use App\Exports\BolsasExport;
+use App\Models\Bolsa;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
+use Inertia\Inertia;
+use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
-
 
 class BolsaController extends Controller
 {
     private const OPCIONES_POR_PAGINA = [5, 10, 20];
-    /**
-     * Display a listing of the resource.
-     */
+
+    #[Middleware('permission:listar bolsas')]
     public function index(Request $request): Response
     {
-
-        // 1. Capturar y validar ordenamiento (Sección 3.1 de la guía)
-        $orden = $request->input('orden', 'created_at'); // Por defecto las más recientes
+        $orden = $request->input('orden', 'created_at');
         $direccion = $request->input('direccion', 'desc');
 
         $camposPermitidos = ['codigo_barra', 'created_at', 'estado'];
-        if (!in_array($orden, $camposPermitidos, true)) {
+        if (! in_array($orden, $camposPermitidos, true)) {
             $orden = 'created_at';
         }
-        if (!in_array($direccion, ['asc', 'desc'], true)) {
+        if (! in_array($direccion, ['asc', 'desc'], true)) {
             $direccion = 'desc';
         }
-        // **************************************************************
 
         $buscar = trim($request->input('buscar', ''));
         $estado = $request->input('estado', '');
@@ -39,7 +35,7 @@ class BolsaController extends Controller
         $opcionesPorPagina = self::OPCIONES_POR_PAGINA;
         $porPagina = (int) $request->input('por_pagina', $opcionesPorPagina[0]);
 
-        if (!in_array($porPagina, $opcionesPorPagina, true)) {
+        if (! in_array($porPagina, $opcionesPorPagina, true)) {
             $porPagina = $opcionesPorPagina[0];
         }
 
@@ -51,11 +47,9 @@ class BolsaController extends Controller
                 'tipo_bolsa_id',
                 'created_at',
             ])
-            // Condición dinámica para buscar por código de barra
             ->when($buscar !== '', function ($query) use ($buscar) {
                 $query->where('codigo_barra', 'like', "%{$buscar}%");
             })
-            // Filtro por estado
             ->when($request->filled('estado'), function ($query) use ($estado) {
                 $query->where('estado', $estado);
             })
@@ -67,12 +61,11 @@ class BolsaController extends Controller
             'bolsas' => $bolsas,
             'porPagina' => $porPagina,
             'opcionesPorPagina' => $opcionesPorPagina,
-            // 4. Devolver los filtros para que React recuerde el criterio actual
             'filtros' => [
                 'buscar' => $buscar,
                 'estado' => $estado,
-                'orden' => $orden,          // Devuelve en orden
-                'direccion' => $direccion,  // Devuelve con direccion
+                'orden' => $orden,
+                'direccion' => $direccion,
             ],
             'estados' => Bolsa::query()
                 ->whereNotNull('estado')
@@ -84,37 +77,18 @@ class BolsaController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
+    #[Middleware('permission:verDetalle bolsas')]
     public function show(Request $request, Bolsa $bolsa): Response|RedirectResponse
     {
         $esVisitaParcial =
-            $request->header('X-Inertia-Partial-Component') === 'bolsas/index'      // Verifica si la visita es parcial desde la página de listado de bolsas
-            && in_array(                                                            // Verifica si la propiedad solicitada es 'bolsaDetalle'
+            $request->header('X-Inertia-Partial-Component') === 'bolsas/index'
+            && in_array(
                 'bolsaDetalle',
-                explode(',', (string) $request->header('X-Inertia-Partial-Data')),  // Convierte la cadena de propiedades solicitadas en un array y verifica si 'bolsaDetalle' está presente
+                explode(',', (string) $request->header('X-Inertia-Partial-Data')),
                 true
-                // in_array('bolsaDetalle', ..., true) comprueba que la lista incluya exactamente esa propiedad. El tercer argumento, true, activa la comparación estricta.
             );
 
-        if (!$esVisitaParcial) {
+        if (! $esVisitaParcial) {
             return redirect()->route('bolsas.index');
         }
 
@@ -228,30 +202,7 @@ class BolsaController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
+    #[Middleware('permission:descargarExcel bolsas')]
     public function export(Request $request)
     {
         $buscar = trim($request->input('buscar', ''));
@@ -260,10 +211,10 @@ class BolsaController extends Controller
         $direccion = $request->input('direccion', 'desc');
 
         $camposPermitidos = ['codigo_barra', 'created_at', 'estado'];
-        if (!in_array($orden, $camposPermitidos, true)) {
+        if (! in_array($orden, $camposPermitidos, true)) {
             $orden = 'created_at';
         }
-        if (!in_array($direccion, ['asc', 'desc'], true)) {
+        if (! in_array($direccion, ['asc', 'desc'], true)) {
             $direccion = 'desc';
         }
 
@@ -276,5 +227,4 @@ class BolsaController extends Controller
 
         return Excel::download(new BolsasExport($filtros), 'reporte_bolsas.xlsx');
     }
-
 }

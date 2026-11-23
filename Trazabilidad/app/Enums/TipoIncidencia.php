@@ -51,7 +51,6 @@ enum TipoIncidencia: string
 
             self::OTRA => 'Otra incidencia / Evento no contemplado',
 
-            
         };
     }
 

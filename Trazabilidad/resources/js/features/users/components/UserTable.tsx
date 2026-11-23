@@ -14,6 +14,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import type { User as AuthUser } from '@/types/auth';
+import { useAuth } from '@/hooks/use-auth';
 
 type UserTableItem = Pick<
     AuthUser,
@@ -49,6 +50,8 @@ export function UserTable({ users }: UserTableProps) {
             onFinish: () => setIsDeleting(false),
         });
     };
+
+    const { can } = useAuth();
 
     return (
         <>
@@ -107,7 +110,8 @@ export function UserTable({ users }: UserTableProps) {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
-                                            <Button
+                                            {(can('editar usuarios'))&&(
+                                                <Button
                                                 asChild
                                                 variant="outline"
                                                 size="icon"
@@ -119,8 +123,9 @@ export function UserTable({ users }: UserTableProps) {
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Link>
-                                            </Button>
-                                            <Button
+                                            </Button>)}
+                                            {(can('eliminar usuarios'))&&(
+                                                <Button
                                                 type="button"
                                                 variant="destructive"
                                                 size="icon"
@@ -131,7 +136,7 @@ export function UserTable({ users }: UserTableProps) {
                                                 title="Eliminar"
                                             >
                                                 <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            </Button>)}
                                         </div>
                                     </TableCell>
                                 </TableRow>

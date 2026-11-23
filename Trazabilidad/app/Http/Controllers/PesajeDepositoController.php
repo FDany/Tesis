@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Bolsa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -12,11 +13,13 @@ use Inertia\Response;
 
 class PesajeDepositoController extends Controller
 {
+    #[Middleware('permission:registrarPesoBolsa Deposito')]
     public function create(): Response
     {
         return Inertia::render('pesaje-deposito/create');
     }
 
+    #[Middleware('permission:registrarPesoBolsa Deposito')]
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([

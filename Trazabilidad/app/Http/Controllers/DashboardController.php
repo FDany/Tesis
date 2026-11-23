@@ -9,12 +9,14 @@ use App\Models\Servicio;
 use App\Models\TipoBolsa;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 
 class DashboardController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    #[Middleware('permission:ver dashboard')]
     public function index(Request $request)
     {
         // 1. Rango de Fechas por Defecto (Mes en curso)

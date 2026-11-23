@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ArrowLeft, Printer, Clock, CheckCircle2, AlertTriangle, XCircle, Package } from 'lucide-react';
 import { ResumenConciliacion } from '@/features/remitos-salida/components/ResumenConciliacion';
 import type { RemitoSalidaRetiro, EstadoRemitoSalida, ConciliarRemitoSalidaRetiroDTO } from '@/features/remitos-salida/types/remitoSalidaRetiro';
+import { useAuth } from '@/hooks/use-auth';
 
 interface Props {
     remito: RemitoSalidaRetiro;
@@ -62,6 +63,8 @@ export default function ShowRemitoSalida({ remito }: Props) {
         }
     };
 
+    const { can } = useAuth();
+
     return (
         <>
             <Head title={`Remito Interno ${remito.numero_remito_interno}`} />
@@ -86,14 +89,14 @@ export default function ShowRemitoSalida({ remito }: Props) {
                         </p>
                     </div>
 
-                    <Button
+                    {(can('descargarPDF remitosSalida'))&&(<Button
                         variant="outline"
                         className="gap-2"
                         onClick={() => window.open(`/remitos-salida/${remito.id}/pdf`, '_blank')}
                     >
                         <Printer className="h-4 w-4 text-sky-600" />
                         Imprimir PDF Interno
-                    </Button>
+                    </Button>)}
                 </div>
 
                 {/* Sección de Conciliación (Formulario y Métricas) */}

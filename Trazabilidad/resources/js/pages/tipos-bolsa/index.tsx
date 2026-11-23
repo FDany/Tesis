@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { router } from '@inertiajs/react';
+import { router, Head } from '@inertiajs/react';
 import {
-  TipoBolsaModalForm,
-  TipoBolsaTable,
-  type TipoBolsa
+    TipoBolsaModalForm,
+    TipoBolsaTable,
+    type TipoBolsa
 } from '@/features/tipos-bolsa';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import FlashMessage from '@/components/FlashMessage';
@@ -11,141 +11,146 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
 import Paginacion, {
-  type PaginacionData,
+    type PaginacionData,
 } from '@/components/Paginador';
 
 import CantFilas from '@/components/CantFilas';
+import { useAuth } from '@/hooks/use-auth';
 
 
 // 1. Los datos vienen directamente como props desde el controlador de Laravel
 interface Props {
-  tiposBolsa: PaginacionData & { data: TipoBolsa[] };
-  porPagina: number;
-  opcionesPorPagina: number[];
+    tiposBolsa: PaginacionData & { data: TipoBolsa[] };
+    porPagina: number;
+    opcionesPorPagina: number[];
 }
 
 export function TiposBolsaPage({
-  tiposBolsa,
-  porPagina,
-  opcionesPorPagina,
+    tiposBolsa,
+    porPagina,
+    opcionesPorPagina,
 }: Props) {
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTipo, setSelectedTipo] = useState<TipoBolsa | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedTipo, setSelectedTipo] = useState<TipoBolsa | null>(null);
 
-  // Estados para el diálogo de confirmación de eliminación
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [idToDelete, setIdToDelete] = useState<number | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+    // Estados para el diálogo de confirmación de eliminación
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<number | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
-  // 2. Eliminación adaptada a Inertia con ConfirmDeleteDialog
-  const handleDelete = (id: number) => {
-    if (!id) return;
-    setIdToDelete(id);
-    setIsDeleteModalOpen(true);
-  };
+    // 2. Eliminación adaptada a Inertia con ConfirmDeleteDialog
+    const handleDelete = (id: number) => {
+        if (!id) return;
+        setIdToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
 
-  const ejecutarEliminacion = () => {
-    if (!idToDelete) return;
+    const ejecutarEliminacion = () => {
+        if (!idToDelete) return;
 
-    setIsDeleting(true);
-    router.delete(`/tipos-bolsa/${idToDelete}`, {
-      preserveScroll: true,
-      onSuccess: () => {
-        setIsDeleteModalOpen(false);
-        setIdToDelete(null);
-      },
-      onError: () => {
-        setIsDeleteModalOpen(false);
-        setIdToDelete(null);
-      },
-      onFinish: () => setIsDeleting(false),
-    });
-  };
+        setIsDeleting(true);
+        router.delete(`/tipos-bolsa/${idToDelete}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setIsDeleteModalOpen(false);
+                setIdToDelete(null);
+            },
+            onError: () => {
+                setIsDeleteModalOpen(false);
+                setIdToDelete(null);
+            },
+            onFinish: () => setIsDeleting(false),
+        });
+    };
 
-  const handleOpenCreateModal = () => {
-    setSelectedTipo(null);
-    setIsModalOpen(true);
-  };
+    const handleOpenCreateModal = () => {
+        setSelectedTipo(null);
+        setIsModalOpen(true);
+    };
 
-  const handleOpenEditModal = (tipo: TipoBolsa) => {
-    setSelectedTipo(tipo);
-    setIsModalOpen(true);
-  };
+    const handleOpenEditModal = (tipo: TipoBolsa) => {
+        setSelectedTipo(tipo);
+        setIsModalOpen(true);
+    };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedTipo(null);
-  };
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedTipo(null);
+    };
 
-  const handlePorPaginaChange = (cantidad: number) => {
-    router.get(
-      '/tipos-bolsa',
-      { por_pagina: cantidad },
-      {
-        preserveState: true,
-        preserveScroll: true,
-        replace: true,
-      },
-    );
-  };
+    const handlePorPaginaChange = (cantidad: number) => {
+        router.get(
+            '/tipos-bolsa',
+            { por_pagina: cantidad },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
 
-  return (
-    <div className="p-6 space-y-6">
-      <FlashMessage />
+    const { can } = useAuth();
 
-      <div className="flex justify-between items-center">
-        <div className='p-8'>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Gestión de Tipos de Bolsa / Residuos
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Configura los flujos de residuos habilitados en el sistema.
-          </p>
+    return (
+        <div className="p-6 space-y-6">
+            <Head title="Flujos de Residuos" />
+            <FlashMessage />
+
+            <div className="flex justify-between items-center">
+                <div className='p-8'>
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        Gestión de Tipos de Bolsa / Residuos
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        Configura los flujos de residuos habilitados en el sistema.
+                    </p>
+                </div>
+                {(can('crear flujosResiduos')) && (
+                    <Button onClick={handleOpenCreateModal}>
+                        <Plus className="mr-2 h-4 w-4" /> Agregar Nuevo Flujo
+                    </Button>)}
+            </div>
+
+            {/* Limitador de cantidad de filas */}
+            <CantFilas
+                value={porPagina}
+                options={opcionesPorPagina}
+                onChange={handlePorPaginaChange}
+            />
+
+            {/* La tabla recibe directamente las props de Inertia */}
+            <TipoBolsaTable
+                tiposBolsa={tiposBolsa.data}
+                onEdit={handleOpenEditModal}
+                onDelete={handleDelete}
+            />
+
+            {/* Paginacion */}
+            <Paginacion pagination={tiposBolsa} />
+
+            {/* El modal maneja sus propias llamadas POST/PUT mediante su useForm de Inertia */}
+            <TipoBolsaModalForm
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                initialData={selectedTipo}
+            />
+
+            <ConfirmDeleteDialog
+                open={isDeleteModalOpen}
+                onOpenChange={(open) => {
+                    setIsDeleteModalOpen(open);
+                    if (!open) setIdToDelete(null);
+                }}
+                title="¿Eliminar flujo de residuos?"
+                description="Estás a punto de borrar este flujo de residuos permanentemente. Esta acción no se puede deshacer."
+                confirmLabel="Sí, eliminar flujo"
+                onConfirm={ejecutarEliminacion}
+                processing={isDeleting}
+            />
         </div>
-        <Button onClick={handleOpenCreateModal}>
-          <Plus className="mr-2 h-4 w-4" /> Agregar Nuevo Flujo
-        </Button>
-      </div>
-
-      {/* Limitador de cantidad de filas */}
-      <CantFilas
-        value={porPagina}
-        options={opcionesPorPagina}
-        onChange={handlePorPaginaChange}
-      />
-
-      {/* La tabla recibe directamente las props de Inertia */}
-      <TipoBolsaTable
-        tiposBolsa={tiposBolsa.data}
-        onEdit={handleOpenEditModal}
-        onDelete={handleDelete}
-      />
-
-      {/* Paginacion */}
-      <Paginacion pagination={tiposBolsa} />
-
-      {/* El modal maneja sus propias llamadas POST/PUT mediante su useForm de Inertia */}
-      <TipoBolsaModalForm
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        initialData={selectedTipo}
-      />
-
-      <ConfirmDeleteDialog
-        open={isDeleteModalOpen}
-        onOpenChange={(open) => {
-          setIsDeleteModalOpen(open);
-          if (!open) setIdToDelete(null);
-        }}
-        title="¿Eliminar flujo de residuos?"
-        description="Estás a punto de borrar este flujo de residuos permanentemente. Esta acción no se puede deshacer."
-        confirmLabel="Sí, eliminar flujo"
-        onConfirm={ejecutarEliminacion}
-        processing={isDeleting}
-      />
-    </div>
-  );
+    );
 }
 
 export default TiposBolsaPage;

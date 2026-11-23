@@ -2,62 +2,56 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\RemitoRecepcion;
+use App\Mail\RemitoRecepcionMail;
 use App\Models\Bolsa;
+use App\Models\RemitoRecepcion;
+use App\Models\Tamanio;
 use App\Models\TipoBolsa;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
-use App\Models\Tamanio;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Validation\ValidationException;
-
-//Email
-use App\Mail\RemitoRecepcionMail;
-use Illuminate\Support\Facades\Mail;
-
 
 class RemitoRecepcionController extends Controller
 {
     private const OPCIONES_POR_PAGINA = [5, 10, 20];
-    /**
-     * Display a listing of the resource.
-     */
 
+    #[Middleware('permission:listar remitosRecepcion')]
     public function index(Request $request): Response
     {
-        // Ordern, filtro, busqueda
         $orden = $request->input('orden', 'fecha_recepcion');
         $direccion = $request->input('direccion', 'asc');
 
         $camposPermitidos = ['fecha_recepcion', 'cantidad_declarada'];
 
-        if (!in_array($orden, $camposPermitidos, true)) {
+        if (! in_array($orden, $camposPermitidos, true)) {
             $orden = 'fecha_recepcion';
         }
 
-        if (!in_array($direccion, ['asc', 'desc'], true)) {
+        if (! in_array($direccion, ['asc', 'desc'], true)) {
             $direccion = 'asc';
         }
 
         $buscar = trim($request->input('buscar', ''));
         $tipoBolsaId = (string) $request->input('tipo_bolsa_id', '');
         $tamanioId = (string) $request->input('tamanio_id', '');
-        // *************************************************
 
         $opcionesPorPagina = self::OPCIONES_POR_PAGINA;
         $porPagina = (int) $request->input('por_pagina', $opcionesPorPagina[0]);
 
-        if (!in_array($porPagina, $opcionesPorPagina, true)) {
+        if (! in_array($porPagina, $opcionesPorPagina, true)) {
             $porPagina = $opcionesPorPagina[0];
         }
 
         $remitos = RemitoRecepcion::with([
             'usuarioRecep',
             'tipoBolsa',
-            'tamanio'
+            'tamanio',
         ])
             ->when($buscar !== '', function ($query) use ($buscar) {
                 $query->where('id', $buscar);
@@ -91,20 +85,16 @@ class RemitoRecepcionController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    #[Middleware('permission:crear remitosRecepcion')]
+    public function create(): Response
     {
-        return Inertia::render('remitos-recepcion/crear', [
+        return Inertia::render('remitos-recepcion/create', [
             'tiposBolsa' => TipoBolsa::all(),
             'tamanios' => Tamanio::all(),
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    #[Middleware('permission:crear remitosRecepcion')]
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -115,27 +105,24 @@ class RemitoRecepcionController extends Controller
                 'distinct:strict',
                 'regex:/^\d{13}$/',
             ],
-            'fecha_recepcion'    => 'required|date',
-            'observaciones'      => 'nullable|string',
-            'codigo_inicio'      => ['required', 'string', 'regex:/^\d{1,4}-\d{1,9}$/'],
-            'codigo_fin'         => ['required', 'string', 'regex:/^\d{1,4}-\d{1,9}$/'],
-            'tipo_bolsa_id'      => 'required|exists:tipos_bolsa,id',
-            'cantidad_declarada' => 'required|integer|min:1|max:1000', // control de cantidad ingresada
-            'tamanio_id'         => 'required|exists:tamanios,id', // Valida que el tamaño exista en la tabla tamanios
+            'fecha_recepcion' => 'required|date',
+            'observaciones' => 'nullable|string',
+            'codigo_inicio' => ['required', 'string', 'regex:/^\d{1,4}-\d{1,9}$/'],
+            'codigo_fin' => ['required', 'string', 'regex:/^\d{1,4}-\d{1,9}$/'],
+            'tipo_bolsa_id' => 'required|exists:tipos_bolsa,id',
+            'cantidad_declarada' => 'required|integer|min:1|max:1000',
+            'tamanio_id' => 'required|exists:tamanios,id',
         ]);
 
-        // Validar que la cantidad declarada coincida con la cantidad de códigos proporcionados
         $codigos = $validated['codigos'];
         unset($validated['codigos']);
 
-        // Extraer prefijos y correlativos del rango
         [$prefijoInicio, $correlativoInicio] = explode('-', $validated['codigo_inicio']);
         [$prefijoFin, $correlativoFin] = explode('-', $validated['codigo_fin']);
 
         $inicioInt = (int) $correlativoInicio;
         $finInt = (int) $correlativoFin;
 
-        // Compara los prefijos ignorando ceros iniciales: 3 y 0003 se consideran iguales.
         $prefijoInicioNormalizado = ltrim($prefijoInicio, '0') ?: '0';
         $prefijoFinNormalizado = ltrim($prefijoFin, '0') ?: '0';
 
@@ -168,7 +155,6 @@ class RemitoRecepcionController extends Controller
         $prefijoFormateado = str_pad($prefijoInicio, 4, '0', STR_PAD_LEFT);
         $codigosEsperados = [];
 
-        // Generar los códigos esperados en el rango (de parte del controlador)
         for ($i = $inicioInt; $i <= $finInt; $i++) {
             $codigosEsperados[] = $prefijoFormateado
                 . str_pad((string) $i, 9, '0', STR_PAD_LEFT);
@@ -178,7 +164,6 @@ class RemitoRecepcionController extends Controller
         sort($codigosRecibidosOrdenados, SORT_STRING);
         sort($codigosEsperados, SORT_STRING);
 
-        // Valida los codigos generados por el controlador con los codigos recibidos de la vista
         if ($codigosRecibidosOrdenados !== $codigosEsperados) {
             throw ValidationException::withMessages([
                 'codigos' => 'Los códigos ingresados no coinciden con el rango declarado.',
@@ -208,29 +193,25 @@ class RemitoRecepcionController extends Controller
 
             foreach ($codigos as $codigo13Digitos) {
                 $bolsasData[] = [
-                    'codigo_barra'  => $codigo13Digitos,
+                    'codigo_barra' => $codigo13Digitos,
                     'tipo_bolsa_id' => $validated['tipo_bolsa_id'],
-                    'tamanio_id'    => $validated['tamanio_id'],
-                    'estado'        => 'DISPONIBLE',
-                    'rem_rep_id'    => $remito->id,
-                    'created_at'    => $now,
-                    'updated_at'    => $now,
+                    'tamanio_id' => $validated['tamanio_id'],
+                    'estado' => 'DISPONIBLE',
+                    'rem_rep_id' => $remito->id,
+                    'created_at' => $now,
+                    'updated_at' => $now,
                 ];
             }
 
             Bolsa::insert($bolsasData);
         });
 
-        // return redirect()->back()->with('success', 'Remito registrado y bolsas generadas correctamente.');
-
         return redirect()
             ->route('remitos-recepcion.index')
             ->with('success', 'Remito registrado y bolsas generadas correctamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
+    #[Middleware('permission:verDetalle remitosRecepcion')]
     public function show(Request $request, string $id): Response|RedirectResponse
     {
         $esVisitaParcialDelIndice =
@@ -241,7 +222,7 @@ class RemitoRecepcionController extends Controller
                 true
             );
 
-        if (!$esVisitaParcialDelIndice) {
+        if (! $esVisitaParcialDelIndice) {
             return redirect()->route('remitos-recepcion.index');
         }
 
@@ -254,7 +235,6 @@ class RemitoRecepcionController extends Controller
         $codigos = $remito->bolsas()
             ->orderBy('id')
             ->pluck('codigo_barra');
-
 
         return Inertia::render('remitos-recepcion/index', [
             'remitoDetalle' => [
@@ -282,30 +262,7 @@ class RemitoRecepcionController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
+    #[Middleware('permission:descargarPDF remitosRecepcion')]
     public function generarPdf(RemitoRecepcion $remito)
     {
         $remito->load([
@@ -320,17 +277,13 @@ class RemitoRecepcionController extends Controller
         ])->download("remito-recepcion-{$remito->id}.pdf");
     }
 
-
-    
-
-    // Envio de mail
-    public function enviarPdf(Request $request, string|RemitoRecepcion $remito)
+    #[Middleware('permission:enviarPDFxCorreo remitosRecepcion')]
+    public function enviarPdf(Request $request, string|RemitoRecepcion $remito): RedirectResponse
     {
         $validated = $request->validate([
             'email' => ['required', 'email'],
         ]);
 
-        // Resuelve el modelo si llega el ID o si viene resuelto por Route Model Binding
         $remito = $remito instanceof RemitoRecepcion
             ? $remito
             : RemitoRecepcion::findOrFail($remito);
@@ -342,11 +295,9 @@ class RemitoRecepcionController extends Controller
             'bolsas' => fn ($query) => $query->orderBy('id'),
         ]);
 
-        // Renderiza el PDF en memoria con la vista existente
         $pdf = Pdf::loadView('pdfs.remitorecepcion.generarremitorecepcion', compact('remito'));
         $pdfBytes = $pdf->output();
 
-        // Envío mediante SMTP con la clase Mailable
         Mail::to($validated['email'])->send(new RemitoRecepcionMail($remito, $pdfBytes));
 
         return back()->with('success', 'Remito enviado correctamente a ' . $validated['email']);

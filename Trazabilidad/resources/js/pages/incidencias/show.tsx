@@ -10,6 +10,7 @@ import { ResolverIncidenciaModal } from '@/features/incidencias/components/Resol
 import { ArrowLeft, CheckSquare, Calendar, User as UserIcon, FileText, AlertCircle, Package, Image as ImageIcon, Building2 } from 'lucide-react';
 import type { Incidencia } from '@/features/incidencias/types/incidencia';
 import type { User } from '@/types/auth';
+import { useAuth } from '@/hooks/use-auth';
 
 interface Props {
     incidencia: Incidencia;
@@ -28,6 +29,8 @@ export default function IncidenciaShow({ incidencia }: Props) {
 
         return fullName || 'Sistema';
     };
+
+    const { can } = useAuth();
 
     return (
         <div>
@@ -53,7 +56,7 @@ export default function IncidenciaShow({ incidencia }: Props) {
                         </div>
                     </div>
 
-                    {incidencia.estado !== 'CERRADA' && (
+                    {can('resolver incidencias') && incidencia.estado !== 'CERRADA' && (
                         <Button onClick={() => setIsModalOpen(true)} className="gap-2 bg-sky-600 hover:bg-sky-700 text-white">
                             <CheckSquare className="h-4 w-4" />
                             Resolver / Actualizar

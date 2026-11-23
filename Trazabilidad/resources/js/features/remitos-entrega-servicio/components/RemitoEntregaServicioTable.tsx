@@ -8,12 +8,15 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import type { RemitoEntregaServicio } from '../types/remitoEntregaServicio';
+import { useAuth } from '@/hooks/use-auth'
 
 interface Props {
     data: RemitoEntregaServicio[];
 }
 
+
 export function RemitoEntregaServicioTable({ data }: Props) {
+    const { can } = useAuth();
     return (
         <div className="rounded-md border">
             <Table>
@@ -59,13 +62,14 @@ export function RemitoEntregaServicioTable({ data }: Props) {
                                 <TableCell>{remito.entregado_cargo}</TableCell>
                                 <TableCell>{remito.cantidad_bolsas_dadas}</TableCell>
                                 <TableCell>
-                                    <Button asChild variant="outline" size="sm">
-                                        <a
-                                            href={`/remitos-entrega-servicio/${remito.id}/pdf`}
-                                        >
-                                            Descargar
-                                        </a>
-                                    </Button>
+                                    {(can('descargarPDF remitosEntregaServicio')) && (
+                                        <Button asChild variant="outline" size="sm">
+                                            <a
+                                                href={`/remitos-entrega-servicio/${remito.id}/pdf`}
+                                            >
+                                                Descargar
+                                            </a>
+                                        </Button>)}
                                 </TableCell>
                             </TableRow>
                         ))
