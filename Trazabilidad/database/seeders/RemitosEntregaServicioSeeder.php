@@ -15,7 +15,7 @@ class RemitosEntregaServicioSeeder extends Seeder
     {
         RemitoEntregaServicio::firstOrCreate([
             'id' => 1,
-            'entrega_usuario_id' => 1,
+            'entrega_usuario_id' => 2,
             'retira_nombre' => 'María López',
             'entregado_cargo' => 'Enfermera Jefa de Guardia',
             'fecha_entrega' => '2026-11-02 09:00:00',

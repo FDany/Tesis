@@ -72,10 +72,4 @@ class User extends Authenticatable // implements MustVerifyEmail, PasskeyUser
     // {  
     //     return $this->hasMany(Bolsa::class, 'pesa_usuario_id');  
     // } 
-
-    // Para obtener el nombre completo del usuario
-    protected function nombreCompleto(): Attribute  
-    {  
-        return Attribute::get(fn () => trim("{$this->first_name} {$this->last_name}"));  
-    }
 }

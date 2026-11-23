@@ -162,7 +162,7 @@ class BolsaController extends Controller
                         'etapa' => 'Recepción',  
                         'fecha' => $bolsa->remitoRecepcion?->fecha_recepcion,  
                         'sector' => 'Depósito de insumos',  
-                        'responsable' => $bolsa->remitoRecepcion?->usuarioRecep?->nombre_completo,  
+                        'responsable' => $bolsa->remitoRecepcion?->usuarioRecep?->fullName,  
                         'documento' => $bolsa->remitoRecepcion  
                             ? 'Remito recepción #'.$bolsa->remitoRecepcion->id  
                             : null,  
@@ -171,23 +171,23 @@ class BolsaController extends Controller
                         'etapa' => 'Entrega',  
                         'fecha' => $bolsa->remitoEntregaServicio?->fecha_entrega,  
                         'sector' => $bolsa->remitoEntregaServicio?->servicio?->nombre,  
-                        'responsable' => $bolsa->remitoEntregaServicio?->usuarioEntrega?->nombre_completo,  
+                        'responsable' => $bolsa->remitoEntregaServicio?->usuarioEntrega?->fullName,  
                         'documento' => $bolsa->remitoEntregaServicio  
-                            ? 'Remito interno #'.$bolsa->remitoEntregaServicio->id  
+                            ? 'RI '.$bolsa->remitoEntregaServicio->id  
                             : null,  
                     ],  
                     [  
                         'etapa' => 'Retorno',  
                         'fecha' => $bolsa->recepcionDeposito?->fecha_hora,  
                         'sector' => 'Depósito de residuos',  
-                        'responsable' => $bolsa->recepcionDeposito?->usuarioRecibe?->nombre_completo,  
+                        'responsable' => $bolsa->recepcionDeposito?->usuarioRecibe?->fullName,  
                         'documento' => null,  
                     ],  
                     [  
                         'etapa' => 'Pesaje',  
                         'fecha' => $bolsa->fecha_pesaje,  
                         'sector' => 'Depósito de residuos',  
-                        'responsable' => $bolsa->pesaUsuario?->nombre_completo,  
+                        'responsable' => $bolsa->pesaUsuario?->fullName,  
                         'documento' => null,  
                     ],  
                     [  
@@ -198,6 +198,15 @@ class BolsaController extends Controller
                         'responsable' => 'DGM',  
                         'documento' => $bolsa->remitoSalidaRetiro?->numero_remito  
                             ? 'Remito N° '.$bolsa->remitoSalidaRetiro->numero_remito  
+                            : null,  
+                    ],
+                    [  
+                        'etapa' => 'Tratamiento',  
+                        'fecha' => $manifiesto?->fecha_tratamiento ?? $manifiesto?->fecha,  
+                        'sector' => 'Tratamiento',  
+                        'responsable' => null,  
+                        'documento' => $manifiesto  
+                            ? 'Manifiesto N° '.$manifiesto->numero_manifiesto  
                             : null,  
                     ],  
                 ])

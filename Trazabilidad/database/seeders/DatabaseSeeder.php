@@ -28,6 +28,10 @@ class DatabaseSeeder extends Seeder
         ]);
         */
         $this->call(RolesAndPermissionsSeeder::class);
+
+        $this->call(RoleAndUserSeeder::class);
+        $this->call(RecepcionDepositoSeeder::class);
+        
         $this->call(TiposBolsaSeeder::class);
         $this->call(TamaniosSeeder::class);
         $this->call(ServiciosSeeder::class);
