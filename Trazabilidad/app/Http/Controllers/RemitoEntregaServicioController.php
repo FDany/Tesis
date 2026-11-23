@@ -169,7 +169,7 @@ class RemitoEntregaServicioController extends Controller
             'bolsas' => fn ($query) => $query->orderBy('id'),
         ]);
 
-        return Pdf::loadView('remitoentregaservicio.generarremitoentregaservicio', [
+        return Pdf::loadView('pdfs.remitoentregaservicio.generarremitoentregaservicio', [
             'remito' => $remito,
         ])->download("remito-entrega-servicio-{$remito->id}.pdf");
     }

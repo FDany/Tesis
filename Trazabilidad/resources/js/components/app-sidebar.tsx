@@ -57,7 +57,7 @@ const navItems: AppNavItem[] = [
         permission: 'listar permisos',
     },
     {
-        title: 'Tamaños de bolsa',
+        title: 'Tamaños de Bolsa',
         href: '/tamanios',
         icon: Trash2,
         permission: 'listar tamBolsas',
@@ -69,7 +69,7 @@ const navItems: AppNavItem[] = [
         permission: 'listar flujosResiduos',
     },
     {
-        title: 'Remitos de recepción',
+        title: 'Remitos de Recepción',
         href: '/remitos-recepcion',
         icon: LayoutDashboard,
         permission: 'listar remitosRecepcion',
@@ -87,7 +87,7 @@ const navItems: AppNavItem[] = [
         permission: 'listar servicios',
     },
     {
-        title: 'Remitos de servicios',
+        title: 'Remitos de Servicios',
         href: '/remitos-entrega-servicio',
         icon: Trash2,
         permission: 'listar remitosEntregaServicio',
@@ -105,7 +105,7 @@ const navItems: AppNavItem[] = [
         permission: 'registrarPesoBolsa Deposito',
     },
     {
-        title: 'Remitos de salida',
+        title: 'Remitos de Salida',
         href: '/remitos-salida',
         icon: LayoutDashboard,
         permission: 'listar remitosSalida',

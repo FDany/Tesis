@@ -1,195 +1,267 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
-    <title>Remito Interno de Salida - {{ $remito->numero_remito_interno }}</title>
+    <title>Remito Interno de Salida - {{ $remito->numero_remito_interno }} | EcoGestión</title>
     <style>
         @page {
-            margin: 1.2cm 1.5cm;
+            /* Margen inferior de 50mm reservado para firmas y pie de página fijo */
+            margin: 18mm 15mm 50mm 15mm;
         }
-
         body {
-            font-family: Helvetica, Arial, sans-serif;
+            font-family: DejaVu Sans, sans-serif;
             font-size: 11px;
-            color: #1e293b;
+            color: #1f2937;
             line-height: 1.4;
+            margin: 0;
         }
 
-        .header {
-            width: 100%;
-            border-bottom: 2px solid #4b92ce;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
+        /* Encabezado Institucional con línea continua */
+        .header-wrapper {
+            border-bottom: 2px solid #296b8b;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
         }
-
-        .header table {
+        .header-table {
             width: 100%;
             border-collapse: collapse;
         }
-
-        .logo-img {
-            max-height: 52px;
+        .header-logo {
+            width: 110px;
+            vertical-align: middle;
+        }
+        .header-logo img {
+            height: 58px;
             width: auto;
         }
-
-        .title {
-            font-size: 17px;
+        .header-title {
+            vertical-align: middle;
+            padding-left: 10px;
+        }
+        .header-title .system-name {
+            font-size: 14px;
             font-weight: bold;
-            color: #1e3a5f;
+            color: #296b8b;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-
-        .subtitle {
-            font-size: 10px;
-            color: #64748b;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            font-size: 10px;
-            font-weight: bold;
-            border-radius: 4px;
-            background-color: #eef6fc;
-            color: #4b92ce;
-            border: 1px solid #c2e0f8;
-        }
-
-        .section-title {
+        .header-title .hospital-name {
             font-size: 11px;
+            color: #4b5563;
+            margin-top: 2px;
+        }
+        .header-meta {
+            text-align: right;
+            vertical-align: middle;
+            width: 220px;
+        }
+        .doc-badge {
+            display: inline-block;
+            background-color: #296b8b;
+            color: #ffffff;
+            font-size: 10.5px;
             font-weight: bold;
-            background-color: #f1f5f9;
-            color: #1e3a5f;
-            padding: 4px 8px;
-            margin-top: 12px;
-            margin-bottom: 6px;
-            border-left: 4px solid #4b92ce;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .doc-date {
+            font-size: 9.5px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        /* Títulos de Sección */
+        .section-title {
+            font-size: 11.5px;
+            font-weight: bold;
+            color: #296b8b;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.4px;
+            border-left: 3px solid #2e7bb8;
+            padding-left: 8px;
+            margin: 16px 0 8px 0;
         }
 
-        .grid-table {
+        /* Tabla de Detalles (2 columnas de pares etiqueta-valor) */
+        .details-grid {
             width: 100%;
-            margin-bottom: 8px;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+            border: 1px solid #d1d5db;
         }
-
-        .grid-table td {
-            padding: 3px 0;
-            vertical-align: top;
+        .details-grid td {
+            padding: 7px 10px;
+            border: 1px solid #e5e7eb;
+            vertical-align: middle;
         }
-
-        .label {
+        .details-grid td.label {
+            width: 20%;
+            background-color: #f8fafc;
             font-weight: bold;
-            color: #475569;
+            color: #374151;
+            font-size: 10px;
+        }
+        .details-grid td.value {
+            width: 30%;
+            color: #111827;
+        }
+        .mono {
+            font-family: DejaVu Sans Mono, monospace;
+            font-size: 10.5px;
+        }
+        .status-pill {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 3px;
+            font-size: 9.5px;
+            font-weight: bold;
+            background-color: #e0f2fe;
+            color: #296b8b;
+            border: 1px solid #bae6fd;
+            text-transform: uppercase;
         }
 
+        /* Tabla de Bolsas Despachadas */
         .data-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 6px;
         }
-
         .data-table th {
-            background-color: #4b92ce;
+            background-color: #296b8b;
             color: #ffffff;
             font-size: 10px;
+            font-weight: bold;
+            padding: 6px 8px;
+            border: 1px solid #296b8b;
             text-align: left;
-            padding: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
         }
-
         .data-table td {
-            border-bottom: 1px solid #e2e8f0;
-            padding: 5px 6px;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
             font-size: 10px;
         }
-
-        .data-table tr:nth-child(even) {
-            background-color: #f8fafc;
+        .data-table tr:nth-child(even) td {
+            background-color: #f9fafb;
         }
 
+        /* Tarjeta de Totales */
+        .totals-wrapper {
+            width: 100%;
+            margin-top: 10px;
+            page-break-inside: avoid;
+        }
         .totals-table {
-            width: 100%;
-            margin-top: 8px;
-        }
-
-        .totals-card {
+            width: 250px;
             float: right;
-            width: 230px;
-            background-color: #f8fafc;
+            border-collapse: collapse;
             border: 1px solid #cbd5e1;
-            border-radius: 4px;
+        }
+        .totals-table td {
             padding: 6px 10px;
+            border: 1px solid #e2e8f0;
+            font-size: 10.5px;
         }
-
-        .totals-card table {
-            width: 100%;
+        .totals-table td.tot-label {
+            background-color: #f8fafc;
+            font-weight: bold;
+            color: #374151;
         }
-
-        .totals-card td {
-            padding: 2px 0;
+        .totals-table td.tot-value {
+            text-align: right;
+            font-weight: bold;
+            color: #111827;
         }
-
+        .totals-table tr.highlight td {
+            background-color: #f0f7fb;
+            color: #296b8b;
+            font-size: 11.5px;
+        }
         .clear {
             clear: both;
         }
 
+        /* Bloque de Firmas anclado al pie con buen aire */
         .signatures {
-            margin-top: 35px;
+            position: fixed;
+            bottom: -14mm;
+            left: 0;
+            right: 0;
             width: 100%;
+            border-collapse: collapse;
         }
-
         .signatures td {
             width: 50%;
             text-align: center;
+            padding: 0 25px;
             vertical-align: bottom;
         }
-
-        .line {
-            width: 70%;
-            margin: 0 auto 4px auto;
-            border-top: 1px solid #94a3b8;
+        .signature-line {
+            border-top: 1px solid #4b5563;
+            padding-top: 5px;
+            font-size: 10px;
+            color: #374151;
+        }
+        .signature-sub {
+            font-size: 8.5px;
+            color: #6b7280;
+            margin-top: 2px;
         }
 
+        /* Pie de página fijo debajo de las firmas */
         .footer {
             position: fixed;
-            bottom: -20px;
+            bottom: -36mm;
             left: 0;
             right: 0;
-            text-align: center;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 6px;
             font-size: 9px;
-            color: #94a3b8;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 4px;
+            color: #6b7280;
+            text-align: center;
         }
     </style>
 </head>
-
 <body>
 
-    <!-- Cabecera Institucional con Logo HSB -->
-    <div class="header">
-        <table>
+    <!-- Espacio para Firmas (anclado abajo) -->
+    <table class="signatures">
+        <tr>
+            <td>
+                <div class="signature-line">
+                    Entregó (Hospital San Bernardo)
+                    <div class="signature-sub">Firma, Aclaración y DNI</div>
+                </div>
+            </td>
+            <td>
+                <div class="signature-line">
+                    Recibió (Transporte / DGM)
+                    <div class="signature-sub">Firma, Aclaración y DNI Chofer</div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Pie de página institucional -->
+    <div class="footer">
+        Hospital San Bernardo • Salta, Argentina — Sistema EcoGestión (Trazabilidad de Residuos Peligrosos)
+    </div>
+
+    <!-- Encabezado Institucional -->
+    <div class="header-wrapper">
+        <table class="header-table">
             <tr>
-                <td style="width: 55%; vertical-align: middle;">
-                    @php
-                        $logoPath = public_path('images/logo-hsb-horizontal.png');
-                    @endphp
-                    @if (file_exists($logoPath))
-                        <img src="data:image/png;base64,{{ base64_encode(file_get_contents($logoPath)) }}" class="logo-img" alt="Logo HSB">
-                    @else
-                        <div class="title">Hospital San Bernardo</div>
-                    @endif
-                    <div class="subtitle" style="margin-top: 3px;">Sistema EcoGestión — Control de Residuos Hospitalarios</div>
-                    <div class="subtitle">Salta, Argentina</div>
+                <td class="header-logo">
+                    <img src="{{ public_path('images/logo-hsb-vertical.png') }}" alt="Hospital San Bernardo">
                 </td>
-                <td style="width: 45%; text-align: right; vertical-align: middle;">
-                    <div style="font-size: 13px; font-weight: bold; color: #1e3a5f;">REMITO INTERNO DE SALIDA</div>
-                    <div style="margin-top: 4px;">
-                        <span class="badge">{{ $remito->numero_remito_interno }}</span>
-                    </div>
+                <td class="header-title">
+                    <div class="system-name">EcoGestión</div>
+                    <div class="hospital-name">Gestión Ambiental Hospitalaria • Hospital San Bernardo</div>
+                    <div class="hospital-name" style="font-size: 10px; color: #6b7280;">Remito Interno de Salida y Disposición Final</div>
+                </td>
+                <td class="header-meta">
+                    <div class="doc-badge">{{ $remito->numero_remito_interno }}</div>
+                    <div class="doc-date">Impreso: {{ now()->format('d/m/Y H:i') }} hs</div>
                 </td>
             </tr>
         </table>
@@ -197,43 +269,36 @@
 
     <!-- Información General del Despacho -->
     <div class="section-title">Datos del Despacho Interno</div>
-    <table class="grid-table">
+    <table class="details-grid">
         <tr>
-            <td style="width: 50%;">
-                <span class="label">Fecha y Hora de Emisión:</span>
-                {{ \Carbon\Carbon::parse($remito->fecha_emision)->format('d/m/Y H:i') }} hs
-            </td>
-            <td style="width: 50%;">
-                <span class="label">Emitido por (Hospital):</span>
-                {{ $remito->usuarioDespacha?->full_name ?? 'N/A' }}
-            </td>
+            <td class="label">Fecha de emisión</td>
+            <td class="value">{{ \Carbon\Carbon::parse($remito->fecha_emision)->format('d/m/Y H:i') }} hs</td>
+            <td class="label">Emitido por</td>
+            <td class="value">{{ $remito->usuarioDespacha?->full_name ?? 'N/A' }}</td>
         </tr>
         <tr>
-            <td>
-                <span class="label">Estado Actual:</span>
-                <strong style="color: #4b92ce;">{{ $remito->estado }}</strong>
+            <td class="label">Estado actual</td>
+            <td class="value">
+                <span class="status-pill">{{ $remito->estado }}</span>
             </td>
-            <td>
-                <span class="label">Vínculo DGM:</span>
-                {{ $remito->numero_remito ?? 'PENDIENTE DE RETIRO (Sin conciliar)' }}
-            </td>
+            <td class="label">Manifiesto DGM</td>
+            <td class="value mono">{{ $remito->numero_remito ?? 'PENDIENTE DE RETIRO (Sin conciliar)' }}</td>
         </tr>
         @if ($remito->observaciones)
             <tr>
-                <td colspan="2">
-                    <span class="label">Observaciones:</span> {{ $remito->observaciones }}
-                </td>
+                <td class="label">Observaciones</td>
+                <td class="value" colspan="3">{{ $remito->observaciones }}</td>
             </tr>
         @endif
     </table>
 
     <!-- Detalle de Bolsas Cargadas -->
-    <div class="section-title">Detalle de Residuos Despachados</div>
+    <div class="section-title">Detalle de Residuos Despachados ({{ $remito->bolsas->count() }})</div>
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 5%;">#</th>
-                <th style="width: 25%;">Código de Barras</th>
+                <th style="width: 6%; text-align: center;">#</th>
+                <th style="width: 24%;">Código de Barras</th>
                 <th style="width: 30%;">Tipo de Residuo</th>
                 <th style="width: 25%;">Origen / Servicio</th>
                 <th style="width: 15%; text-align: right;">Peso (kg)</th>
@@ -242,15 +307,17 @@
         <tbody>
             @forelse($remito->bolsas as $index => $bolsa)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td><strong>{{ $bolsa->codigo_barra }}</strong></td>
-                    <td>{{ $bolsa->tipoBolsa->tipo_residuo ?? 'Residuo Patogénico' }}</td>
-                    <td>{{ $bolsa->remitoEntregaServicio->servicio->nombre ?? 'Depósito Central' }}</td>
-                    <td style="text-align: right; font-weight: bold;">{{ number_format($bolsa->peso, 2, ',', '.') }} kg</td>
+                    <td style="text-align: center; color: #6b7280;">{{ $index + 1 }}</td>
+                    <td class="mono"><strong>{{ $bolsa->codigo_barra }}</strong></td>
+                    <td>{{ $bolsa->tipoBolsa?->tipo_residuo ?? 'Residuo Patogénico' }}</td>
+                    <td>{{ $bolsa->remitoEntregaServicio?->servicio?->nombre ?? 'Depósito Central' }}</td>
+                    <td style="text-align: right; font-weight: bold;">
+                        {{ number_format($bolsa->peso, 2, ',', '.') }} kg
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" style="text-align: center; color: #94a3b8; padding: 10px;">
+                    <td colspan="5" style="text-align: center; color: #6b7280; padding: 14px;">
                         No hay bolsas vinculadas a este remito.
                     </td>
                 </tr>
@@ -259,45 +326,19 @@
     </table>
 
     <!-- Tarjeta de Resumen / Totales -->
-    <div class="totals-table">
-        <div class="totals-card">
-            <table>
-                <tr>
-                    <td class="label">Total Bolsas:</td>
-                    <td style="text-align: right; font-weight: bold;">{{ $remito->cantidad_bolsas_sistema }} u.</td>
-                </tr>
-                <tr>
-                    <td class="label">Peso Total Acumulado:</td>
-                    <td style="text-align: right; font-weight: bold; font-size: 12px; color: #1e3a5f;">
-                        {{ number_format($remito->peso_total_sistema ?? $remito->bolsas->sum('peso'), 2, ',', '.') }} kg
-                    </td>
-                </tr>
-            </table>
-        </div>
+    <div class="totals-wrapper">
+        <table class="totals-table">
+            <tr>
+                <td class="tot-label">Total de Bolsas:</td>
+                <td class="tot-value">{{ $remito->cantidad_bolsas_sistema }} u.</td>
+            </tr>
+            <tr class="highlight">
+                <td class="tot-label" style="background-color: #f0f7fb; color: #296b8b;">Peso Total Sistema:</td>
+                <td class="tot-value">{{ number_format($remito->peso_total_sistema ?? $remito->bolsas->sum('peso'), 2, ',', '.') }} kg</td>
+            </tr>
+        </table>
         <div class="clear"></div>
     </div>
 
-    <!-- Firmas de Conformidad -->
-    <table class="signatures">
-        <tr>
-            <td>
-                <div class="line"></div>
-                <div class="label">Entregó (Hospital San Bernardo)</div>
-                <div style="font-size: 9px; color: #64748b;">Firma, Aclaración y DNI</div>
-            </td>
-            <td>
-                <div class="line"></div>
-                <div class="label">Recibió (Transporte / DGM)</div>
-                <div style="font-size: 9px; color: #64748b;">Firma, Aclaración y DNI Chofer</div>
-            </td>
-        </tr>
-    </table>
-
-    <!-- Pie de página -->
-    <div class="footer">
-        Hospital San Bernardo — Documento de Control Interno — Impreso el {{ date('d/m/Y H:i') }} hs
-    </div>
-
 </body>
-
 </html>
