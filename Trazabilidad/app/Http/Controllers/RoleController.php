@@ -4,15 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
+    #[Middleware('permission:listar roles')]
     public function index(): Response
     {
         return Inertia::render('roles/index', [
@@ -24,6 +27,7 @@ class RoleController extends Controller
         ]);
     }
 
+    #[Middleware('permission:crear roles')]
     public function create(): Response
     {
         return Inertia::render('roles/create', [
@@ -33,6 +37,7 @@ class RoleController extends Controller
         ]);
     }
 
+    #[Middleware('permission:crear roles')]
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -61,6 +66,7 @@ class RoleController extends Controller
         return to_route('roles.index')->with('success', 'Rol creado correctamente.');
     }
 
+    #[Middleware('permission:editar roles')]
     public function edit(Role $role): Response
     {
         abort_unless($role->guard_name === 'web', 404);
@@ -77,6 +83,7 @@ class RoleController extends Controller
         ]);
     }
 
+    #[Middleware('permission:editar roles')]
     public function update(Request $request, Role $role): RedirectResponse
     {
         abort_unless($role->guard_name === 'web', 404);
@@ -106,13 +113,12 @@ class RoleController extends Controller
         return to_route('roles.index')->with('success', 'Rol actualizado correctamente.');
     }
 
+    #[Middleware('permission:eliminar roles')]
     public function destroy(Role $role): RedirectResponse
     {
         abort_unless($role->guard_name === 'web', 404);
 
-        if ($role->users()->exists()) {
-            return to_route('roles.index')->with('error', 'No se puede eliminar un rol asignado a usuarios.');
-        }
+        Gate::authorize('delete', $role);
 
         $role->delete();
 

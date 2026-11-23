@@ -18,114 +18,206 @@ class RolesAndPermissionsSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         //Crear Permisos
-        Permission::create(['name' => 'ver dashboard']);
-        Permission::create(['name' => 'listar usuarios']);
-        Permission::create(['name' => 'crear usuarios']);
-        Permission::create(['name' => 'editar usuarios']);
-        Permission::create(['name' => 'eliminar usuarios']);
-        Permission::create(['name' => 'listar roles']);
-        Permission::create(['name' => 'crear roles']);
-        Permission::create(['name' => 'editar roles']);
-        Permission::create(['name' => 'eliminar roles']);
-        Permission::create(['name' => 'listar permisos']);
-        Permission::create(['name' => 'listar tamBolsas']);
-        Permission::create(['name' => 'crear tamBolsas']);
-        Permission::create(['name' => 'editar tamBolsas']);
-        Permission::create(['name' => 'eliminar tamBolsas']);
-        Permission::create(['name' => 'listar servicios']);
-        Permission::create(['name' => 'crear servicios']);
-        Permission::create(['name' => 'editar servicios']);
-        Permission::create(['name' => 'eliminar servicios']);
-        Permission::create(['name' => 'listar flujosResiduos']);
-        Permission::create(['name' => 'crear flujosResiduos']);
-        Permission::create(['name' => 'editar flujosResiduos']);
-        Permission::create(['name' => 'eliminar flujosResiduos']);
-        Permission::create(['name' => 'listar remitosRecepcion']);
-        Permission::create(['name' => 'crear remitosRecepcion']);
-        Permission::create(['name' => 'ver detalleRemitoRecepcion']);
-        Permission::create(['name' => 'listar remitosSalida']);
-        Permission::create(['name' => 'crear remitosSalida']);
-        Permission::create(['name' => 'ver detalleRemitoSalida']);
-        Permission::create(['name' => 'imprimirPDF remitoSalida']);
-        Permission::create(['name' => 'listar bolsas']);
-        Permission::create(['name' => 'crear bolsas']);
-        Permission::create(['name' => 'ver detalleBolsa']);
-        Permission::create(['name' => 'listar incidencias']);
-        Permission::create(['name' => 'crear incidencias']);
-        Permission::create(['name' => 'ver detalleIncidencia']);
-        Permission::create(['name' => 'resolver incidencias']);
-        Permission::create(['name' => 'generar remitoRecepcion']);
-        Permission::create(['name' => 'registrar entregaBolsasServicio']);
+        $permissions = [
+            // Dashboard
+            'ver dashboard',
 
-        //Crear Roles
-        $superAdminRole = Role::firstOrCreate(['name' => 'admin',]);
-        $adminRole = Role::firstOrCreate(['name' => 'admin-prueba',]);
-        $recepcionRole = Role::firstOrCreate(['name' => 'recepcion',]);
-        $depositoRole = Role::firstOrCreate(['name' => 'deposito',]);
+            // Usuarios, Roles y Permisos
+            'listar usuarios',
+            'crear usuarios',
+            'editar usuarios',
+            'eliminar usuarios',
 
-        //Asignar permisos a los roles
-        // Super Admin obtiene absolutamente todos los permisos
-        $superAdminRole->givePermissionTo(Permission::all());
+            'listar roles',
+            'crear roles',
+            'editar roles',
+            'eliminar roles',
 
-        // Admin obtiene todos los permisos excepto los de editar y eliminar
-        $permisosAdmin = Permission::where('name', 'not like', '%editar%')
-            ->where('name', 'not like', '%eliminar%')
-            ->get();
-        $adminRole->syncPermissions($permisosAdmin);
+            'listar permisos',
+            'crear permisos',
+            'editar permisos',
+            'eliminar permisos',
 
-        $recepcionRole->givePermissionTo([
+            // Catálogos
+            'listar tamBolsas',
+            'crear tamBolsas',
+            'editar tamBolsas',
+            'eliminar tamBolsas',
+
+            'listar flujosResiduos',
+            'crear flujosResiduos',
+            'editar flujosResiduos',
+            'eliminar flujosResiduos',
+
+            'listar servicios',
+            'crear servicios',
+            'editar servicios',
+            'eliminar servicios',
+
+            // Remitos de Recepción (Insumos)
+            'listar remitosRecepcion',
+            'crear remitosRecepcion',
+            'verDetalle remitosRecepcion',
+            'enviarPDFxCorreo remitosRecepcion',
+            'descargarPDF remitosRecepcion',
+
+            // Bolsas
+            'listar bolsas',
+            'crear bolsas',
+            'verDetalle bolsas',
+            'descargarExcel bolsas',
+
+            // Remitos de Entrega a Servicio
+            'listar remitosEntregaServicio',
+            'crear remitosEntregaServicio',
+            'descargarPDF remitosEntregaServicio',
+
+            // Depósito de Residuos
+            'registrarRecepcionBolsa Deposito',
+            'registrarPesoBolsa Deposito',
+
+            // Remitos de Salida y Conciliación DGM
+            'listar remitosSalida',
+            'crear remitosSalida',
+            'verDetalle remitosSalida',
+            'descargarPDF remitosSalida',
+            'conciliar remitosSalida',
+
+            // Incidencias
+            'listar incidencias',
+            'crear incidencias',
+            'verDetalle incidencias',
+            'resolver incidencias',
+        ];
+
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'web',
+            ]);
+        }
+
+        // 1. ADMINISTRADOR
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $adminRole->syncPermissions(Permission::all());
+
+        // 2. RECEPCIÓN / DEPÓSITO DE INSUMOS
+        $recepcionInsumosRole = Role::firstOrCreate(['name' => 'recepcion-insumos', 'guard_name' => 'web']);
+        $recepcionInsumosRole->syncPermissions([
             'ver dashboard',
             'listar tamBolsas', 'crear tamBolsas', 'editar tamBolsas',
-            'listar remitosRecepcion', 'crear remitosRecepcion', 'ver detalleRemitoRecepcion', 'generar remitoRecepcion',
             'listar flujosResiduos', 'crear flujosResiduos', 'editar flujosResiduos',
-            'listar bolsas', 'crear bolsas', 'ver detalleBolsa',
-            'registrar entregaBolsasServicio',
+            'listar servicios',
+            'listar remitosRecepcion', 'crear remitosRecepcion', 'verDetalle remitosRecepcion',
+            'enviarPDFxCorreo remitosRecepcion', 'descargarPDF remitosRecepcion',
+            'listar bolsas', 'crear bolsas', 'verDetalle bolsas', 'descargarExcel bolsas',
+            'listar remitosEntregaServicio', 'crear remitosEntregaServicio', 'descargarPDF remitosEntregaServicio',
+            'listar incidencias', 'crear incidencias', 'verDetalle incidencias',
         ]);
-        $depositoRole->givePermissionTo([
+
+        // 3. SERVICIOS
+        $serviciosRole = Role::firstOrCreate(['name' => 'servicios', 'guard_name' => 'web']);
+        $serviciosRole->syncPermissions([
             'ver dashboard',
-            'listar bolsas', 'ver detalleBolsa',
-            'listar remitosSalida', 'crear remitosSalida', 'ver detalleRemitoSalida', 'imprimirPDF remitoSalida',
+            'listar bolsas', 'verDetalle bolsas',
+            'listar remitosEntregaServicio', 'descargarPDF remitosEntregaServicio',
+            'listar incidencias', 'crear incidencias', 'verDetalle incidencias',
+        ]);
+
+        // 4. DEPÓSITO DE RESIDUOS
+        $depositoResiduosRole = Role::firstOrCreate(['name' => 'deposito-residuos', 'guard_name' => 'web']);
+        $depositoResiduosRole->syncPermissions([
+            'ver dashboard',
+            'listar bolsas', 'verDetalle bolsas', 'descargarExcel bolsas',
+            'registrarRecepcionBolsa Deposito', 'registrarPesoBolsa Deposito',
+            'listar remitosSalida', 'crear remitosSalida', 'verDetalle remitosSalida',
+            'descargarPDF remitosSalida', 'conciliar remitosSalida',
+            'listar incidencias', 'crear incidencias', 'verDetalle incidencias', 'resolver incidencias',
+        ]);
+
+        // 5. ÁREA AMBIENTAL
+        $areaAmbientalRole = Role::firstOrCreate(['name' => 'area-ambiental', 'guard_name' => 'web']);
+        $areaAmbientalRole->syncPermissions([
+            'ver dashboard',
+            'listar tamBolsas', 'listar flujosResiduos', 'listar servicios',
+            'listar bolsas', 'verDetalle bolsas', 'descargarExcel bolsas',
+            'listar remitosRecepcion', 'verDetalle remitosRecepcion', 'descargarPDF remitosRecepcion',
+            'listar remitosEntregaServicio', 'descargarPDF remitosEntregaServicio',
+            'listar remitosSalida', 'verDetalle remitosSalida', 'descargarPDF remitosSalida',
+            'listar incidencias', 'verDetalle incidencias', 'resolver incidencias',
+        ]);
+
+        // 6. ADMINISTRACIÓN
+        $administracionRole = Role::firstOrCreate(['name' => 'administracion', 'guard_name' => 'web']);
+        $administracionRole->syncPermissions([
+            'ver dashboard',
+            'listar bolsas', 'verDetalle bolsas', 'descargarExcel bolsas',
+            'listar remitosRecepcion', 'verDetalle remitosRecepcion', 'descargarPDF remitosRecepcion',
+            'listar remitosEntregaServicio', 'descargarPDF remitosEntregaServicio',
+            'listar remitosSalida', 'verDetalle remitosSalida', 'descargarPDF remitosSalida',
+            'listar incidencias', 'verDetalle incidencias',
         ]);
 
         //Crear Usuarios y asignar roles
-        User::firstOrCreate(
-            ['dni' => '12345678'], // DNI para probar en Login
+        // Usuarios de prueba por perfil
+        $usuariosPrueba = [
             [
-                'first_name' => 'Super',
-                'last_name' => 'Admin',
-                'email' => 'superadmin@example.com',
-                'password' => bcrypt('12345678'),
-            ]
-        )->assignRole($superAdminRole);
-
-        User::firstOrCreate(
-            ['dni' => '87654321'],
-            [
+                'dni' => '12345678',
                 'first_name' => 'Admin',
-                'last_name' => 'Sistema',
-                'email' => 'admin@example.com',
-                'password' => bcrypt('87654321'),
-            ]
-        )->assignRole($adminRole);
-
-        User::firstOrCreate(
-            ['dni' => '11111111'],
+                'last_name' => 'General',
+                'email' => 'admin@ecogestion.local',
+                'role' => $adminRole,
+            ],
             [
-                'first_name' => 'Recepcionista',
-                'last_name' => 'Sistema',
-                'email' => 'recepcionista@example.com',
-                'password' => bcrypt('11111111'),
-            ]
-        )->assignRole($recepcionRole);
-
-        User::firstOrCreate(
-            ['dni' => '22222222'],
+                'dni' => '11111111',
+                'first_name' => 'Recepción',
+                'last_name' => 'Insumos',
+                'email' => 'recepcion@ecogestion.local',
+                'role' => $recepcionInsumosRole,
+            ],
             [
-                'first_name' => 'Deposito',
-                'last_name' => 'Sistema',
-                'email' => 'deposito@example.com',
-                'password' => bcrypt('22222222'),
-            ]
-        )->assignRole($depositoRole);
+                'dni' => '22222222',
+                'first_name' => 'Personal',
+                'last_name' => 'Servicios',
+                'email' => 'servicios@ecogestion.local',
+                'role' => $serviciosRole,
+            ],
+            [
+                'dni' => '33333333',
+                'first_name' => 'Depósito',
+                'last_name' => 'Residuos',
+                'email' => 'deposito@ecogestion.local',
+                'role' => $depositoResiduosRole,
+            ],
+            [
+                'dni' => '44444444',
+                'first_name' => 'Área',
+                'last_name' => 'Ambiental',
+                'email' => 'ambiental@ecogestion.local',
+                'role' => $areaAmbientalRole,
+            ],
+            [
+                'dni' => '55555555',
+                'first_name' => 'Personal',
+                'last_name' => 'Administración',
+                'email' => 'administracion@ecogestion.local',
+                'role' => $administracionRole,
+            ],
+        ];
+
+        foreach ($usuariosPrueba as $data) {
+            $user = User::firstOrCreate(
+                ['dni' => $data['dni']],
+                [
+                    'first_name' => $data['first_name'],
+                    'last_name' => $data['last_name'],
+                    'email' => $data['email'],
+                    'password' => $data['dni'],
+                    'must_change_password' => false,
+                ]
+            );
+
+            $user->syncRoles([$data['role']]);
+        }
     }
 }

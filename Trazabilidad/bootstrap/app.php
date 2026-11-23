@@ -11,6 +11,9 @@ use App\Http\Middleware\EnsurePasswordIsChanged;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Illuminate\Auth\Access\AuthorizationException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -38,4 +41,36 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn(Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+        //Agregados
+        $exceptions->render(function (AuthorizationException|AccessDeniedHttpException $e, Request $request) {
+            if ($request->header('X-Inertia')) {
+                $mensaje = $e->getMessage() !== '' && $e->getMessage() !== 'This action is unauthorized.'
+                    ? $e->getMessage()
+                    : 'No tienes autorización para realizar esta acción.';
+
+                return back()->with('error', $mensaje);
+            }
+        });
+
+        $exceptions->render(function (UnauthorizedException $e, Request $request) {
+            if ($request->header('X-Inertia')) {
+                return back()->with('error', 'No tienes los permisos necesarios para realizar esta acción.');
+            }
+        });
+
+        $exceptions->render(function (AuthorizationException|AccessDeniedHttpException|UnauthorizedException $e, Request $request) {
+            if (! $request->header('X-Inertia')) {
+                return null;
+            }
+
+            $mensaje = ($e instanceof UnauthorizedException || $e->getMessage() === '' || $e->getMessage() === 'This action is unauthorized.')
+                ? 'No tienes los permisos necesarios para realizar esta acción.'
+                : $e->getMessage();
+
+            $destino = url()->previous() !== $request->fullUrl()
+                ? back()
+                : redirect()->route('dashboard');
+
+            return $destino->with('error', $mensaje);
+        });
     })->create();

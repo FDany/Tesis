@@ -3,22 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Enums\TipoIncidencia;
-use App\Models\Bolsa;
-use App\Models\DocumentoAdjunto;
 use App\Models\Incidencia;
 use App\Models\Servicio;
 use App\Models\TipoBolsa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class IncidenciaController extends Controller
 {
-    /**
-     * Muestra el listado de incidencias con filtros y paginación.
-     */
+    #[Middleware('permission:listar incidencias')]
     public function index(Request $request): Response
     {
         $query = Incidencia::with([
@@ -31,17 +29,14 @@ class IncidenciaController extends Controller
             'documentos',
         ]);
 
-        // Filtro por Estado
         if ($request->filled('estado')) {
             $query->where('estado', $request->estado);
         }
 
-        // Filtro por Tipo de Incidencia
         if ($request->filled('tipo_incidencia')) {
             $query->where('tipo_incidencia', $request->tipo_incidencia);
         }
 
-        // Vusqueda por nombre, apellido o ambos
         $registradoPor = trim((string) $request->input('registrado_por', ''));
         if ($registradoPor !== '') {
             $terminos = preg_split('/\s+/', $registradoPor, -1, PREG_SPLIT_NO_EMPTY) ?: [];
@@ -62,9 +57,9 @@ class IncidenciaController extends Controller
             ->withQueryString();
 
         return Inertia::render('incidencias/index', [
-            'incidencias'  => $incidencias,
-            'filters'      => $request->only([
-                'estado', 
+            'incidencias' => $incidencias,
+            'filters' => $request->only([
+                'estado',
                 'tipo_incidencia',
                 'registrado_por',
             ]),
@@ -79,50 +74,44 @@ class IncidenciaController extends Controller
         ]);
     }
 
-    /**
-     * Muestra el formulario para registrar una incidencia manual.
-     */
+    #[Middleware('permission:crear incidencias')]
     public function create(): Response
     {
         return Inertia::render('incidencias/create', [
             'tiposManuales' => TipoIncidencia::tiposManuales(),
-            'servicios'     => Servicio::select('id', 'nombre')->orderBy('nombre')->get(),
-            'tiposBolsa'    => TipoBolsa::select('id', 'tipo_residuo')->get(),
+            'servicios' => Servicio::select('id', 'nombre')->orderBy('nombre')->get(),
+            'tiposBolsa' => TipoBolsa::select('id', 'tipo_residuo')->get(),
         ]);
     }
 
-    /**
-     * Guarda una nueva incidencia manual y procesa archivos/fotografías si existen.
-     */
+    #[Middleware('permission:crear incidencias')]
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'tipo_incidencia'      => ['required', 'string', new Enum(TipoIncidencia::class)],
-            'descripcion'          => 'required|string|min:5|max:600',
-            'bolsa_id'             => 'nullable|exists:bolsas,id',
+            'tipo_incidencia' => ['required', 'string', new Enum(TipoIncidencia::class)],
+            'descripcion' => 'required|string|min:5|max:600',
+            'bolsa_id' => 'nullable|exists:bolsas,id',
             'codigo_no_registrado' => 'nullable|string|max:30',
-            'servicio_id'          => 'nullable|exists:servicios,id',
-            'tipo_bolsa_id'        => 'nullable|exists:tipos_bolsa,id',
-            'rem_sal_id'           => 'nullable|exists:remitos_salida_retiro,id',
-            'documentos'           => 'nullable|array',
-            'documentos.*'         => 'file|mimes:jpeg,png,jpg,webp,pdf|max:5120', // Máx 5MB
+            'servicio_id' => 'nullable|exists:servicios,id',
+            'tipo_bolsa_id' => 'nullable|exists:tipos_bolsa,id',
+            'rem_sal_id' => 'nullable|exists:remitos_salida_retiro,id',
+            'documentos' => 'nullable|array',
+            'documentos.*' => 'file|mimes:jpeg,png,jpg,webp,pdf|max:5120',
         ]);
 
-        // 1. Crear el registro de la Incidencia
         $incidencia = Incidencia::create([
-            'fecha_hora'           => now(),
-            'usuario_registra'     => $request->user()->id,
-            'tipo_incidencia'      => $validated['tipo_incidencia'],
-            'descripcion'          => $validated['descripcion'],
-            'bolsa_id'             => $validated['bolsa_id'] ?? null,
+            'fecha_hora' => now(),
+            'usuario_registra' => $request->user()->id,
+            'tipo_incidencia' => $validated['tipo_incidencia'],
+            'descripcion' => $validated['descripcion'],
+            'bolsa_id' => $validated['bolsa_id'] ?? null,
             'codigo_no_registrado' => $validated['codigo_no_registrado'] ?? null,
-            'servicio_id'          => $validated['servicio_id'] ?? null,
-            'tipo_bolsa_id'        => $validated['tipo_bolsa_id'] ?? null,
-            'rem_sal_id'           => $validated['rem_sal_id'] ?? null,
-            'estado'               => 'ABIERTA',
+            'servicio_id' => $validated['servicio_id'] ?? null,
+            'tipo_bolsa_id' => $validated['tipo_bolsa_id'] ?? null,
+            'rem_sal_id' => $validated['rem_sal_id'] ?? null,
+            'estado' => 'ABIERTA',
         ]);
 
-        // 2. Procesar la fotografía/evidencia polimórfica si fue adjuntada
         if ($request->hasFile('documentos')) {
             foreach ($request->file('documentos') as $file) {
                 if ($file->isValid()) {
@@ -133,8 +122,8 @@ class IncidenciaController extends Controller
                     $incidencia->documentos()->create([
                         'tipo_documento' => $tipoDoc,
                         'nombre_archivo' => $file->getClientOriginalName(),
-                        'url_archivo'    => $path,
-                        'fecha_hora'     => now(),
+                        'url_archivo' => $path,
+                        'fecha_hora' => now(),
                     ]);
                 }
             }
@@ -144,9 +133,7 @@ class IncidenciaController extends Controller
             ->with('message', "Incidencia #{$incidencia->id} registrada correctamente.");
     }
 
-    /**
-     * Muestra el detalle de una incidencia específica.
-     */
+    #[Middleware('permission:verDetalle incidencias')]
     public function show(Incidencia $incidencia): Response
     {
         $incidencia->load([
@@ -164,20 +151,20 @@ class IncidenciaController extends Controller
         ]);
     }
 
-    /**
-     * Actualiza la incidencia con las acciones adoptadas y la marca como resuelta/cerrada.
-     */
+    #[Middleware('permission:resolver incidencias')]
     public function resolver(Request $request, Incidencia $incidencia): RedirectResponse
     {
+        Gate::authorize('resolver', $incidencia);
+
         $validated = $request->validate([
             'accion_adoptada' => 'required|string|min:5|max:600',
-            'estado'          => 'required|string|in:EN_ANALISIS,RESUELTA,CERRADA',
+            'estado' => 'required|string|in:EN_ANALISIS,RESUELTA,CERRADA',
         ]);
 
         $incidencia->update([
             'accion_adoptada' => $validated['accion_adoptada'],
-            'estado'          => $validated['estado'],
-            'usuario_cierra'  => $request->user()->id,
+            'estado' => $validated['estado'],
+            'usuario_cierra' => $request->user()->id,
             'fecha_resolucion' => now(),
         ]);
 

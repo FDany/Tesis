@@ -5,20 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Bolsa;
 use App\Models\RemitoEntregaServicio;
 use App\Models\Servicio;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\JsonResponse;
-
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class RemitoEntregaServicioController extends Controller
 {
     private const OPCIONES_POR_PAGINA = [5, 10, 20];
-    
+
+    #[Middleware('permission:listar remitosEntregaServicio')]
     public function index(Request $request): Response
     {
         $buscar = trim((string) $request->input('buscar', ''));
@@ -28,7 +28,7 @@ class RemitoEntregaServicioController extends Controller
         $opcionesPorPagina = self::OPCIONES_POR_PAGINA;
         $porPagina = (int) $request->input('por_pagina', $opcionesPorPagina[0]);
 
-        if (!in_array($porPagina, $opcionesPorPagina, true)) {
+        if (! in_array($porPagina, $opcionesPorPagina, true)) {
             $porPagina = $opcionesPorPagina[0];
         }
 
@@ -62,7 +62,7 @@ class RemitoEntregaServicioController extends Controller
         ]);
     }
 
-
+    #[Middleware('permission:crear remitosEntregaServicio')]
     public function create(Request $request): Response
     {
         return Inertia::render('remitos-entrega-servicio/create', [
@@ -70,40 +70,11 @@ class RemitoEntregaServicioController extends Controller
                 ->where('activo', true)
                 ->orderBy('nombre')
                 ->get(['id', 'nombre']),
-                'remitoEntregaServicio' => $request->session()->get('remitoEntregaServicio'),
+            'remitoEntregaServicio' => $request->session()->get('remitoEntregaServicio'),
         ]);
     }
 
-    
-    public function verificarBolsa(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'codigo' => ['required', 'string', 'regex:/^\d{13}$/'],
-        ]);
-
-        $bolsa = Bolsa::query()
-            ->where('codigo_barra', $validated['codigo'])
-            ->first();
-
-        if (! $bolsa) {
-            return response()->json([
-                'message' => 'No existe una bolsa con ese código.',
-            ], 404);
-        }
-
-        if ($bolsa->estado !== 'DISPONIBLE' || $bolsa->remitos_serv_id !== null) {
-            return response()->json([
-                'message' => "La bolsa {$bolsa->codigo_barra} no está disponible. Estado actual: {$bolsa->estado}.",
-            ], 422);
-        }
-
-        return response()->json([
-            'id' => $bolsa->id,
-            'codigo_barra' => $bolsa->codigo_barra,
-            'estado' => $bolsa->estado,
-        ]);
-    }
-
+    #[Middleware('permission:crear remitosEntregaServicio')]
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -189,6 +160,7 @@ class RemitoEntregaServicioController extends Controller
         });
     }
 
+    #[Middleware('permission:descargarPDF remitosEntregaServicio')]
     public function descargarPdf(RemitoEntregaServicio $remito)
     {
         $remito->load([

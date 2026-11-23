@@ -10,6 +10,7 @@ import type {
     Role,
     RolesIndexProps,
 } from '@/features/roles-y-permisos/types/rolYPermiso';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function RolesIndex({ roles }: RolesIndexProps) {
     const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
@@ -28,9 +29,11 @@ export default function RolesIndex({ roles }: RolesIndexProps) {
         });
     }
 
+    const { can } = useAuth();
+
     return (
         <>
-            <Head title="Gestión de roles" />
+            <Head title="Roles" />
             <FlashMessage />
 
             <div className="space-y-6 p-4">
@@ -45,12 +48,13 @@ export default function RolesIndex({ roles }: RolesIndexProps) {
                         </p>
                     </div>
 
-                    <Button asChild>
-                        <Link href="/roles/create">
-                            <Plus className="size-4" />
-                            Nuevo rol
-                        </Link>
-                    </Button>
+                    {(can('crear roles')) && (
+                        <Button asChild>
+                            <Link href="/roles/create">
+                                <Plus className="size-4" />
+                                Nuevo rol
+                            </Link>
+                        </Button>)}
                 </header>
 
                 <RoleTable

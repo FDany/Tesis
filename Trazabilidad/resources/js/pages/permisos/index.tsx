@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm, router } from '@inertiajs/react';
+import { useForm, router, Head } from '@inertiajs/react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Edit, Trash2 } from 'lucide-react';
 import FlashMessage from '@/components/FlashMessage';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useAuth } from '@/hooks/use-auth'
 
 interface Permission {
     id: number;
@@ -92,8 +93,12 @@ export default function Index({ permissions }: IndexProps) {
         return matchesSearch && perm.name.toLowerCase().startsWith(actionFilter);
     });
 
+    const { can } = useAuth();
+
     return (
         <div className="p-8 max-w-6xl mx-auto space-y-6">
+            <Head title="Permisos" />
+
             <div>
                 <h1 className="text-2xl font-bold tracking-tight">Permisos Atómicos del Sistema</h1>
                 <p className="text-sm text-muted-foreground">
@@ -107,32 +112,33 @@ export default function Index({ permissions }: IndexProps) {
 
                 {/* COLUMNA IZQUIERDA: Formulario dinámico de Alta/Edición */}
 
-                <div className="border rounded-xl p-5 bg-white shadow-sm space-y-4">
-                    <h2 className="text-lg font-semibold">
-                        {editingId ? '📝 Modificar Permiso' : '🛡️ Registrar Permiso'}
-                    </h2>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-xs font-semibold text-muted-foreground uppercase">Nombre Clave</label>
-                            <Input
-                                placeholder="Ej: listar usuarios"
-                                value={data.name}
-                                onChange={e => setData('name', e.target.value)}
-                            />
-                            {errors.name && <p className="text-destructive text-sm">{errors.name}</p>}
-                        </div>
-                        <div className="flex gap-2">
-                            <Button type="submit" className="flex-1" disabled={processing}>
-                                {editingId ? 'Actualizar' : 'Guardar'}
-                            </Button>
-                            {editingId && (
-                                <Button type="button" variant="outline" onClick={cancelEdit}>
-                                    Cancelar
+                {(can('editar permisos')) && (can('crear permisos')) && (
+                    <div className="border rounded-xl p-5 bg-white shadow-sm space-y-4">
+                        <h2 className="text-lg font-semibold">
+                            {editingId ? '📝 Modificar Permiso' : '🛡️ Registrar Permiso'}
+                        </h2>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold text-muted-foreground uppercase">Nombre Clave</label>
+                                <Input
+                                    placeholder="Ej: listar usuarios"
+                                    value={data.name}
+                                    onChange={e => setData('name', e.target.value)}
+                                />
+                                {errors.name && <p className="text-destructive text-sm">{errors.name}</p>}
+                            </div>
+                            <div className="flex gap-2">
+                                <Button type="submit" className="flex-1" disabled={processing}>
+                                    {editingId ? 'Actualizar' : 'Guardar'}
                                 </Button>
-                            )}
-                        </div>
-                    </form>
-                </div>
+                                {editingId && (
+                                    <Button type="button" variant="outline" onClick={cancelEdit}>
+                                        Cancelar
+                                    </Button>
+                                )}
+                            </div>
+                        </form>
+                    </div>)}
 
                 {/* COLUMNA DERECHA: Tabla con Buscadores Avanzados */}
                 <div className="lg:col-span-2 space-y-4">
@@ -196,26 +202,28 @@ export default function Index({ permissions }: IndexProps) {
                                                 {perm.guard_name}
                                             </TableCell>
                                             <TableCell className="text-right space-x-1.5 whitespace-nowrap">
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    title="Editar"
-                                                    aria-label="Editar"
-                                                    onClick={() => startEdit(perm)}
-                                                    disabled={editingId === perm.id}
-                                                >
-                                                    <Edit className="h-4 w-4" />
-                                                </Button>
+                                                {can('editar permisos') && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        title="Editar"
+                                                        aria-label="Editar"
+                                                        onClick={() => startEdit(perm)}
+                                                        disabled={editingId === perm.id}
+                                                    >
+                                                        <Edit className="h-4 w-4" />
+                                                    </Button>)}
 
-                                                <Button
-                                                    variant="destructive"
-                                                    size="icon"
-                                                    title="Eliminar"
-                                                    aria-label="Eliminar"
-                                                    onClick={() => handleDelete(perm.id)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                {(can('eliminar permisos')) && (
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="icon"
+                                                        title="Eliminar"
+                                                        aria-label="Eliminar"
+                                                        onClick={() => handleDelete(perm.id)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>)}
                                             </TableCell>
                                         </TableRow>
                                     ))

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Spatie\Permission\Models\Role;
+use App\Policies\RolePolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
-        Gate::define('manage-administration', fn (User $user): bool => $user->hasRole('admin'));
+        Gate::policy(Role::class, RolePolicy::class);
     }
 
     /**

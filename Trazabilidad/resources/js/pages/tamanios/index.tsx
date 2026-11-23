@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { router } from '@inertiajs/react';
+import { router, Head } from '@inertiajs/react';
 import {
     TamanioModalForm,
     TamanioTable,
@@ -69,6 +69,7 @@ export const TamaniosPage: React.FC<Props> = ({ tamanios }) => {
 
     return (
         <div className="p-6 space-y-6">
+            <Head title="Tamaños de Bolsa" />
             <FlashMessage />
 
             <div className="flex justify-between items-center">

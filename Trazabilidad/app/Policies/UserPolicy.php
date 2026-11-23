@@ -10,9 +10,9 @@ class UserPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $authUser): bool
     {
-        return false;
+        return $authUser->can('listar usuarios');
     }
 
     /**
@@ -26,29 +26,45 @@ class UserPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $authUser): bool
     {
-        return false;
+        return $authUser->can('crear usuarios');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, User $model): bool
+    public function update(User $authUser, User $targetUser): Response|bool
     {
-        return false;
+        if (! $authUser->can('editar usuarios')) {
+            return false;
+        }
+
+        if ($targetUser->hasRole('admin') && ! $authUser->hasRole('admin')) {
+            return Response::deny('Solo un administrador puede modificar a otro administrador.');
+        }
+
+        return true;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $authUser, User $targetUser): Response
+    public function delete(User $authUser, User $targetUser): Response|bool
     {
+        if (! $authUser->can('eliminar usuarios')) {
+            return false;
+        }
+
         if ($authUser->is($targetUser)) {
             return Response::deny('No puedes eliminar tu propia cuenta.');
         }
 
-        return Response::allow();
+        if ($targetUser->hasRole('admin') && ! $authUser->hasRole('admin')) {
+            return Response::deny('Solo un administrador puede eliminar a otro administrador.');
+        }
+
+        return true;
     }
 
     /**

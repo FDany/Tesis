@@ -11,6 +11,7 @@ import type { TipoBolsa } from '@/features/tipos-bolsa';
 import type { Tamanio } from '@/features/tamanios';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import FlashMessage from '@/components/FlashMessage';
 
 import Paginacion, {
     type PaginacionData,
@@ -146,6 +147,7 @@ export default function Index({
             <Head title="Remitos de Recepción" />
 
             <div className="p-6 space-y-6">
+                <FlashMessage />
                 {/* Encabezado con título y botón de acción */}
                 <div className="flex justify-between items-center">
                     <div>

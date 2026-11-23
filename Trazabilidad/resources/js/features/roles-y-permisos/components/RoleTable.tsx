@@ -3,6 +3,7 @@ import { Edit, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import type { Role } from '../types/rolYPermiso';
+import { useAuth } from '@/hooks/use-auth';
 
 type RoleTableProps = {
     roles: Role[];
@@ -10,6 +11,9 @@ type RoleTableProps = {
 };
 
 export function RoleTable({ roles, onDelete }: RoleTableProps) {
+
+    const { can } = useAuth();
+
     return (
         <div className="overflow-x-auto rounded-lg border">
             <table className="w-full text-left text-sm">
@@ -59,7 +63,8 @@ export function RoleTable({ roles, onDelete }: RoleTableProps) {
 
                             <td className="p-3">
                                 <div className="flex gap-2">
-                                    <Button
+                                    {(can('editar roles'))&&(
+                                        <Button
                                         variant="outline"
                                         size="icon"
                                         asChild
@@ -71,9 +76,10 @@ export function RoleTable({ roles, onDelete }: RoleTableProps) {
                                         >
                                             <Edit className="h-4 w-4" />
                                         </Link>
-                                    </Button>
+                                    </Button>)}
 
-                                    <Button
+                                    {(can('eliminar roles'))&&(
+                                        <Button
                                         type="button"
                                         variant="destructive"
                                         size="icon"
@@ -87,7 +93,7 @@ export function RoleTable({ roles, onDelete }: RoleTableProps) {
                                         onClick={() => onDelete(role)}
                                     >
                                         <Trash2 className="h-4 w-4" />
-                                    </Button>
+                                    </Button>)}
                                 </div>
                             </td>
                         </tr>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { router } from '@inertiajs/react';
+import { router, Head } from '@inertiajs/react';
 import {
     ServicioModalForm,
     ServicioTable,
@@ -15,6 +15,7 @@ import Paginacion, {
 } from '@/components/Paginador';
 
 import CantFilas from '@/components/CantFilas';
+import { useAuth } from '@/hooks/use-auth';
 
 // 1. Los datos vienen directamente como props desde el controlador de Laravel
 interface Props {
@@ -84,8 +85,11 @@ export const ServiciosPage: React.FC<Props> = ({ servicios, porPagina, opcionesP
         );
     };
 
+    const { can } = useAuth();
+
     return (
         <div className="p-6 space-y-6">
+            <Head title="Servicios" />
             <FlashMessage />
 
             <div className="flex justify-between items-center">
@@ -95,9 +99,10 @@ export const ServiciosPage: React.FC<Props> = ({ servicios, porPagina, opcionesP
                         Configura los servicios habilitados en el sistema.
                     </p>
                 </div>
-                <Button onClick={handleOpenCreateModal}>
-                    <Plus className="mr-2 h-4 w-4" /> Agregar Nuevo Servicio
-                </Button>
+                {(can('crear servicios')) && (
+                    <Button onClick={handleOpenCreateModal}>
+                        <Plus className="mr-2 h-4 w-4" /> Agregar Nuevo Servicio
+                    </Button>)}
             </div>
 
             {/* Limitador de cantidad de filas */}

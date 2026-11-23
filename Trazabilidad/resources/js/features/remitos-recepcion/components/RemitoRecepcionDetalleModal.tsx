@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Download, Mail } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth'
 
 export type RemitoDetalle = {
     id: number;
@@ -53,7 +54,7 @@ export function RemitoRecepcionDetalleModal({
     const [detalleLocal, setDetalleLocal] = useState<RemitoDetalle | undefined>(detalleProp);
 
     // Sirve para actualizar los datos cuando se abre distintos remitos,
-    // Confirma que los datos correspondan al remito correcto y 
+    // Confirma que los datos correspondan al remito correcto y
     // Protege los datos cuando envías el mail,
     useEffect(() => {
         if (detalleProp && detalleProp.id === remitoId) {       // Garantiza que solo se guarden los datos si realmente pertenecen al remito que el usuario tiene abierto en pantalla
@@ -67,7 +68,7 @@ export function RemitoRecepcionDetalleModal({
             ? detalleLocal
             : undefined;
 
-    
+
 
     const { data, setData, post, processing, errors, reset, recentlySuccessful } = useForm({
         email: '',
@@ -90,6 +91,8 @@ export function RemitoRecepcionDetalleModal({
         });
     };
 
+    const { can } = useAuth();
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-hidden">
@@ -101,41 +104,43 @@ export function RemitoRecepcionDetalleModal({
 
                         {detalle && detalle.id === remitoId && (
                             <div className="w-full space-y-3 pt-2">
-                                <Button asChild variant="outline" className="w-auto self-start">
-                                    <a href={`/remitos-recepcion/${detalle.id}/pdf`}>
-                                        <Download className="mr-1 h-4 w-4" />
-                                        Descargar PDF
-                                    </a>
-                                </Button>
+                                {(can('descargarPDF remitosRecepcion')) && (
+                                    <Button asChild variant="outline" className="w-auto self-start">
+                                        <a href={`/remitos-recepcion/${detalle.id}/pdf`}>
+                                            <Download className="mr-1 h-4 w-4" />
+                                            Descargar PDF
+                                        </a>
+                                    </Button>)}
 
-                                <form onSubmit={handleEnviarCorreo} className="rounded-lg border bg-muted/40 p-3 space-y-2">
-                                    <label htmlFor="email-destino" className="text-sm font-medium">
-                                        Enviar remito en PDF por correo:
-                                    </label>
-                                    <div className="flex gap-2">
-                                        <Input
-                                            id="email-destino"
-                                            type="email"
-                                            placeholder="ejemplo@correo.com"
-                                            value={data.email}
-                                            onChange={(e) => setData('email', e.target.value)}
-                                            required
-                                            className="bg-background"
-                                        />
-                                        <Button type="submit" disabled={processing}>
-                                            <Mail className="mr-1 h-4 w-4" />
-                                            {processing ? 'Enviando...' : 'Enviar PDF'}
-                                        </Button>
-                                    </div>
-                                    {errors.email && (
-                                        <p className="text-sm text-destructive">{errors.email}</p>
-                                    )}
-                                    {recentlySuccessful && (
-                                        <p className="text-sm text-green-600 font-medium">
-                                            ✓ Remito enviado con éxito
-                                        </p>
-                                    )}
-                                </form>
+                                {(can('enviarPDFxCorreo remitosRecepcion')) && (
+                                    <form onSubmit={handleEnviarCorreo} className="rounded-lg border bg-muted/40 p-3 space-y-2">
+                                        <label htmlFor="email-destino" className="text-sm font-medium">
+                                            Enviar remito en PDF por correo:
+                                        </label>
+                                        <div className="flex gap-2">
+                                            <Input
+                                                id="email-destino"
+                                                type="email"
+                                                placeholder="ejemplo@correo.com"
+                                                value={data.email}
+                                                onChange={(e) => setData('email', e.target.value)}
+                                                required
+                                                className="bg-background"
+                                            />
+                                            <Button type="submit" disabled={processing}>
+                                                <Mail className="mr-1 h-4 w-4" />
+                                                {processing ? 'Enviando...' : 'Enviar PDF'}
+                                            </Button>
+                                        </div>
+                                        {errors.email && (
+                                            <p className="text-sm text-destructive">{errors.email}</p>
+                                        )}
+                                        {recentlySuccessful && (
+                                            <p className="text-sm text-green-600 font-medium">
+                                                ✓ Remito enviado con éxito
+                                            </p>
+                                        )}
+                                    </form>)}
                             </div>
                         )}
                     </DialogHeader>

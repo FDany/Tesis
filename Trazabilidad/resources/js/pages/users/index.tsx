@@ -9,6 +9,7 @@ import CantFilas from '@/components/CantFilas';
 import Paginacion, {
     type PaginacionData,
 } from '@/components/Paginador';
+import { useAuth } from '@/hooks/use-auth';
 
 interface Role {
     id: number;
@@ -43,6 +44,8 @@ export default function UsersIndex({ users, porPagina, opcionesPorPagina }: Inde
         );
     };
 
+    const { can } = useAuth();
+
     return (
         <>
             <Head title="Usuarios" />
@@ -56,12 +59,13 @@ export default function UsersIndex({ users, porPagina, opcionesPorPagina }: Inde
                             Administra las cuentas y sus roles.
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href="/users/create">
-                            <Plus className="size-4" />
-                            Nuevo usuario
-                        </Link>
-                    </Button>
+                    {(can('crear usuarios')) && (
+                        <Button asChild>
+                            <Link href="/users/create">
+                                <Plus className="size-4" />
+                                Nuevo usuario
+                            </Link>
+                        </Button>)}
                 </div>
 
                 {/* Limitador de cantidad de filas */}

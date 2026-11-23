@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Tamanio;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class TamanioController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    #[Middleware('permission:listar tamBolsas')]
     public function index(): Response
     {
         return Inertia::render('tamanios/index', [
@@ -23,17 +22,7 @@ class TamanioController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    #[Middleware('permission:crear tamBolsas')]
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -45,25 +34,7 @@ class TamanioController extends Controller
         return redirect()->back()->with('success', 'Tamaño de bolsa creado correctamente');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
+    #[Middleware('permission:editar tamBolsas')]
     public function update(Request $request, Tamanio $tamanio): RedirectResponse
     {
         $validated = $request->validate([
@@ -75,12 +46,9 @@ class TamanioController extends Controller
         return redirect()->back()->with('success', 'Tamaño de bolsa actualizado correctamente');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    #[Middleware('permission:eliminar tamBolsas')]
     public function destroy(Tamanio $tamanio): RedirectResponse
     {
-        // Prevenimos eliminar registros que ya tengan bolsas asociadas
         if ($tamanio->bolsas()->exists()) {
             return redirect()->back()->with('error', 'No se puede eliminar un tamaño de bolsa en uso por bolsas registradas');
         }
