@@ -120,12 +120,89 @@ class BolsaController extends Controller
 
         $bolsa->load([
             'tipoBolsa',
-            'remitoRecepcion',
-            'remitoEntregaServicio.servicio',
-            'recepcionDeposito',
-            'remitoSalidaRetiro',
+            'remitoRecepcion.usuarioRecep',  
+            'remitoEntregaServicio.servicio',  
+            'remitoEntregaServicio.usuarioEntrega',  
+            'recepcionDeposito.usuarioRecibe',  
+            'remitoSalidaRetiro.manifiestosFinales',  
+            'pesaUsuario',
         ]);
 
+        $manifiesto = $bolsa->remitoSalidaRetiro?->manifiestosFinales->first();  
+
+
+        // 'eventos' => collect([      // Creo una colección de eventos asociados a la bolsa
+                //     [
+                //         'nombre' => 'Recepción',
+                //         'fecha' => $bolsa->remitoRecepcion?->fecha_recepcion,
+                //     ],
+                //     [
+                //         'nombre' => 'Entrega al servicio',
+                //         'servicio' => $bolsa->remitoEntregaServicio?->servicio?->nombre,
+                //         'fecha' => $bolsa->remitoEntregaServicio?->fecha_entrega,
+                //     ],
+                //     [
+                //         'nombre' => 'Recepción en depósito',
+                //         'fecha' => $bolsa->recepcionDeposito?->fecha_hora,
+                //     ],
+                //     [  
+                //         'nombre' => 'Pesaje en depósito',  
+                //         'fecha' => $bolsa->fecha_pesaje,  
+                //         'peso' => $bolsa->peso,  
+                //         'usuario' => $bolsa->pesaUsuario?->name,
+                //     ],  
+                //     [
+                //         'nombre' => 'Salida / retiro',
+                //         'fecha' => $bolsa->remitoSalidaRetiro?->fecha_retiro,
+                //     ],
+                // ])
+
+                $eventos = collect([  
+                    [  
+                        'etapa' => 'Recepción',  
+                        'fecha' => $bolsa->remitoRecepcion?->fecha_recepcion,  
+                        'sector' => 'Depósito de insumos',  
+                        'responsable' => $bolsa->remitoRecepcion?->usuarioRecep?->nombre_completo,  
+                        'documento' => $bolsa->remitoRecepcion  
+                            ? 'Remito recepción #'.$bolsa->remitoRecepcion->id  
+                            : null,  
+                    ],  
+                    [  
+                        'etapa' => 'Entrega',  
+                        'fecha' => $bolsa->remitoEntregaServicio?->fecha_entrega,  
+                        'sector' => $bolsa->remitoEntregaServicio?->servicio?->nombre,  
+                        'responsable' => $bolsa->remitoEntregaServicio?->usuarioEntrega?->nombre_completo,  
+                        'documento' => $bolsa->remitoEntregaServicio  
+                            ? 'Remito interno #'.$bolsa->remitoEntregaServicio->id  
+                            : null,  
+                    ],  
+                    [  
+                        'etapa' => 'Retorno',  
+                        'fecha' => $bolsa->recepcionDeposito?->fecha_hora,  
+                        'sector' => 'Depósito de residuos',  
+                        'responsable' => $bolsa->recepcionDeposito?->usuarioRecibe?->nombre_completo,  
+                        'documento' => null,  
+                    ],  
+                    [  
+                        'etapa' => 'Pesaje',  
+                        'fecha' => $bolsa->fecha_pesaje,  
+                        'sector' => 'Depósito de residuos',  
+                        'responsable' => $bolsa->pesaUsuario?->nombre_completo,  
+                        'documento' => null,  
+                    ],  
+                    [  
+                        'etapa' => 'Retiro',  
+                        'fecha' => $bolsa->remitoSalidaRetiro?->fecha_retiro  
+                            ?? $bolsa->remitoSalidaRetiro?->fecha_emision,  
+                        'sector' => 'Hospital',  
+                        'responsable' => 'DGM',  
+                        'documento' => $bolsa->remitoSalidaRetiro?->numero_remito  
+                            ? 'Remito N° '.$bolsa->remitoSalidaRetiro->numero_remito  
+                            : null,  
+                    ],  
+                ])
+                    ->filter(fn ($evento) => $evento['fecha'] !== null)
+                    ->values();
         return Inertia::render('bolsas/index', [
             'bolsaDetalle' => [
                 'id' => $bolsa->id,
@@ -135,27 +212,7 @@ class BolsaController extends Controller
                     'tipo_residuo' => $bolsa->tipoBolsa->tipo_residuo,
                     'color' => $bolsa->tipoBolsa->color,
                 ] : null,
-                'eventos' => collect([      // Creo una colección de eventos asociados a la bolsa
-                    [
-                        'nombre' => 'Recepción',
-                        'fecha' => $bolsa->remitoRecepcion?->fecha_recepcion,
-                    ],
-                    [
-                        'nombre' => 'Entrega al servicio',
-                        'servicio' => $bolsa->remitoEntregaServicio?->servicio?->nombre,
-                        'fecha' => $bolsa->remitoEntregaServicio?->fecha_entrega,
-                    ],
-                    [
-                        'nombre' => 'Recepción en depósito',
-                        'fecha' => $bolsa->recepcionDeposito?->fecha_hora,
-                    ],
-                    [
-                        'nombre' => 'Salida / retiro',
-                        'fecha' => $bolsa->remitoSalidaRetiro?->fecha_retiro,
-                    ],
-                ])
-                    ->filter(fn ($evento) => $evento['fecha'] !== null)
-                    ->values(),
+                'eventos' => $eventos,
             ],
         ]);
     }
