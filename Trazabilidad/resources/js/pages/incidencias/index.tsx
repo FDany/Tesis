@@ -61,7 +61,7 @@ export default function IncidenciasIndex({
     return (
 
         <div>
-            <Head title="Gestión de Incidencias" />
+            <Head title="Incidencias" />
 
             <div className="max-w-6xl mx-auto space-y-6 p-6">
                 {/* Encabezado */}

@@ -33,7 +33,7 @@ export default function RolesIndex({ roles }: RolesIndexProps) {
 
     return (
         <>
-            <Head title="Gestión de roles" />
+            <Head title="Roles" />
             <FlashMessage />
 
             <div className="space-y-6 p-4">

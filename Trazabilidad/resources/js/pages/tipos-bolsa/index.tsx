@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { router } from '@inertiajs/react';
+import { router, Head } from '@inertiajs/react';
 import {
     TipoBolsaModalForm,
     TipoBolsaTable,
@@ -95,6 +95,7 @@ export function TiposBolsaPage({
 
     return (
         <div className="p-6 space-y-6">
+            <Head title="Flujos de Residuos" />
             <FlashMessage />
 
             <div className="flex justify-between items-center">

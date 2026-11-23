@@ -63,7 +63,7 @@ const navItems: AppNavItem[] = [
         permission: 'listar tamBolsas',
     },
     {
-        title: 'Tipos de residuos',
+        title: 'Flujos de Residuos',
         href: '/tipos-bolsa',
         icon: Trash2,
         permission: 'listar flujosResiduos',

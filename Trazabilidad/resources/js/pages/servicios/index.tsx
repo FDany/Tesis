@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { router } from '@inertiajs/react';
+import { router, Head } from '@inertiajs/react';
 import {
     ServicioModalForm,
     ServicioTable,
@@ -89,6 +89,7 @@ export const ServiciosPage: React.FC<Props> = ({ servicios, porPagina, opcionesP
 
     return (
         <div className="p-6 space-y-6">
+            <Head title="Servicios" />
             <FlashMessage />
 
             <div className="flex justify-between items-center">

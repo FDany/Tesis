@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm, router } from '@inertiajs/react';
+import { useForm, router, Head } from '@inertiajs/react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,6 +97,8 @@ export default function Index({ permissions }: IndexProps) {
 
     return (
         <div className="p-8 max-w-6xl mx-auto space-y-6">
+            <Head title="Permisos" />
+
             <div>
                 <h1 className="text-2xl font-bold tracking-tight">Permisos Atómicos del Sistema</h1>
                 <p className="text-sm text-muted-foreground">
