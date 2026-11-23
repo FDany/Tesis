@@ -159,7 +159,7 @@ export function RemitoSalidaTabla({ data }: RemitoSalidaTablaProps) {
                                     <TableCell className="text-center">
                                         <div className="flex items-center justify-center gap-1">
                                             {/* Botón Imprimir PDF Interno */}
-                                            {can('imprimirPDF remitoSalida') && (
+                                            {can('descargarPDF remitosSalida') && (
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Button
@@ -183,9 +183,7 @@ export function RemitoSalidaTabla({ data }: RemitoSalidaTablaProps) {
                                             )}
 
                                             {/* Botón Ver Detalle y Conciliar */}
-                                            {can(
-                                                'ver detalleRemitoSalida',
-                                            ) && (
+                                            {can('verDetalle remitosSalida') && (
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Button

@@ -2,34 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\UsuarioCreadoMail;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
-use App\Mail\UsuarioCreadoMail;
 use Throwable;
 
 class UserController extends Controller
 {
     private const OPCIONES_POR_PAGINA = [5, 10, 20];
 
+    #[Middleware('permission:listar usuarios')]
     public function index(Request $request): Response
     {
-
         $opcionesPorPagina = self::OPCIONES_POR_PAGINA;
         $porPagina = (int) $request->input('por_pagina', $opcionesPorPagina[0]);
 
-        if (!in_array($porPagina, $opcionesPorPagina, true)) {
+        if (! in_array($porPagina, $opcionesPorPagina, true)) {
             $porPagina = $opcionesPorPagina[0];
         }
+
         return Inertia::render('users/index', [
             'users' => User::query()
                 ->with('roles:id,name')
@@ -41,6 +43,7 @@ class UserController extends Controller
         ]);
     }
 
+    #[Middleware('permission:crear usuarios')]
     public function create(): Response
     {
         return Inertia::render('users/create', [
@@ -48,6 +51,7 @@ class UserController extends Controller
         ]);
     }
 
+    #[Middleware('permission:crear usuarios')]
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -85,16 +89,22 @@ class UserController extends Controller
         return to_route('users.index')->with('success', 'Usuario creado y credenciales enviadas por correo.');
     }
 
+    #[Middleware('permission:editar usuarios')]
     public function edit(User $user): Response
     {
+        Gate::authorize('update', $user);
+
         return Inertia::render('users/edit', [
             'user' => $user->load('roles:id,name'),
             'roles' => Role::query()->where('guard_name', 'web')->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
+    #[Middleware('permission:editar usuarios')]
     public function update(Request $request, User $user): RedirectResponse
     {
+        Gate::authorize('update', $user);
+
         $validated = $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
@@ -153,6 +163,7 @@ class UserController extends Controller
         return to_route('users.index')->with('success', $mensaje);
     }
 
+    #[Middleware('permission:eliminar usuarios')]
     public function destroy(User $user): RedirectResponse
     {
         Gate::authorize('delete', $user);

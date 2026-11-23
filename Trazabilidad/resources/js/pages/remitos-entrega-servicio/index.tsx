@@ -10,6 +10,7 @@ import { RemitoEntregaServicioFiltros } from '@/features/remitos-entrega-servici
 import type { Servicio } from '@/features/servicios';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth'
 
 interface Props {
     remitos: PaginacionData & { data: RemitoEntregaServicio[] };
@@ -87,6 +88,8 @@ export default function RemitosEntregaServicioIndex({
         visitarListado({ por_pagina: cantidad });
     };
 
+    const { can } = useAuth();
+
     return (
         <>
             <Head title="Remitos de Entrega a Servicios" />
@@ -101,12 +104,13 @@ export default function RemitosEntregaServicioIndex({
                             Historial de bolsas entregadas a los servicios.
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href="/remitos-entrega-servicio/create">
-                            <Plus className="size-4" />
-                            Nueva Entrega a Servicio
-                        </Link>
-                    </Button>
+                    {(can('crear remitosEntregaServicio')) && (
+                        <Button asChild>
+                            <Link href="/remitos-entrega-servicio/create">
+                                <Plus className="size-4" />
+                                Nueva Entrega a Servicio
+                            </Link>
+                        </Button>)}
                 </div>
 
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-end">

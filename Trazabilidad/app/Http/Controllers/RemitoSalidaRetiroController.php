@@ -5,18 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Bolsa;
 use App\Models\Incidencia;
 use App\Models\RemitoSalidaRetiro;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class RemitoSalidaRetiroController extends Controller
 {
-    /**
-     * Muestra el historial de remitos de salida.
-     */
-    public function index(Request $request)
+    #[Middleware('permission:listar remitosSalida')]
+    public function index(Request $request): Response
     {
         $buscar = trim((string) $request->input('buscar', ''));
         $estado = (string) $request->input('estado', '');
@@ -47,33 +49,26 @@ class RemitoSalidaRetiroController extends Controller
         ]);
     }
 
-    /**
-     * Formulario para la creación del despacho interno.
-     */
-    public function create()
+    #[Middleware('permission:crear remitosSalida')]
+    public function create(): Response
     {
         return Inertia::render('remitos-salida/create');
     }
 
-    /**
-     * FASE 1: Emisión del Remito Interno del Hospital (Generación de PDF).
-     */
-    public function store(Request $request)
+    #[Middleware('permission:crear remitosSalida')]
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'bolsas_ids' => 'required|array|min:1',     // Validación de que se envíe un array de IDs de bolsas
-            'bolsas_ids.*' => ['required', 'integer', 'distinct', 'exists:bolsas,id'],  // Validación cada ID esté presente, sea entero, no se repita y corresponda a una bolsa existente
+            'bolsas_ids' => 'required|array|min:1',
+            'bolsas_ids.*' => ['required', 'integer', 'distinct', 'exists:bolsas,id'],
             'observaciones' => 'nullable|string',
         ]);
 
         return DB::transaction(function () use ($validated, $request) {
-
-            //
             $bolsas = Bolsa::whereIn('id', $validated['bolsas_ids'])
-                ->lockForUpdate()   // Bloquea esas bolsas para que otra transacción no las modifique mientras se procesa este despacho.
-                ->get();            // Ejecuta la consulta y devuelve las bolsas encontradas como colección
+                ->lockForUpdate()
+                ->get();
 
-            // Validación adicional, nos aseguramos de que todas las bolsas solicitadas fueron encontradas
             if ($bolsas->count() !== count($validated['bolsas_ids'])) {
                 throw ValidationException::withMessages([
                     'bolsas_ids' => 'No se encontraron todas las bolsas seleccionadas.',
@@ -94,8 +89,6 @@ class RemitoSalidaRetiroController extends Controller
                 ]);
             }
 
-
-            // Generar correlativo interno automático (Ej: RSI-2026-00001)
             $anioActual = date('Y');
             $ultimoId = RemitoSalidaRetiro::max('id') ?? 0;
             $numeroCorrelativo = str_pad($ultimoId + 1, 5, '0', STR_PAD_LEFT);
@@ -103,7 +96,6 @@ class RemitoSalidaRetiroController extends Controller
 
             $cantidadBolsas = count($validated['bolsas_ids']);
 
-            // 1. Crear el remito interno institucional
             $remito = RemitoSalidaRetiro::create([
                 'numero_remito_interno' => $numeroRemitoInterno,
                 'fecha_emision' => now(),
@@ -113,7 +105,6 @@ class RemitoSalidaRetiroController extends Controller
                 'observaciones' => $validated['observaciones'] ?? null,
             ]);
 
-            // 2. Asociar bolsas y cambiar su estado
             Bolsa::whereIn('id', $validated['bolsas_ids'])->update([
                 'rem_sal_id' => $remito->id,
                 'estado' => 'DESPACHADA',
@@ -124,12 +115,10 @@ class RemitoSalidaRetiroController extends Controller
         });
     }
 
-    /**
-     * FASE 2: Conciliación con el Remito Oficial entregado por DGM.
-     */
-    public function conciliar(Request $request, string $id)
+    #[Middleware('permission:conciliar remitosSalida')]
+    public function conciliar(Request $request, RemitoSalidaRetiro $remito): RedirectResponse
     {
-        $remito = RemitoSalidaRetiro::findOrFail($id);
+        Gate::authorize('conciliar', $remito);
 
         $validated = $request->validate([
             'numero_remito' => 'required|string|max:50',
@@ -147,7 +136,6 @@ class RemitoSalidaRetiroController extends Controller
 
             $nuevoEstado = $coincide ? 'CONCILIADO' : 'CON_INCIDENCIA';
 
-            // 1. Actualizar el remito con los datos recibidos de DGM
             $remito->update([
                 'numero_remito' => $validated['numero_remito'],
                 'fecha_retiro' => $validated['fecha_retiro'],
@@ -158,8 +146,7 @@ class RemitoSalidaRetiroController extends Controller
                 'observaciones' => $validated['observaciones'] ?? $remito->observaciones,
             ]);
 
-            // 2. En caso de discrepancia, generar la incidencia automática
-            if (!$coincide) {
+            if (! $coincide) {
                 $diferencia = $cantidadSistema - $cantidadDgm;
 
                 Incidencia::create([
@@ -179,15 +166,13 @@ class RemitoSalidaRetiroController extends Controller
         });
     }
 
-    /**
-     * Muestra el detalle de un remito de salida.
-     */
-    public function show(string $id)
+    #[Middleware('permission:verDetalle remitosSalida')]
+    public function show(string $id): Response
     {
         $remito = RemitoSalidaRetiro::with([
             'usuarioDespacha',
-            'bolsas.tipoBolsa', // Anidamos la relación para cargar el tipo de residuo de cada bolsa
-            'incidencia'
+            'bolsas.tipoBolsa',
+            'incidencia',
         ])
             ->withCount('bolsas')
             ->withSum('bolsas as peso_total_sistema', 'peso')
@@ -198,25 +183,20 @@ class RemitoSalidaRetiroController extends Controller
         ]);
     }
 
-    /**
-     * Genera y descarga el PDF del Remito Interno de Salida.
-     */
+    #[Middleware('permission:descargarPDF remitosSalida')]
     public function descargarPdf(RemitoSalidaRetiro $remito)
     {
-        // Carga anidada de relaciones Eloquent
         $remito->load([
             'usuarioDespacha',
             'bolsas.tipoBolsa',
             'bolsas.remitoEntregaServicio.servicio',
-            'incidencia'
+            'incidencia',
         ]);
 
-        // Generar la vista Blade pasándole el modelo cargado
         $pdf = Pdf::loadView('pdfs.remitosalida.generarremitosalida', [
             'remito' => $remito,
         ]);
 
-        // Transmitir en el navegador (stream) o descargar (download)
         return $pdf->stream("remito-salida-{$remito->numero_remito_interno}.pdf");
     }
 }

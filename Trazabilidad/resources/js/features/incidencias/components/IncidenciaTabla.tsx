@@ -6,6 +6,7 @@ import { IncidenciaBadge } from '@/features/incidencias/components/IncidenciaBad
 import { CheckSquare, Eye, Building2, Package, FileText } from 'lucide-react';
 import type { Incidencia } from '@/features/incidencias/types/incidencia';
 import type { User } from '@/types/auth';
+import { useAuth } from '@/hooks/use-auth';
 
 interface IncidenciaTablaProps {
     incidencias: Incidencia[];
@@ -22,6 +23,8 @@ export function IncidenciaTabla({ incidencias, onResolve }: IncidenciaTablaProps
 
         return fullName || 'Sistema';
     };
+
+    const { can } = useAuth();
 
     if (incidencias.length === 0) {
         return (
@@ -97,13 +100,14 @@ export function IncidenciaTabla({ incidencias, onResolve }: IncidenciaTablaProps
                         </TableCell>
                         <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
-                                <Link href={`/incidencias/${incidencia.id}`}>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Ver Detalle">
-                                        <Eye className="h-4 w-4" />
-                                    </Button>
-                                </Link>
+                                {(can('verDetalle incidencias')) && (
+                                    <Link href={`/incidencias/${incidencia.id}`}>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Ver Detalle">
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                    </Link>)}
 
-                                {incidencia.estado !== 'CERRADA' && (
+                                {can('resolver incidencias') && incidencia.estado !== 'CERRADA' && (
                                     <Button
                                         variant="outline"
                                         size="sm"

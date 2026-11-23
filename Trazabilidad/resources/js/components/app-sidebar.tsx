@@ -36,28 +36,25 @@ const navItems: AppNavItem[] = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutDashboard,
+        permission: 'ver dashboard',
     },
     {
         title: 'Usuarios',
         href: '/users',
         icon: Users,
-        adminOnly: true,
         permission: 'listar usuarios',
-
     },
     {
         title: 'Roles',
         href: '/roles',
         icon: ShieldCheck,
         permission: 'listar roles',
-        adminOnly: true,
     },
     {
         title: 'Permisos',
         href: '/permisos',
         icon: ShieldCheck,
         permission: 'listar permisos',
-        adminOnly: true,
     },
     {
         title: 'Tamaños de bolsa',
@@ -93,19 +90,19 @@ const navItems: AppNavItem[] = [
         title: 'Remitos de servicios',
         href: '/remitos-entrega-servicio',
         icon: Trash2,
-        permission: 'registrar entregaBolsasServicio',
+        permission: 'listar remitosEntregaServicio',
     },
     {
         title: 'Recepción Depósito',
         href: '/recepciones-deposito',
         icon: Trash2,
-        permission: 'listar bolsas',
+        permission: 'registrarRecepcionBolsa Deposito',
     },
     {
         title: 'Pesaje Depósito',
         href: '/pesaje-deposito',
         icon: Trash2,
-        permission: 'listar bolsas',
+        permission: 'registrarPesoBolsa Deposito',
     },
     {
         title: 'Remitos de salida',
@@ -147,23 +144,13 @@ const navItems: AppNavItem[] = [
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
-
-    const { canManageAdministration } = usePage<{
-        canManageAdministration: boolean;
-    }>().props;
-
     const { can } = useAuth();
 
-
-
-    const mainNavItems = navItems.filter(
-        (item) => !item.adminOnly || canManageAdministration,
-    );
-    const filteredNavItems = mainNavItems.filter((item) => {
-        // Si el ítem no tiene la propiedad 'permission', se muestra a todos (ej:Dashboard).
-        // Si la tiene, evalúa si el usuario tiene el permiso asignado en Spatie.
+    const filteredNavItems = navItems.filter((item) => {
+        // Si el ítem no tiene la propiedad 'permission', se muestra a todos.
+        // Si la tiene, evalúa si el usuario tiene el permiso asignado en Spatie (o es super-admin).
         return !item.permission || can(item.permission);
-    })
+    });
 
     return (
         <Sidebar collapsible="icon" variant="inset">

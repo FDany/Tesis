@@ -2,26 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Bolsa;
 use App\Models\RecepcionDeposito;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\JsonResponse;
 
 class RecepcionDepositoController extends Controller
 {
-
-
+    #[Middleware('permission:registrarRecepcionBolsa Deposito')]
     public function create(): Response
     {
         return Inertia::render('recepciones-deposito/create');
     }
 
-
+    #[Middleware('permission:registrarRecepcionBolsa Deposito')]
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -30,7 +29,7 @@ class RecepcionDepositoController extends Controller
                 'required',
                 'string',
                 'distinct:strict',
-                'regex:/^\d{13}$/',     // Valida que cada código sea un string de 13 dígitos
+                'regex:/^\d{13}$/',
             ],
         ]);
 
@@ -80,43 +79,5 @@ class RecepcionDepositoController extends Controller
 
             return back()->with('success', 'Bolsas recibidas en depósito correctamente.');
         });
-    }
-
-    public function verificarBolsa(Request $request): JsonResponse
-    {
-        // Validación de la entrada (codigo de barras)
-        $validated = $request->validate([
-            'codigo' => ['required', 'string', 'regex:/^\d{13}$/'],
-        ]);
-
-        // Busca la bolsa por el código de barras
-        $bolsa = Bolsa::query()
-            ->where('codigo_barra', $validated['codigo'])
-            ->first();
-
-        // Si no se encuentra la bolsa, retornamos un error 404
-        if (! $bolsa) {
-            return response()->json([
-                'message' => 'No existe una bolsa con ese código.',
-            ], 404);
-        }
-
-        // Validación de estado y si tiene remitos asociados
-        if (
-            $bolsa->estado !== 'OCUPADO'
-            || $bolsa->remitos_serv_id === null
-            || $bolsa->recep_dep_id !== null
-        ) {
-            return response()->json([
-                'message' => "La bolsa {$bolsa->codigo_barra} no está pendiente de recepción desde un servicio. Estado actual: {$bolsa->estado}.",
-            ], 422);
-        }
-
-        // Retorna la información de la bolsa si pasa todas las validaciones
-        return response()->json([
-            'id' => $bolsa->id,
-            'codigo_barra' => $bolsa->codigo_barra,
-            'estado' => $bolsa->estado,
-        ]);
     }
 }

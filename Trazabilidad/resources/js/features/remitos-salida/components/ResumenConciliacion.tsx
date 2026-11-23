@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, AlertTriangle, Scale, PackageCheck, FileText, CheckSquare } from 'lucide-react';
 import type { ConciliarRemitoSalidaRetiroDTO, RemitoSalidaRetiro } from '../types/remitoSalidaRetiro';
+import { useAuth } from '@/hooks/use-auth';
 
 interface Props {
     remito: RemitoSalidaRetiro;
@@ -32,6 +33,8 @@ export function ResumenConciliacion({
 
     const coincide = cantidadSistema === cantidadDgm;
     const diferencia = cantidadSistema - cantidadDgm;
+
+    const { can } = useAuth();
 
     return (
         <form onSubmit={onSubmit} className="space-y-6">
@@ -204,9 +207,10 @@ export function ResumenConciliacion({
             )}
 
             <div className="flex justify-end pt-2">
-                <Button type="submit" size="lg" disabled={processing || cantidadDgm <= 0}>
-                    <CheckSquare className="mr-2 h-5 w-5" /> Conciliar y Cerrar Retiro DGM
-                </Button>
+                {(can('conciliar remitosSalida')) && (
+                    <Button type="submit" size="lg" disabled={processing || cantidadDgm <= 0}>
+                        <CheckSquare className="mr-2 h-5 w-5" /> Conciliar y Cerrar Retiro DGM
+                    </Button>)}
             </div>
         </form>
     );
