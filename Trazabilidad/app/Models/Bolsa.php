@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use App\Enums\EstadoBolsa;
 
 #[Fillable([
     'codigo_barra',
@@ -28,6 +29,7 @@ class Bolsa extends Model
     protected $table = 'bolsas';
 
     protected $casts = [
+        'estado' => EstadoBolsa::class,
         'peso' => 'float',
         'fecha_pesaje' => 'datetime',
     ];
@@ -82,9 +84,9 @@ class Bolsa extends Model
         return $this->hasMany(Incidencia::class, 'bolsa_id');
     }
 
-    /* Usuario que registró el pesaje de la bolsa en depósito. */  
-    public function pesaUsuario(): BelongsTo  
-    {  
-        return $this->belongsTo(User::class, 'pesa_usuario_id');  
-    }  
+    /* Usuario que registró el pesaje de la bolsa en depósito. */
+    public function pesaUsuario(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'pesa_usuario_id');
+    }
 }

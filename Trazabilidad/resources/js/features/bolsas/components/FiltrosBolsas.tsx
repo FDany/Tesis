@@ -1,5 +1,6 @@
 import { FiltroGenerico } from '@/components/filtros/FiltroGenerico';
 import type { CampoFiltro } from '@/components/filtros/FiltroGenerico';
+import { ESTADO_BOLSA_LABELS, type EstadoBolsa } from '../types/bolsa';
 
 interface Props {
     valores: {
@@ -26,7 +27,7 @@ export function FiltrosBolsas({ valores, estados, onChange }: Props) {
                 { value: 'todos', label: 'Todos los estados' },
                 ...estados.map((estado) => ({
                     value: estado,
-                    label: estado,
+                    label: ESTADO_BOLSA_LABELS[estado as EstadoBolsa] ?? estado,
                 })),
             ],
         },

@@ -15,6 +15,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use App\Enums\EstadoBolsa;
 
 class ManifiestoFinalController extends Controller
 {
@@ -80,7 +81,7 @@ class ManifiestoFinalController extends Controller
             'documentoOficial',
         ]);
 
-        // Se calcula peso_total_sistema igual que RemitoSalidaRetiroController::show  
+        // Se calcula peso_total_sistema igual que RemitoSalidaRetiroController::show
         $manifiesto->remitoSalidaRetiro?->loadSum('bolsas as peso_total_sistema', 'peso');
 
         return Inertia::render('manifiestos-finales/show', [
@@ -145,6 +146,10 @@ class ManifiestoFinalController extends Controller
 
             $remito->update([
                 'estado' => 'FINALIZADO',
+            ]);
+
+            $remito->bolsas()->update([
+                'estado' => EstadoBolsa::TRATADA_DISPOSICION_FINAL->value,
             ]);
 
             return redirect()

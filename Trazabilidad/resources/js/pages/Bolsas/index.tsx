@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Head, router } from '@inertiajs/react';
 import {
     BolsaDetalleModal,
-    BolsaTable,
+    BolsaTabla,
     type Bolsa,
     type BolsaDetalle,
     FiltrosBolsas,
@@ -254,7 +254,7 @@ export default function Index({
                 />
 
                 {/* Tabla con la lista de registros */}
-                <BolsaTable
+                <BolsaTabla
                     data={bolsas.data}
                     orden={orden}
                     direccion={direccion}

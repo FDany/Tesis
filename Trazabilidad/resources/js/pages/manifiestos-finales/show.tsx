@@ -19,6 +19,7 @@ import {
 import FlashMessage from '@/components/FlashMessage';
 import type { ManifiestoFinal } from '@/features/manifiestos-finales/types/manifiestoFinal';
 import { useAuth } from '@/hooks/use-auth';
+import { ESTADO_BOLSA_LABELS } from '@/features/bolsas/types/bolsa';
 
 interface Props {
     manifiesto: ManifiestoFinal;
@@ -348,7 +349,7 @@ export default function ShowManifiestoFinal({ manifiesto }: Props) {
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <Badge variant="outline" className="text-xs">
-                                                    {bolsa.estado}
+                                                    {ESTADO_BOLSA_LABELS[bolsa.estado] ?? bolsa.estado}
                                                 </Badge>
                                             </TableCell>
                                         </TableRow>

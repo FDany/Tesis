@@ -1,5 +1,5 @@
 // Componentes
-export * from './components/BolsaTable';
+export * from './components/BolsaTabla';
 
 // Tipos
 export * from './types/bolsa';

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Enums\EstadoBolsa;
 
 class RemitoSalidaRetiroController extends Controller
 {
@@ -77,7 +78,7 @@ class RemitoSalidaRetiroController extends Controller
 
             $bolsasNoDisponibles = $bolsas->filter(
                 fn (Bolsa $bolsa) =>
-                    $bolsa->estado !== 'PESADA'
+                    $bolsa->estado !== EstadoBolsa::PESADA
                     || $bolsa->peso === null
                     || $bolsa->peso <= 0
                     || $bolsa->rem_sal_id !== null
@@ -107,7 +108,7 @@ class RemitoSalidaRetiroController extends Controller
 
             Bolsa::whereIn('id', $validated['bolsas_ids'])->update([
                 'rem_sal_id' => $remito->id,
-                'estado' => 'DESPACHADA',
+                'estado' => EstadoBolsa::DESPACHADA->value,
             ]);
 
             return redirect()->route('remitos-salida.show', $remito->id)
@@ -144,6 +145,10 @@ class RemitoSalidaRetiroController extends Controller
                 'datos_transporte' => $validated['datos_transporte'] ?? null,
                 'estado' => $nuevoEstado,
                 'observaciones' => $validated['observaciones'] ?? $remito->observaciones,
+            ]);
+
+            $remito->bolsas()->update([
+                'estado' => EstadoBolsa::RETIRADA_POR_DGM->value,
             ]);
 
             if (! $coincide) {
@@ -185,7 +190,7 @@ class RemitoSalidaRetiroController extends Controller
             // 1. Liberar las bolsas vinculadas para que vuelvan a estar disponibles para despacho
             $remito->bolsas()->update([
                 'rem_sal_id' => null,
-                'estado' => 'PESADA',
+                'estado' => EstadoBolsa::PESADA->value,
             ]);
 
             // 2. Registrar auditoría de anulación en observaciones y cambiar estado

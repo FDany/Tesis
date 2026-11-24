@@ -33,7 +33,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 
-class BolsasExport implements 
+class BolsasExport implements
         FromQuery,
         WithHeadings,
         WithMapping,
@@ -84,15 +84,14 @@ class BolsasExport implements
         return [
             '#' . $bolsa->codigo_barra,
             $bolsa->tipoBolsa ? $bolsa->tipoBolsa->tipo_residuo : '—',
-            // $bolsa->created_at ? $bolsa->created_at->format('d/m/Y') : '—',
             $bolsa->created_at
                 ? Date::dateTimeToExcel($bolsa->created_at)
                 : '—',
-            $bolsa->estado,
+            $bolsa->estado?->label() ?? '—',
             $bolsa->tipoBolsa?->color,
         ];
     }
-    
+
     // Para mostrar el formato día/mes/año
     public function columnFormats(): array
     {

@@ -14,6 +14,7 @@ import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import FlashMessage from '@/components/FlashMessage';
 import type { RemitoSalidaRetiro, EstadoRemitoSalida, ConciliarRemitoSalidaRetiroDTO } from '@/features/remitos-salida/types/remitoSalidaRetiro';
 import { useAuth } from '@/hooks/use-auth';
+import { ESTADO_BOLSA_LABELS } from '@/features/bolsas/types/bolsa';
 
 interface Props {
     remito: RemitoSalidaRetiro;
@@ -81,8 +82,8 @@ export default function ShowRemitoSalida({ remito }: Props) {
                     //     <FileCheck2 className="h-3 w-3" /> Finalizado
                     // </Badge>
 
-                    <Badge className="bg-blue-600 hover:bg-blue-700 gap-1">  
-                        <CheckCircle2 className="h-3 w-3" /> Finalizado  
+                    <Badge className="bg-blue-600 hover:bg-blue-700 gap-1">
+                        <CheckCircle2 className="h-3 w-3" /> Finalizado
                     </Badge>
                 );
             case 'ANULADO':
@@ -229,7 +230,7 @@ export default function ShowRemitoSalida({ remito }: Props) {
                                             <TableCell className="text-right font-mono font-semibold">{Number(bolsa.peso).toFixed(2)} Kg</TableCell>
                                             <TableCell className="text-center">
                                                 <Badge variant="outline" className="text-xs">
-                                                    {bolsa.estado}
+                                                    {ESTADO_BOLSA_LABELS[bolsa.estado] ?? bolsa.estado}
                                                 </Badge>
                                             </TableCell>
                                         </TableRow>

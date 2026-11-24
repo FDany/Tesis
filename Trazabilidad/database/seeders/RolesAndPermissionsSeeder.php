@@ -96,6 +96,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'crear incidencias',
             'verDetalle incidencias',
             'resolver incidencias',
+
+            //Reportes
+            'ver reportes',
         ];
 
         foreach ($permissions as $permission) {
