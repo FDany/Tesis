@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { Building2 } from 'lucide-react';
-import type { MetricaServicio } from '../types/dashboard';
+import type { MetricaServicio } from '../types/reportes';
 
 interface Props {
     metricasServicio: MetricaServicio[];

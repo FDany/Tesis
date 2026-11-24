@@ -16,12 +16,16 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ManifiestoFinalController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DepositoController;
+use App\Http\Controllers\ReporteController;
 
 Route::inertia('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Reportes Estadísticos
+    Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
 
     // Administración (Usuarios, Roles y Permisos)
     Route::resource('users', UserController::class)->except(['show']);
@@ -64,9 +68,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('remitos-entrega-servicio.pdf');
 
     // Módulo de Depósito
-    Route::get('deposito', [DepositoController::class, 'create'])->name('deposito.create');  
-    Route::post('recepciones-deposito', [DepositoController::class, 'storeRecepcion'])->name('recepciones-deposito.store');  
-    Route::post('pesaje-deposito', [DepositoController::class, 'storePesaje'])->name('pesaje-deposito.store');  
+    Route::get('deposito', [DepositoController::class, 'create'])->name('deposito.create');
+    Route::post('recepciones-deposito', [DepositoController::class, 'storeRecepcion'])->name('recepciones-deposito.store');
+    Route::post('pesaje-deposito', [DepositoController::class, 'storePesaje'])->name('pesaje-deposito.store');
 
     // Módulo Remitos de Salida (Despacho Interno y Conciliación DGM)
     Route::resource('remitos-salida', RemitoSalidaRetiroController::class)->only(['index', 'create', 'store', 'show']);

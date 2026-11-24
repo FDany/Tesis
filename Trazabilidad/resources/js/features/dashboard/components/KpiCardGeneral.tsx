@@ -1,16 +1,15 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PackageCheck, Scale, RefreshCw, ArrowUpRight } from 'lucide-react';
-import type { IndicadoresGenerales } from '../types/dashboard';
+import { PackageCheck, Scale, RefreshCw, Truck } from 'lucide-react';
+import type { ResumenMesDashboard } from '../types/dashboard';
 
 interface Props {
-    generales: IndicadoresGenerales;
+    resumenMes: ResumenMesDashboard;
 }
 
-export function KpiCardGeneral({ generales }: Props) {
+export function KpiCardGeneral({ resumenMes }: Props) {
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            {/* Bolsas Recibidas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="hover:shadow-sm transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                     <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -19,12 +18,11 @@ export function KpiCardGeneral({ generales }: Props) {
                     <PackageCheck className="h-4 w-4 text-sky-600" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{generales.bolsas_recibidas}</div>
-                    <p className="text-xs text-muted-foreground mt-1">Total en el período</p>
+                    <div className="text-2xl font-bold">{resumenMes.bolsas_recibidas}</div>
+                    <p className="text-xs text-muted-foreground mt-1">Mes en curso</p>
                 </CardContent>
             </Card>
 
-            {/* Bolsas Utilizadas */}
             <Card className="hover:shadow-sm transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                     <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -33,12 +31,24 @@ export function KpiCardGeneral({ generales }: Props) {
                     <RefreshCw className="h-4 w-4 text-indigo-600" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{generales.bolsas_utilizadas}</div>
+                    <div className="text-2xl font-bold">{resumenMes.bolsas_utilizadas}</div>
                     <p className="text-xs text-muted-foreground mt-1">En servicios hospitalarios</p>
                 </CardContent>
             </Card>
 
-            {/* Kilogramos Generados */}
+            <Card className="hover:shadow-sm transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        Bolsas Retiradas
+                    </CardTitle>
+                    <Truck className="h-4 w-4 text-purple-600" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{resumenMes.bolsas_retiradas}</div>
+                    <p className="text-xs text-muted-foreground mt-1">Retiradas por DGM / dispuestas</p>
+                </CardContent>
+            </Card>
+
             <Card className="hover:shadow-sm transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                     <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -47,38 +57,8 @@ export function KpiCardGeneral({ generales }: Props) {
                     <Scale className="h-4 w-4 text-emerald-600" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{generales.kilogramos_generados} Kg</div>
-                    <p className="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-0.5">
-                        <ArrowUpRight className="h-3 w-3" /> Peso acumulado
-                    </p>
-                </CardContent>
-            </Card>
-
-            {/* Peso Promedio por Bolsa */}
-            <Card className="hover:shadow-sm transition-shadow">
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Promedio / Bolsa
-                    </CardTitle>
-                    <Scale className="h-4 w-4 text-amber-600" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">{generales.peso_promedio_bolsa} Kg</div>
-                    <p className="text-xs text-muted-foreground mt-1">Peso medio registrado</p>
-                </CardContent>
-            </Card>
-
-            {/* Bolsas Retiradas DGM */}
-            <Card className="hover:shadow-sm transition-shadow">
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Bolsas Retiradas
-                    </CardTitle>
-                    <PackageCheck className="h-4 w-4 text-purple-600" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">{generales.bolsas_retiradas}</div>
-                    <p className="text-xs text-muted-foreground mt-1">Despachadas por DGM</p>
+                    <div className="text-2xl font-bold">{resumenMes.kilogramos_generados.toFixed(2)} Kg</div>
+                    <p className="text-xs text-muted-foreground mt-1">Peso acumulado en el mes</p>
                 </CardContent>
             </Card>
         </div>

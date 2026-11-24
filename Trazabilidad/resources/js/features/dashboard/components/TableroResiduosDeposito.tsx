@@ -9,6 +9,7 @@ interface Props {
 
 export function TableroResiduosDeposito({ residuosDeposito }: Props) {
     const totalBolsas = residuosDeposito.reduce((acc, item) => acc + Number(item.cantidad || 0), 0);
+    const totalPeso = residuosDeposito.reduce((acc, item) => acc + Number(item.peso_total || 0), 0);
 
     return (
         <Card className="h-full">
@@ -31,7 +32,7 @@ export function TableroResiduosDeposito({ residuosDeposito }: Props) {
                         <div className="space-y-2.5">
                             {residuosDeposito.map((item, idx) => (
                                 <div
-                                    key={idx}
+                                    key={item.tipo_bolsa_id ?? `${item.tipo_residuo}-${idx}`}
                                     className="flex items-center justify-between p-2.5 rounded-lg border bg-card text-sm"
                                 >
                                     <span className="flex items-center gap-2.5 font-medium text-foreground capitalize">
@@ -41,18 +42,32 @@ export function TableroResiduosDeposito({ residuosDeposito }: Props) {
                                         />
                                         {item.tipo_residuo}
                                     </span>
-                                    <span className="font-bold font-mono text-base bg-muted px-2.5 py-0.5 rounded-md">
-                                        {item.cantidad.toLocaleString('es-AR')} bolsas
-                                    </span>
+                                    <div className="text-right">
+                                        <span className="font-bold font-mono text-base bg-muted px-2.5 py-0.5 rounded-md">
+                                            {Number(item.cantidad || 0).toLocaleString('es-AR')} bolsas
+                                        </span>
+                                        {typeof item.peso_total === 'number' && (
+                                            <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                                                {Number(item.peso_total).toFixed(2)} Kg
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>
 
                         <div className="flex items-center justify-between pt-3 border-t text-sm">
                             <span className="font-medium text-muted-foreground">Total en Depósito</span>
-                            <span className="font-bold font-mono text-base text-emerald-700 dark:text-emerald-400">
-                                {totalBolsas.toLocaleString('es-AR')} bolsas
-                            </span>
+                            <div className="text-right">
+                                <span className="font-bold font-mono text-base text-emerald-700 dark:text-emerald-400">
+                                    {totalBolsas.toLocaleString('es-AR')} bolsas
+                                </span>
+                                {totalPeso > 0 && (
+                                    <p className="text-xs text-muted-foreground font-mono">
+                                        {totalPeso.toFixed(2)} Kg
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </>
                 )}
