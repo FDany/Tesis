@@ -37,7 +37,7 @@ class BolsaScannerController extends Controller
         return response()->json($resultado['payload'], $resultado['status']);
     }
 
-    #[Middleware('permission:registrarRecepcionBolsa Deposito')]
+    #[Middleware('permission:gestionar deposito')]
     public function buscarParaRecepcionDeposito(Request $request): JsonResponse
     {
         $validated = $request->validate([

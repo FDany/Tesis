@@ -73,8 +73,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'descargarPDF remitosEntregaServicio',
 
             // Depósito de Residuos
-            'registrarRecepcionBolsa Deposito',
-            'registrarPesoBolsa Deposito',
+            // 'registrarRecepcionBolsa Deposito',
+            // 'registrarPesoBolsa Deposito',
+            'gestionar deposito',
 
             // Remitos de Salida y Conciliación DGM
             'listar remitosSalida',
@@ -136,7 +137,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $depositoResiduosRole->syncPermissions([
             'ver dashboard',
             'listar bolsas', 'verDetalle bolsas', 'descargarExcel bolsas',
-            'registrarRecepcionBolsa Deposito', 'registrarPesoBolsa Deposito',
+            'gestionar deposito',
             'listar remitosSalida', 'crear remitosSalida', 'verDetalle remitosSalida',
             'descargarPDF remitosSalida', 'conciliar remitosSalida', 'anular remitosSalida',
             'listar manifiestosFinales', 'crear manifiestosFinales', 'verDetalle manifiestosFinales', 'descargarDocumento manifiestosFinales',
