@@ -46,6 +46,16 @@ export default function ShowManifiestoFinal({ manifiesto }: Props) {
         });
     };
 
+    const resumenPorServicio = Object.values(
+        bolsas.reduce((acc, b) => {
+            const nombre = b.remito_entrega_servicio?.servicio?.nombre || 'Depósito Central';
+            if (!acc[nombre]) acc[nombre] = { nombre, cantidad: 0, peso: 0 };
+            acc[nombre].cantidad += 1;
+            acc[nombre].peso += Number(b.peso) || 0;
+            return acc;
+        }, {} as Record<string, { nombre: string; cantidad: number; peso: number }>)
+    ).sort((a, b) => b.cantidad - a.cantidad);
+
     return (
         <>
             <Head title={`Manifiesto Final ${manifiesto.numero_manifiesto}`} />
@@ -147,8 +157,8 @@ export default function ShowManifiestoFinal({ manifiesto }: Props) {
                         <CardContent className="p-4 flex items-start gap-3">
                             <div
                                 className={`p-2 rounded-lg ${diferenciaBolsas === 0 && Math.abs(diferenciaPeso) < 0.01
-                                        ? 'bg-emerald-50 text-emerald-600'
-                                        : 'bg-amber-50 text-amber-600'
+                                    ? 'bg-emerald-50 text-emerald-600'
+                                    : 'bg-amber-50 text-amber-600'
                                     }`}
                             >
                                 {diferenciaBolsas === 0 && Math.abs(diferenciaPeso) < 0.01 ? (
@@ -259,6 +269,41 @@ export default function ShowManifiestoFinal({ manifiesto }: Props) {
                     </Card>
                 </div>
 
+
+                {/* Resumen por Servicio de Origen */}
+                <Card className="shadow-sm">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-base font-semibold flex items-center gap-2">
+                            <Package className="h-5 w-5 text-muted-foreground" />
+                            Origen de las Bolsas por Servicio
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Servicio</TableHead>
+                                    <TableHead className="text-center">Cantidad de Bolsas</TableHead>
+                                    <TableHead className="text-right">Peso Total (Kg)</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {resumenPorServicio.map((s) => (
+                                    <TableRow key={s.nombre}>
+                                        <TableCell className="font-medium">{s.nombre}</TableCell>
+                                        <TableCell className="text-center font-mono">{s.cantidad}</TableCell>
+                                        <TableCell className="text-right font-mono font-semibold">
+                                            {s.peso.toFixed(2)} Kg
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+
+
+
                 {/* Tabla de Bolsas Incluidas en la Disposición Final */}
                 <Card className="shadow-sm">
                     <CardHeader className="pb-3">
@@ -278,6 +323,7 @@ export default function ShowManifiestoFinal({ manifiesto }: Props) {
                                 <TableRow>
                                     <TableHead>Código de Barras</TableHead>
                                     <TableHead>Tipo de Residuo</TableHead>
+                                    <TableHead>Servicio de Origen</TableHead>
                                     <TableHead className="text-right">Peso (Kg)</TableHead>
                                     <TableHead className="text-center">Estado Bolsa</TableHead>
                                 </TableRow>
@@ -285,7 +331,7 @@ export default function ShowManifiestoFinal({ manifiesto }: Props) {
                             <TableBody>
                                 {bolsas.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                        <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
                                             No hay bolsas registradas en el remito vinculado.
                                         </TableCell>
                                     </TableRow>
@@ -294,6 +340,9 @@ export default function ShowManifiestoFinal({ manifiesto }: Props) {
                                         <TableRow key={bolsa.id}>
                                             <TableCell className="font-mono font-bold">{bolsa.codigo_barra}</TableCell>
                                             <TableCell>{bolsa.tipo_bolsa?.tipo_residuo || 'General'}</TableCell>
+                                            <TableCell>
+                                                {bolsa.remito_entrega_servicio?.servicio?.nombre || 'Depósito Central'}
+                                            </TableCell>
                                             <TableCell className="text-right font-mono font-semibold">
                                                 {Number(bolsa.peso).toFixed(2)} Kg
                                             </TableCell>

@@ -76,6 +76,7 @@ class ManifiestoFinalController extends Controller
 
         $manifiesto->load([
             'remitoSalidaRetiro.bolsas.tipoBolsa',
+            'remitoSalidaRetiro.bolsas.remitoEntregaServicio.servicio',
             'documentoOficial',
         ]);
 
