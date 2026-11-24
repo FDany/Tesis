@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Enums\EstadoBolsa;
 
 class RemitoEntregaServicioController extends Controller
 {
@@ -116,7 +117,7 @@ class RemitoEntregaServicioController extends Controller
 
             $codigosNoDisponibles = $bolsas
                 ->filter(fn (Bolsa $bolsa) =>
-                    $bolsa->estado !== 'DISPONIBLE'
+                    $bolsa->estado !== EstadoBolsa::DISPONIBLE
                     || $bolsa->remitos_serv_id !== null
                 )
                 ->pluck('codigo_barra')
@@ -140,7 +141,7 @@ class RemitoEntregaServicioController extends Controller
 
             foreach ($bolsas as $bolsa) {
                 $bolsa->update([
-                    'estado' => 'OCUPADO',
+                    'estado' => EstadoBolsa::ENTREGADA_A_SERVICIO->value,
                     'remitos_serv_id' => $remito->id,
                 ]);
             }

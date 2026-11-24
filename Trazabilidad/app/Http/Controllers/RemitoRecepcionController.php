@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Enums\EstadoBolsa;
 
 class RemitoRecepcionController extends Controller
 {
@@ -196,7 +197,7 @@ class RemitoRecepcionController extends Controller
                     'codigo_barra' => $codigo13Digitos,
                     'tipo_bolsa_id' => $validated['tipo_bolsa_id'],
                     'tamanio_id' => $validated['tamanio_id'],
-                    'estado' => 'DISPONIBLE',
+                    'estado' => EstadoBolsa::DISPONIBLE->value,
                     'rem_rep_id' => $remito->id,
                     'created_at' => $now,
                     'updated_at' => $now,

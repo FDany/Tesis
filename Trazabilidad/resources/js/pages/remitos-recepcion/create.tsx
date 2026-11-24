@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/table';
 import { useState } from 'react';
 import { ScannerInput } from '@/features/bolsas';
+import { ESTADO_BOLSA_LABELS } from '@/features/bolsas/types/bolsa';
 
 interface CrearProps {
     tiposBolsa: TipoBolsa[];
@@ -369,10 +370,6 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
                             </div>
                         </section>
 
-
-
-
-
                         <div className="space-y-2">
                             {error && <p className="text-sm text-destructive">{error}</p>}
 
@@ -384,13 +381,6 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
                         </div>
                     </>
                 )}
-
-
-
-
-
-
-
 
                 {vistaPrevia && (
                     <>
@@ -405,8 +395,6 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
                                     Editar datos
                                 </Button>
                             </div>
-
-
 
                             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
                                 <span>Fecha: {vistaPrevia.remito.fecha_recepcion}</span>
@@ -446,7 +434,6 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
 
                         </section>
 
-
                         {/* Botones de opciones para cargar bolsas: por lote o individual */}
                         <div className="flex gap-2">
                             <Button
@@ -475,8 +462,6 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
                                 <h2 className="text-lg font-semibold">
                                     Bolsas generadas ({vistaPrevia.bolsas.length})
                                 </h2>
-
-
 
                                 {/* Si el modo es individual, mostrar el input para agregar bolsas */}
                                 {modoCarga === 'individual' && (
@@ -525,7 +510,7 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
                                                         (tamanio) => String(tamanio.id) === vistaPrevia.remito.tamanio_id,
                                                     )?.nombre ?? '—'}
                                                 </TableCell>
-                                                <TableCell>Recibido</TableCell>
+                                                <TableCell>{ESTADO_BOLSA_LABELS.RECIBIDA}</TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -558,25 +543,3 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
         </>
     );
 }
-
-/*
-
-Ejemplo de código para generar códigos de barras de manera individual
-
-
-Código inicial: 3-21
-Código final: 3-30
-
-
-0003000000021
-0003000000022
-0003000000023
-0003000000024
-0003000000025
-0003000000026
-0003000000027
-0003000000028
-0003000000029
-0003000000030
-
-*/
