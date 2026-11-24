@@ -103,16 +103,10 @@ const navItems: AppNavItem[] = [
         permission: 'listar remitosEntregaServicio',
     },
     {
-        title: 'Recepción Depósito',
-        href: '/recepciones-deposito',
+        title: 'Depósito',  
+        href: '/deposito',  
         icon: PackageCheck,
-        permission: 'registrarRecepcionBolsa Deposito',
-    },
-    {
-        title: 'Pesaje Depósito',
-        href: '/pesaje-deposito',
-        icon: Scale,
-        permission: 'registrarPesoBolsa Deposito',
+        permission: 'gestionar deposito',
     },
     {
         title: 'Remitos de Salida',

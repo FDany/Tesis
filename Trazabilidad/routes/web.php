@@ -5,8 +5,6 @@ use App\Http\Controllers\BolsaScannerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IncidenciaController;
 use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\PesajeDepositoController;
-use App\Http\Controllers\RecepcionDepositoController;
 use App\Http\Controllers\RemitoEntregaServicioController;
 use App\Http\Controllers\RemitoRecepcionController;
 use App\Http\Controllers\RemitoSalidaRetiroController;
@@ -17,6 +15,7 @@ use App\Http\Controllers\TipoBolsaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ManifiestoFinalController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DepositoController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -64,17 +63,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('remitos-entrega-servicio/{remito}/pdf', [RemitoEntregaServicioController::class, 'descargarPdf'])
         ->name('remitos-entrega-servicio.pdf');
 
-    // Módulo Recepción en Depósito
-    Route::get('recepciones-deposito', [RecepcionDepositoController::class, 'create'])
-        ->name('recepciones-deposito.create');
-    Route::post('recepciones-deposito', [RecepcionDepositoController::class, 'store'])
-        ->name('recepciones-deposito.store');
-
-    // Módulo Pesaje en Depósito
-    Route::get('pesaje-deposito', [PesajeDepositoController::class, 'create'])
-        ->name('pesaje-deposito.create');
-    Route::post('pesaje-deposito', [PesajeDepositoController::class, 'store'])
-        ->name('pesaje-deposito.store');
+    // Módulo de Depósito
+    Route::get('deposito', [DepositoController::class, 'create'])->name('deposito.create');  
+    Route::post('recepciones-deposito', [DepositoController::class, 'storeRecepcion'])->name('recepciones-deposito.store');  
+    Route::post('pesaje-deposito', [DepositoController::class, 'storePesaje'])->name('pesaje-deposito.store');  
 
     // Módulo Remitos de Salida (Despacho Interno y Conciliación DGM)
     Route::resource('remitos-salida', RemitoSalidaRetiroController::class)->only(['index', 'create', 'store', 'show']);
