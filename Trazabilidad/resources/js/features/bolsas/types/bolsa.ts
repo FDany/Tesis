@@ -14,6 +14,14 @@ export interface Bolsa {
   rem_rep_id: number;
   recep_dep_id?: number | null;
   rem_sal_id?: number | null;
+  remito_entrega_servicio?: {  
+    id: number;  
+    fecha_entrega?: string | null;  
+    servicio?: {  
+      id: number;  
+      nombre: string;  
+    } | null;  
+  } | null;  
   created_at?: string;
   updated_at?: string;
 }
