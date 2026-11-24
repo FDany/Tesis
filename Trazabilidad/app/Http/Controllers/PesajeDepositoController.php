@@ -27,7 +27,7 @@ class PesajeDepositoController extends Controller
             'peso' => ['required', 'numeric', 'gt:0'],
         ]);
 
-        return DB::transaction(function () use ($validated) {
+        return DB::transaction(function () use ($validated, $request) {
             $bolsa = Bolsa::query()
                 ->where('codigo_barra', $validated['codigo'])
                 ->lockForUpdate()
@@ -52,6 +52,8 @@ class PesajeDepositoController extends Controller
             $bolsa->update([
                 'peso' => $validated['peso'],
                 'estado' => 'PESADA',
+                'fecha_pesaje' => now(),  
+                'pesa_usuario_id' => $request->user()->id,  
             ]);
 
             return back()->with(

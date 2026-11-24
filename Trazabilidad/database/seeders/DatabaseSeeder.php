@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RemitosRecepcionSeeder::class);
         $this->call(RemitosEntregaServicioSeeder::class);
         $this->call(RemitosSalidaRetiroSeeder::class);
+        $this->call(RecepcionDepositoSeeder::class);
         $this->call(BolsasSeeder::class);
         $this->call(IncidenciasSeeder::class);
     }

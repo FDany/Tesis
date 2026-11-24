@@ -15,6 +15,7 @@ use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
+
 use Spatie\Permission\Traits\HasRoles;
 
 /*
@@ -64,4 +65,11 @@ class User extends Authenticatable // implements MustVerifyEmail, PasskeyUser
             get: fn() => trim("{$this->first_name} {$this->last_name}"),
         );
     }
+
+    // Por si se necesita ver todas las bolsas que un usuario las peso
+    
+    // public function bolsasPesadas(): HasMany  
+    // {  
+    //     return $this->hasMany(Bolsa::class, 'pesa_usuario_id');  
+    // } 
 }
