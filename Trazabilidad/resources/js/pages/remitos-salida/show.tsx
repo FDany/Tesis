@@ -77,8 +77,12 @@ export default function ShowRemitoSalida({ remito }: Props) {
                 );
             case 'FINALIZADO':
                 return (
-                    <Badge className="bg-emerald-600 hover:bg-emerald-700 gap-1">
-                        <FileCheck2 className="h-3 w-3" /> Finalizado
+                    // <Badge className="bg-emerald-600 hover:bg-emerald-700 gap-1">
+                    //     <FileCheck2 className="h-3 w-3" /> Finalizado
+                    // </Badge>
+
+                    <Badge className="bg-blue-600 hover:bg-blue-700 gap-1">  
+                        <CheckCircle2 className="h-3 w-3" /> Finalizado  
                     </Badge>
                 );
             case 'ANULADO':
