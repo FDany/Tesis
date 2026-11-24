@@ -194,7 +194,10 @@ export default function Index({ permissions }: IndexProps) {
                                         <TableRow key={perm.id} className="hover:bg-muted/40 transition-colors">
                                             <TableCell className="text-muted-foreground font-mono">#{perm.id}</TableCell>
                                             <TableCell>
-                                                <span className="font-mono text-xs font-semibold text-indigo-600 bg-indigo-50/50 px-2 py-1 rounded border border-indigo-100/60">
+                                                <span className="font-mono text-xs font-semibold px-2 py-1 rounded border  
+                                                     text-indigo-600 bg-indigo-50/50 border-indigo-100/60  
+                                                     dark:text-indigo-300 dark:bg-indigo-950/40 dark:border-indigo-800/50"
+                                                >
                                                     {perm.name}
                                                 </span>
                                             </TableCell>
