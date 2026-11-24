@@ -43,13 +43,13 @@ class BolsasSeeder extends Seeder
             'estado' => 'RETIRADA POR DGM',
             'peso' => 3.2,
             'pesa_usuario_id' => 4,
-            'fecha_pesaje' => '2026-11-05 18:45',
+            'fecha_pesaje' => '2026-11-05 18:50:00',
             'recep_dep_id' => 1,
             'rem_rep_id' => 1,
             'remitos_serv_id' => 1,
             'rem_sal_id' => 2,
-            'created_at' => '2026-11-05 19:43:51',
-            'updated_at' => '2026-11-05 19:43:51',
+            'created_at' => '2026-11-05 19:43:3',
+            'updated_at' => '2026-11-05 19:43:3',
         ]);
 
         // Remito Interno RSI-2026-00003 (Retirada por DGM - Con Incidencia)
@@ -61,13 +61,13 @@ class BolsasSeeder extends Seeder
             'estado' => 'RETIRADA POR DGM',
             'peso' => 5.1,
             'pesa_usuario_id' => 4,
-            'fecha_pesaje' => '2026-11-05 19:15',
+            'fecha_pesaje' => '2026-11-05 19:15:00',
             'recep_dep_id' => 2,
             'rem_rep_id' => 1,
             'remitos_serv_id' => 1,
             'rem_sal_id' => 3,
-            'created_at' => '2026-11-05 20:10:00',
-            'updated_at' => '2026-11-05 20:10:00',
+            'created_at' => '2026-11-05 19:43:37',
+            'updated_at' => '2026-11-05 19:43:37',
         ]);
 
         Bolsa::firstOrCreate([
@@ -78,7 +78,7 @@ class BolsasSeeder extends Seeder
             'estado' => 'RETIRADA POR DGM',
             'peso' => 2.8,
             'pesa_usuario_id' => 4,
-            'fecha_pesaje' => '2026-11-05 19:15',
+            'fecha_pesaje' => '2026-11-05 19:15:00',
             'recep_dep_id' => 2,
             'rem_rep_id' => 1,
             'remitos_serv_id' => 1,
@@ -93,15 +93,15 @@ class BolsasSeeder extends Seeder
             'tipo_bolsa_id' => 1,
             'tamanio_id' => 1,
             'estado' => 'RETIRADA POR DGM',
-            'peso' => 3.9,
+            'peso' => 4.0,
             'pesa_usuario_id' => 4,
-            'fecha_pesaje' => '2026-11-05 19:15',
+            'fecha_pesaje' => '2026-11-05 19:15:00',
             'recep_dep_id' => 2,
             'rem_rep_id' => 1,
             'remitos_serv_id' => 1,
             'rem_sal_id' => 3,
-            'created_at' => '2026-11-05 20:12:00',
-            'updated_at' => '2026-11-05 20:12:00',
+            'created_at' => '2026-11-05 20:11:00',
+            'updated_at' => '2026-11-05 20:11:00',
         ]);
 
         // ------------------------------------------------------------------------
@@ -113,15 +113,15 @@ class BolsasSeeder extends Seeder
             'tipo_bolsa_id' => 1,
             'tamanio_id' => 1,
             'estado' => 'PESADA',
-            'peso' => 4.1,
+            'peso' => 3.7,
             'pesa_usuario_id' => 4,
-            'fecha_pesaje' => '2026-11-06 07:45',
+            'fecha_pesaje' => '2026-11-06 07:45:00',
             'recep_dep_id' => 3,
             'rem_rep_id' => 1,
             'remitos_serv_id' => 1,
             'rem_sal_id' => null,
-            'created_at' => '2026-11-06 08:00:00',
-            'updated_at' => '2026-11-06 08:00:00',
+            'created_at' => '2026-11-06 08:15:00',
+            'updated_at' => '2026-11-06 08:15:00',
         ]);
 
         Bolsa::firstOrCreate([
@@ -132,7 +132,7 @@ class BolsasSeeder extends Seeder
             'estado' => 'PESADA',
             'peso' => 6.0,
             'pesa_usuario_id' => 4,
-            'fecha_pesaje' => '2026-11-06 07:45',
+            'fecha_pesaje' => '2026-11-06 07:45:00',
             'recep_dep_id' => 3,
             'rem_rep_id' => 1,
             'remitos_serv_id' => 1,

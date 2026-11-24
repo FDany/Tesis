@@ -28,14 +28,13 @@ class DatabaseSeeder extends Seeder
         ]);
         */
         $this->call(RolesAndPermissionsSeeder::class);
-        $this->call(RecepcionDepositoSeeder::class);
-        
         $this->call(TiposBolsaSeeder::class);
         $this->call(TamaniosSeeder::class);
         $this->call(ServiciosSeeder::class);
         $this->call(RemitosRecepcionSeeder::class);
         $this->call(RemitosEntregaServicioSeeder::class);
         $this->call(RemitosSalidaRetiroSeeder::class);
+        $this->call(RecepcionDepositoSeeder::class);
         $this->call(BolsasSeeder::class);
         $this->call(IncidenciasSeeder::class);
     }

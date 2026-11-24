@@ -138,7 +138,7 @@ class BolsaController extends Controller
                         'sector' => 'Depósito de insumos',  
                         'responsable' => $bolsa->remitoRecepcion?->usuarioRecep?->fullName,  
                         'documento' => $bolsa->remitoRecepcion  
-                            ? 'Remito recepción #'.$bolsa->remitoRecepcion->id  
+                            ? 'Remito recepción N° '.$bolsa->remitoRecepcion->id  
                             : null,  
                     ],  
                     [  
@@ -188,6 +188,7 @@ class BolsaController extends Controller
                 ])
                     ->filter(fn ($evento) => $evento['fecha'] !== null)
                     ->values();
+                    
         return Inertia::render('bolsas/index', [
             'bolsaDetalle' => [
                 'id' => $bolsa->id,
