@@ -102,6 +102,7 @@ class BolsaController extends Controller
             'pesaUsuario',
         ]);
 
+        $remito = $bolsa->remitoSalidaRetiro; 
         $manifiesto = $bolsa->remitoSalidaRetiro?->manifiestosFinales->first();  
 
 
@@ -139,7 +140,8 @@ class BolsaController extends Controller
                         'responsable' => $bolsa->remitoRecepcion?->usuarioRecep?->fullName,  
                         'documento' => $bolsa->remitoRecepcion  
                             ? 'Remito recepción N° '.$bolsa->remitoRecepcion->id  
-                            : null,  
+                            : null,
+                        'informacion' => 'Ingreso',
                     ],  
                     [  
                         'etapa' => 'Entrega',  
@@ -148,21 +150,24 @@ class BolsaController extends Controller
                         'responsable' => $bolsa->remitoEntregaServicio?->usuarioEntrega?->fullName,  
                         'documento' => $bolsa->remitoEntregaServicio  
                             ? 'RI '.$bolsa->remitoEntregaServicio->id  
-                            : null,  
+                            : null,
+                        'informacion' => 'Entregada',
                     ],  
                     [  
                         'etapa' => 'Retorno',  
                         'fecha' => $bolsa->recepcionDeposito?->fecha_hora,  
                         'sector' => 'Depósito de residuos',  
                         'responsable' => $bolsa->recepcionDeposito?->usuarioRecibe?->fullName,  
-                        'documento' => null,  
+                        'documento' => null,
+                        'informacion' => 'Recepcion',
                     ],  
                     [  
                         'etapa' => 'Pesaje',  
                         'fecha' => $bolsa->fecha_pesaje,  
                         'sector' => 'Depósito de residuos',  
                         'responsable' => $bolsa->pesaUsuario?->fullName,  
-                        'documento' => null,  
+                        'documento' => null,
+                        'informacion' => $bolsa->peso !== null ? $bolsa->peso.' kg' : null, 
                     ],  
                     [  
                         'etapa' => 'Retiro',  
@@ -174,7 +179,10 @@ class BolsaController extends Controller
                             // ?->numero_remito  
                             ? 'Remito N° '.($bolsa->remitoSalidaRetiro->numero_remito
                                 ?? $bolsa->remitoSalidaRetiro->numero_remito_interno) 
-                            : null,  
+                            : null,
+                        'informacion' => $remito  
+                            ? ($remito->fecha_retiro ? 'Retirada por DGM' : 'Lista para retiro')  
+                            : null,
                     ],
                     [  
                         'etapa' => 'Tratamiento',  
@@ -183,7 +191,8 @@ class BolsaController extends Controller
                         'responsable' => null,  
                         'documento' => $manifiesto  
                             ? 'Manifiesto N° '.$manifiesto->numero_manifiesto  
-                            : null,  
+                            : null,
+                        'informacion' => 'Tratamiento/disposición',
                     ],  
                 ])
                     ->filter(fn ($evento) => $evento['fecha'] !== null)

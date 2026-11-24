@@ -18,7 +18,8 @@ interface BolsaEvento {
   fecha: string;  
   sector: string | null;  
   responsable: string | null;  
-  documento: string | null;  
+  documento: string | null;
+  informacion?: string | null
 }  
   
 export interface BolsaDetalle {  
@@ -119,7 +120,8 @@ export function BolsaDetalleModal({
                         <TableHead>Etapa</TableHead>  
                         <TableHead>Sector/Lugar</TableHead>  
                         <TableHead>Responsable</TableHead>  
-                        <TableHead>Documento</TableHead>  
+                        <TableHead>Documento</TableHead>
+                        <TableHead>Información</TableHead>
                       </TableRow>  
                     </TableHeader>  
                     <TableBody>  
@@ -135,7 +137,8 @@ export function BolsaDetalleModal({
                           </TableCell>  
                           <TableCell>{evento.sector ?? '—'}</TableCell>  
                           <TableCell>{evento.responsable ?? '—'}</TableCell>  
-                          <TableCell>{evento.documento ?? '—'}</TableCell>  
+                          <TableCell>{evento.documento ?? '—'}</TableCell> 
+                          <TableCell>{evento.informacion ?? '—'}</TableCell>
                         </TableRow>  
                       ))}  
                     </TableBody>  
