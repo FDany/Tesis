@@ -16,10 +16,10 @@ import {
 interface BolsaEvento {  
   etapa: string;  
   fecha: string;  
-  sector: string | null;  
-  responsable: string | null;  
-  documento: string | null;
-  informacion?: string | null
+  sector?: string | null;  
+  responsable?: string | null;  
+  documento?: string | null;  
+  informacion?: string | null; 
 }  
   
 export interface BolsaDetalle {  

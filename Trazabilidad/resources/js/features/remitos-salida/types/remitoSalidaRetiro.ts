@@ -8,8 +8,8 @@ export type EstadoRemitoSalida =
   | 'PENDIENTE_RETIRO'
   | 'CONCILIADO'
   | 'CON_INCIDENCIA'
-  | 'FINALIZADO'
-  | 'ANULADO';
+  | 'ANULADO'
+  | 'FINALIZADO';
 
 // Entidad principal del Remito de Salida
 export interface RemitoSalidaRetiro {

@@ -80,6 +80,9 @@ class ManifiestoFinalController extends Controller
             'documentoOficial',
         ]);
 
+        // Se calcula peso_total_sistema igual que RemitoSalidaRetiroController::show  
+        $manifiesto->remitoSalidaRetiro?->loadSum('bolsas as peso_total_sistema', 'peso');
+
         return Inertia::render('manifiestos-finales/show', [
             'manifiesto' => $manifiesto,
         ]);

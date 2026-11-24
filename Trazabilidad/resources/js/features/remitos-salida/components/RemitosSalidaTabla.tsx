@@ -134,7 +134,9 @@ export function RemitosSalidaTabla({ data }: RemitosSalidaTablaProps) {
                                     ? 'Ver Detalle y Conciliar'
                                     : remito.estado === 'CONCILIADO' || remito.estado === 'CON_INCIDENCIA'
                                         ? 'Ver Detalle y Cargar Manifiesto Final'
-                                        : 'Ver Detalle';
+                                        : remito.estado === 'FINALIZADO'
+                                            ? 'Ver Detalle y Manifiesto'
+                                            : 'Ver Detalle';
                             return (
                                 <TableRow key={remito.id}>
                                     <TableCell className="font-mono font-bold text-primary">
