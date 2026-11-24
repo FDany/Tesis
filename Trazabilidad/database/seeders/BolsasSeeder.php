@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Bolsa;
+use App\Enums\EstadoBolsa;
 
 class BolsasSeeder extends Seeder
 {
@@ -22,7 +23,7 @@ class BolsasSeeder extends Seeder
             'codigo_barra' => '0001000000001',
             'tipo_bolsa_id' => 1,
             'tamanio_id' => 1,
-            'estado' => 'DESPACHADA',
+            'estado' => EstadoBolsa::DESPACHADA->value,
             'peso' => 4.5,
             'pesa_usuario_id' => 4,
             'fecha_pesaje' => '2026-11-05 18:45',
@@ -40,7 +41,7 @@ class BolsasSeeder extends Seeder
             'codigo_barra' => '0001000000002',
             'tipo_bolsa_id' => 1,
             'tamanio_id' => 1,
-            'estado' => 'RETIRADA_POR_DGM',
+            'estado' => EstadoBolsa::RETIRADA_POR_DGM->value,
             'peso' => 3.2,
             'pesa_usuario_id' => 4,
             'fecha_pesaje' => '2026-11-05 18:50:00',
@@ -58,7 +59,7 @@ class BolsasSeeder extends Seeder
             'codigo_barra' => '0001000000003',
             'tipo_bolsa_id' => 1,
             'tamanio_id' => 1,
-            'estado' => 'RETIRADA_POR_DGM',
+            'estado' => EstadoBolsa::RETIRADA_POR_DGM->value,
             'peso' => 5.1,
             'pesa_usuario_id' => 4,
             'fecha_pesaje' => '2026-11-05 19:15:00',
@@ -75,7 +76,7 @@ class BolsasSeeder extends Seeder
             'codigo_barra' => '0001000000004',
             'tipo_bolsa_id' => 1,
             'tamanio_id' => 1,
-            'estado' => 'RETIRADA_POR_DGM',
+            'estado' => EstadoBolsa::RETIRADA_POR_DGM->value,
             'peso' => 2.8,
             'pesa_usuario_id' => 4,
             'fecha_pesaje' => '2026-11-05 19:15:00',
@@ -92,7 +93,7 @@ class BolsasSeeder extends Seeder
             'codigo_barra' => '0001000000005',
             'tipo_bolsa_id' => 1,
             'tamanio_id' => 1,
-            'estado' => 'RETIRADA_POR_DGM',
+            'estado' => EstadoBolsa::RETIRADA_POR_DGM->value,
             'peso' => 4.0,
             'pesa_usuario_id' => 4,
             'fecha_pesaje' => '2026-11-05 19:15:00',
