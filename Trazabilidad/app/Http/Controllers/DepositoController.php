@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Routing\Attributes\Controllers\Middleware;
+use App\Enums\EstadoBolsa;
 
 class DepositoController extends Controller
 {
@@ -19,9 +20,11 @@ class DepositoController extends Controller
     #[Middleware('permission:gestionar deposito')]
     public function create(Request $request): Response
     {
+        $puedeGestionar = $request->user()->can('gestionar deposito');  
+
         return Inertia::render('deposito/create', [
-            'puedeRecepcionar' => $request->user()->can('registrarRecepcionBolsa Deposito'),
-            'puedePesar' => $request->user()->can('registrarPesoBolsa Deposito'),
+            'puedeRecepcionar' => $puedeGestionar,  
+            'puedePesar' => $puedeGestionar, 
         ]);
     }
 
@@ -57,7 +60,8 @@ class DepositoController extends Controller
 
             $bolsasEstado = $bolsas
                 ->filter(fn (Bolsa $bolsa) =>
-                    $bolsa->estado !== 'OCUPADO'
+                    // $bolsa->estado !== 'OCUPADO'
+                    $bolsa->estado !== EstadoBolsa::ENTREGADA_A_SERVICIO
                     || $bolsa->remitos_serv_id === null
                     || $bolsa->recep_dep_id !== null
                 )
@@ -78,7 +82,8 @@ class DepositoController extends Controller
 
             foreach ($bolsas as $bolsa) {
                 $bolsa->update([
-                    'estado' => 'EN_DEPOSITO',
+                    // 'estado' => 'EN_DEPOSITO',
+                    'estado' => EstadoBolsa::INGRESADA_AL_DEPOSITO,
                     'recep_dep_id' => $recepcion->id,
                 ]);
             }
@@ -109,7 +114,8 @@ class DepositoController extends Controller
             }
 
             if (
-                $bolsa->estado !== 'EN_DEPOSITO'
+                // $bolsa->estado !== 'EN_DEPOSITO'
+                $bolsa->estado !== EstadoBolsa::INGRESADA_AL_DEPOSITO
                 || $bolsa->recep_dep_id === null
                 || $bolsa->rem_sal_id !== null
             ) {
@@ -120,7 +126,8 @@ class DepositoController extends Controller
 
             $bolsa->update([
                 'peso' => $validated['peso'],
-                'estado' => 'PESADA',
+                // 'estado' => 'PESADA',
+                'estado' => EstadoBolsa::PESADA,
             ]);
 
             return back()->with(
