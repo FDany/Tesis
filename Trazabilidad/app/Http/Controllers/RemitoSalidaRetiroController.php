@@ -23,7 +23,7 @@ class RemitoSalidaRetiroController extends Controller
         $buscar = trim((string) $request->input('buscar', ''));
         $estado = (string) $request->input('estado', '');
 
-        $remitos = RemitoSalidaRetiro::with(['usuarioDespacha', 'incidencia'])
+        $remitos = RemitoSalidaRetiro::with(['usuarioDespacha', 'incidencia', 'manifiestoFinal'])
             ->withCount('bolsas')
             ->when($buscar !== '', function ($query) use ($buscar) {
                 $query->where(function ($subquery) use ($buscar) {
@@ -111,7 +111,7 @@ class RemitoSalidaRetiroController extends Controller
             ]);
 
             return redirect()->route('remitos-salida.show', $remito->id)
-                ->with('message', "Remito interno {$numeroRemitoInterno} generado exitosamente. Listo para imprimir.");
+                ->with('success', "Remito interno {$numeroRemitoInterno} generado exitosamente. Listo para imprimir.");
         });
     }
 
@@ -159,11 +159,53 @@ class RemitoSalidaRetiroController extends Controller
                 ]);
             }
 
-            return redirect()->route('remitos-salida.index')
-                ->with('message', $coincide
-                    ? 'Retiro conciliado exitosamente sin discrepancias.'
+            return redirect()->route('remitos-salida.show', $remito->id)
+                ->with('success', $coincide
+                    ? 'Retiro conciliado exitosamente sin discrepancias. Ya puede registrar el manifiesto final.'
                     : 'Retiro conciliado. Se ha generado una incidencia automática por discrepancia de bolsas.');
         });
+    }
+
+    /**
+     * Anula un remito de salida interno pendiente de retiro y libera sus bolsas.
+     */
+    #[Middleware('permission:anular remitosSalida')]
+    public function anular(Request $request, RemitoSalidaRetiro $remito)
+    {
+        Gate::authorize('anular', $remito);
+
+        $validated = $request->validate([
+            'motivo_anulacion' => ['required', 'string', 'min:5', 'max:500'],
+        ], [
+            'motivo_anulacion.required' => 'Debe indicar el motivo por el cual se anula el remito.',
+            'motivo_anulacion.min' => 'El motivo de anulación debe tener al menos 5 caracteres.',
+        ]);
+
+        DB::transaction(function () use ($request, $remito, $validated) {
+            // 1. Liberar las bolsas vinculadas para que vuelvan a estar disponibles para despacho
+            $remito->bolsas()->update([
+                'rem_sal_id' => null,
+                'estado' => 'PESADA',
+            ]);
+
+            // 2. Registrar auditoría de anulación en observaciones y cambiar estado
+            $usuarioNombre = $request->user()->full_name ?? $request->user()->name;
+            $fechaHora = now()->format('d/m/Y H:i');
+            $notaAnulacion = "[ANULADO el {$fechaHora} por {$usuarioNombre}]: {$validated['motivo_anulacion']}";
+
+            $observacionesActualizadas = $remito->observaciones
+                ? "{$remito->observaciones}\n{$notaAnulacion}"
+                : $notaAnulacion;
+
+            $remito->update([
+                'estado' => 'ANULADO',
+                'observaciones' => $observacionesActualizadas,
+            ]);
+        });
+
+        return redirect()
+            ->route('remitos-salida.show', $remito->id)
+            ->with('success', "El remito interno {$remito->numero_remito_interno} fue anulado y sus bolsas volvieron a estar disponibles.");
     }
 
     #[Middleware('permission:verDetalle remitosSalida')]
@@ -173,6 +215,7 @@ class RemitoSalidaRetiroController extends Controller
             'usuarioDespacha',
             'bolsas.tipoBolsa',
             'incidencia',
+            'manifiestoFinal.documentoOficial',
         ])
             ->withCount('bolsas')
             ->withSum('bolsas as peso_total_sistema', 'peso')

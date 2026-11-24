@@ -14,6 +14,7 @@ const etiquetasEstado: Record<string, string> = {
   PENDIENTE_RETIRO: 'Pendiente Retiro',
   CONCILIADO: 'Conciliado',
   CON_INCIDENCIA: 'Con Incidencia',
+  FINALIZADO: 'Finalizado',
   ANULADO: 'Anulado',
 };
 

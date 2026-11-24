@@ -36,6 +36,19 @@ class RemitoSalidaRetiroPolicy
         return Response::allow();
     }
 
+    public function anular(User $user, RemitoSalidaRetiro $remito): Response
+    {
+        if (! $user->can('anular remitosSalida')) {
+            return Response::deny('No tienes permiso para anular remitos de salida.');
+        }
+
+        if ($remito->estado !== 'PENDIENTE_RETIRO') {
+            return Response::deny("Solo se pueden anular remitos en estado Pendiente de Retiro (estado actual: {$remito->estado}).");
+        }
+
+        return Response::allow();
+    }
+
     public function descargarPdf(User $user, RemitoSalidaRetiro $remito): bool
     {
         return $user->can('descargarPDF remitosSalida');

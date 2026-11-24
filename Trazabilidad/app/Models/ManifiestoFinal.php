@@ -27,8 +27,8 @@ class ManifiestoFinal extends Model
     protected $casts = [
         'fecha' => 'date',
         'fecha_tratamiento' => 'date',
-        'peso_informado' => 'float',
-        'numero_manifiesto' => 'integer',
+        'cantidad_bolsas' => 'integer',
+        'peso_informado' => 'decimal:2',
     ];
 
     /**Relaciones eloquent*/
