@@ -113,7 +113,7 @@ export default function Index({ permissions }: IndexProps) {
                 {/* COLUMNA IZQUIERDA: Formulario dinámico de Alta/Edición */}
 
                 {(can('editar permisos')) && (can('crear permisos')) && (
-                    <div className="border rounded-xl p-5 bg-white shadow-sm space-y-4">
+                    <div className="border rounded-xl p-5 bg-card shadow-sm space-y-4">
                         <h2 className="text-lg font-semibold">
                             {editingId ? '📝 Modificar Permiso' : '🛡️ Registrar Permiso'}
                         </h2>
@@ -172,7 +172,7 @@ export default function Index({ permissions }: IndexProps) {
                     </div>
 
                     {/* Tabla Shadcn */}
-                    <div className="border rounded-md bg-white shadow-sm overflow-hidden">
+                    <div className="border rounded-md bg-card shadow-sm overflow-hidden">
                         <Table>
                             <TableHeader>
                                 <TableRow>

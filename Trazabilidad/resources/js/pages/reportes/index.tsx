@@ -148,7 +148,7 @@ export default function ReportesPage({
                                                 name === 'kilogramos' ? `${value} Kg` : `${value} bolsas`,
                                                 name === 'kilogramos' ? 'Kilogramos' : 'Bolsas',
                                             ]}
-                                            contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                                            contentStyle={{ borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--popover)', color: 'var(--popover-foreground)' }}
                                         />
                                         <Bar dataKey="kilogramos" fill="#0284c7" radius={[4, 4, 0, 0]} />
                                     </BarChart>

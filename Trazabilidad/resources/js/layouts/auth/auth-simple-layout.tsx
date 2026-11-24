@@ -8,8 +8,8 @@ export default function AuthSimpleLayout({
     description,
 }: AuthLayoutProps) {
     return (
-        <div className="flex min-h-svh flex-col items-center justify-center bg-neutral-100 p-6 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 md:p-10">
-            <div className="w-full max-w-md overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 text-foreground dark:bg-background md:p-10">
+            <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
                 {/* Franja institucional superior */}
                 <div className="h-2 w-full bg-[#296b8b]" />
 
@@ -31,7 +31,7 @@ export default function AuthSimpleLayout({
                             <h1 className="text-xl font-bold tracking-tight">
                                 {title}
                             </h1>
-                            <p className="text-center text-sm text-neutral-500 dark:text-neutral-400">
+                            <p className="text-center text-sm text-muted-foreground">
                                 {description}
                             </p>
                         </div>
@@ -41,7 +41,7 @@ export default function AuthSimpleLayout({
                 </div>
             </div>
 
-            <p className="mt-6 text-center text-xs text-neutral-500 dark:text-neutral-400">
+            <p className="mt-6 text-center text-xs text-muted-foreground">
                 Hospital San Bernardo • Salta, Argentina — EcoGestión
             </p>
         </div>

@@ -58,7 +58,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
-                                            className="ml-auto text-xs text-neutral-600 hover:text-[#296b8b] dark:text-neutral-400"
+                                            className="ml-auto text-xs text-muted-foreground hover:text-[#296b8b]"
                                             tabIndex={5}
                                         >
                                             ¿Olvidaste tu contraseña?
@@ -84,7 +84,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                 />
                                 <Label
                                     htmlFor="remember"
-                                    className="cursor-pointer text-sm font-normal text-neutral-600 dark:text-neutral-400"
+                                    className="cursor-pointer text-sm font-normal text-muted-foreground"
                                 >
                                     Mantener sesión iniciada
                                 </Label>
@@ -102,10 +102,10 @@ export default function Login({ status, canResetPassword }: Props) {
                             </Button>
                         </div>
 
-                        <div className="border-t border-neutral-100 pt-4 text-center dark:border-neutral-800">
+                        <div className="border-t border-border pt-4 text-center">
                             <TextLink
                                 href={home()}
-                                className="inline-flex items-center gap-1.5 text-xs text-neutral-500 no-underline hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground no-underline hover:text-foreground"
                                 tabIndex={6}
                             >
                                 <ArrowLeft className="h-3.5 w-3.5" />
