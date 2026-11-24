@@ -15,7 +15,7 @@ class RemitosRecepcionSeeder extends Seeder
         RemitoRecepcion::firstOrCreate([
             'id' => 1,
             'fecha_recepcion' => '2026-10-05 10:00:00',
-            'recep_usuario_id' => 3,
+            'recep_usuario_id' => 2,
             'codigo_inicio' => '1-1',
             'codigo_fin' => '1-10',
             'tipo_bolsa_id' => 1,

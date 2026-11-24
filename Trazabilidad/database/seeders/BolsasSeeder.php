@@ -48,8 +48,8 @@ class BolsasSeeder extends Seeder
             'rem_rep_id' => 1,
             'remitos_serv_id' => 1,
             'rem_sal_id' => 2,
-            'created_at' => '2026-11-05 19:43:3',
-            'updated_at' => '2026-11-05 19:43:3',
+            'created_at' => '2026-11-05 19:43:37',
+            'updated_at' => '2026-11-05 19:43:37',
         ]);
 
         // Remito Interno RSI-2026-00003 (Retirada por DGM - Con Incidencia)
