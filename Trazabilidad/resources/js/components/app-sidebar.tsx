@@ -103,8 +103,8 @@ const navItems: AppNavItem[] = [
         permission: 'listar remitosEntregaServicio',
     },
     {
-        title: 'Depósito',  
-        href: '/deposito',  
+        title: 'Depósito',
+        href: '/deposito',
         icon: PackageCheck,
         permission: 'gestionar deposito',
     },
@@ -130,6 +130,7 @@ const navItems: AppNavItem[] = [
         title: 'Reportes',
         href: '/reportes',
         icon: BarChart3,
+        permission: 'ver reportes'
     },
     {
         title: 'Configuración',

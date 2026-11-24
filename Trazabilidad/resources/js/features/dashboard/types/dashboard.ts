@@ -3,12 +3,14 @@ import type { Tamanio } from '@/features/tamanios/types/tamanio';
 
 // Conteo agrupado por corriente / tipo_residuo y color (usado en Residuos en Depósito y Pendientes)
 export interface ConteoPorCorriente {
+    tipo_bolsa_id?: number;
     tipo_residuo: string;
     color: string;
     cantidad: number;
+    peso_total?: number;
 }
 
-// 1. Stock de Bolsas Vacías (Rojas pequeñas, Rojas grandes, Amarillas)
+// 1. Stock de Bolsas Vacías (dinámico por tipo_bolsa y tamaño)
 export interface ItemStockVacias {
     tipo_bolsa_id: number;
     tipo_bolsa?: TipoBolsa | null;
@@ -30,9 +32,22 @@ export interface EstadoPendientes {
     };
 }
 
+// Resumen rápido del mes en curso (KPIs superiores)
+export interface ResumenMesDashboard {
+    bolsas_recibidas: number;
+    bolsas_utilizadas: number;
+    bolsas_retiradas: number;
+    kilogramos_generados: number;
+}
+
 // Interface principal enviada por DashboardController a Inertia React (Punto 22)
 export interface TableroControlData {
     stock_vacias: ItemStockVacias[];
     residuos_deposito: ConteoPorCorriente[];
     pendientes: EstadoPendientes;
+}
+
+export interface DashboardPageProps {
+    resumen_mes: ResumenMesDashboard;
+    tablero: TableroControlData;
 }

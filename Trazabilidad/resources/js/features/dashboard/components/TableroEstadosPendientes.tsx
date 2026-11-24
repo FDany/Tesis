@@ -8,6 +8,9 @@ interface Props {
 }
 
 export function TableroEstadosPendientes({ pendientes }: Props) {
+    const remitosDgm = Number(pendientes?.documentacion?.remitos_dgm ?? 0);
+    const manifiestos = Number(pendientes?.documentacion?.manifiestos ?? 0);
+
     return (
         <Card className="h-full">
             <CardHeader className="pb-3">
@@ -33,7 +36,7 @@ export function TableroEstadosPendientes({ pendientes }: Props) {
                     ) : (
                         <div className="grid grid-cols-1 gap-1.5">
                             {pendientes.pesaje.map((item, idx) => (
-                                <div key={idx} className="flex justify-between items-center text-sm py-0.5">
+                                <div key={item.tipo_bolsa_id ?? `${item.tipo_residuo}-${idx}`} className="flex justify-between items-center text-sm py-0.5">
                                     <span className="flex items-center gap-2 text-muted-foreground capitalize">
                                         <span
                                             className="h-2.5 w-2.5 rounded-full shrink-0 border border-black/10"
@@ -42,7 +45,7 @@ export function TableroEstadosPendientes({ pendientes }: Props) {
                                         {item.tipo_residuo}:
                                     </span>
                                     <strong className="font-mono text-foreground">
-                                        {item.cantidad.toLocaleString('es-AR')}
+                                        {Number(item.cantidad || 0).toLocaleString('es-AR')}
                                     </strong>
                                 </div>
                             ))}
@@ -63,7 +66,7 @@ export function TableroEstadosPendientes({ pendientes }: Props) {
                     ) : (
                         <div className="grid grid-cols-1 gap-1.5">
                             {pendientes.retiro.map((item, idx) => (
-                                <div key={idx} className="flex justify-between items-center text-sm py-0.5">
+                                <div key={item.tipo_bolsa_id ?? `${item.tipo_residuo}-${idx}`} className="flex justify-between items-center text-sm py-0.5">
                                     <span className="flex items-center gap-2 text-muted-foreground capitalize">
                                         <span
                                             className="h-2.5 w-2.5 rounded-full shrink-0 border border-black/10"
@@ -72,7 +75,7 @@ export function TableroEstadosPendientes({ pendientes }: Props) {
                                         {item.tipo_residuo}:
                                     </span>
                                     <strong className="font-mono text-foreground">
-                                        {item.cantidad.toLocaleString('es-AR')}
+                                        {Number(item.cantidad || 0).toLocaleString('es-AR')}
                                     </strong>
                                 </div>
                             ))}
@@ -89,13 +92,13 @@ export function TableroEstadosPendientes({ pendientes }: Props) {
                     <div className="flex justify-between items-center text-sm bg-rose-50/50 dark:bg-rose-950/20 p-2 rounded-md border border-rose-100 dark:border-rose-900/50">
                         <span className="text-rose-900 dark:text-rose-200 font-medium">Remitos DGM</span>
                         <span className="font-bold font-mono text-rose-700 dark:text-rose-400">
-                            {pendientes.documentacion.remitos_dgm.toLocaleString('es-AR')}
+                            {remitosDgm.toLocaleString('es-AR')}
                         </span>
                     </div>
                     <div className="flex justify-between items-center text-sm bg-slate-50 dark:bg-slate-900 p-2 rounded-md border">
                         <span className="text-muted-foreground font-medium">Manifiestos</span>
                         <span className="font-bold font-mono">
-                            {pendientes.documentacion.manifiestos.toLocaleString('es-AR')}
+                            {manifiestos.toLocaleString('es-AR')}
                         </span>
                     </div>
                 </div>

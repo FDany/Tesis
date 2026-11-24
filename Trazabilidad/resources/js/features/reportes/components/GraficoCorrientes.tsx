@@ -2,24 +2,11 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { Biohazard } from 'lucide-react';
-import type { CorrienteResiduo } from '../types/dashboard';
+import type { CorrienteResiduo } from '../types/reportes';
 
 interface Props {
     corrientes: CorrienteResiduo[];
 }
-
-const HEX_COLOR_MAP: Record<string, string> = {
-    rojo: '#ef4444',
-    red: '#ef4444',
-    amarillo: '#f59e0b',
-    yellow: '#f59e0b',
-    azul: '#3b82f6',
-    blue: '#3b82f6',
-    negro: '#1e293b',
-    black: '#1e293b',
-    verde: '#10b981',
-    green: '#10b981',
-};
 
 const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -49,17 +36,12 @@ const CustomTooltip = ({ active, payload }: any) => {
     return null;
 };
 
-const resolveColor = (colorName: string) => {
-    const key = colorName?.toLowerCase() || '';
-    return HEX_COLOR_MAP[key] || '#6366f1';
-};
-
 export function GraficoCorrientes({ corrientes }: Props) {
     const chartData = corrientes.map((c) => ({
         name: c.tipo_residuo,
         value: c.cantidad_total,
         peso: c.peso_total,
-        color: c.color,
+        color: c.color || '#6366f1',
     }));
 
     return (
@@ -117,7 +99,7 @@ export function GraficoCorrientes({ corrientes }: Props) {
                                 <span className="flex items-center gap-2">
                                     <span
                                         className="h-3 w-3 rounded-full shrink-0"
-                                        style={{ backgroundColor: resolveColor(corriente.color) }}
+                                        style={{ backgroundColor: corriente.color || '#6366f1' }}
                                     />
                                     {corriente.tipo_residuo}
                                 </span>

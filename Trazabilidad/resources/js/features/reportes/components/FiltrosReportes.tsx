@@ -4,15 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Filter, RefreshCw } from 'lucide-react';
 import { FiltroGenerico } from '@/components/filtros/FiltroGenerico';
 import type { CampoFiltro } from '@/components/filtros/FiltroGenerico';
-import type { FiltrosDashboard as FiltrosDashboardType } from '../types/dashboard';
+import type { FiltrosReportes } from '../types/reportes';
 import type { Servicio } from '@/features/servicios/types/servicio';
 
 interface Props {
-    filtros: FiltrosDashboardType;
+    filtros: FiltrosReportes;
     servicios?: Servicio[];
 }
 
-export function FiltrosDashboard({ filtros, servicios = [] }: Props) {
+export function FiltrosReportes({ filtros, servicios = [] }: Props) {
     const valores = {
         fecha_inicio: filtros.fecha_inicio ?? '',
         fecha_fin: filtros.fecha_fin ?? '',
@@ -56,14 +56,14 @@ export function FiltrosDashboard({ filtros, servicios = [] }: Props) {
                 : value || undefined;
 
         router.get(
-            '/dashboard',
+            '/reportes',
             { ...filtros, [key]: valor },
             { preserveState: true, replace: true },
         );
     };
 
     const handleLimpiarFiltros = () => {
-        router.get('/dashboard', {}, { preserveState: true, replace: true });
+        router.get('/reportes', {}, { preserveState: true, replace: true });
     };
 
     return (
@@ -73,7 +73,7 @@ export function FiltrosDashboard({ filtros, servicios = [] }: Props) {
                     <div className="flex items-center gap-2 text-muted-foreground md:self-start">
                         <Filter className="h-4 w-4" />
                         <span className="text-sm font-semibold uppercase tracking-wider">
-                            Filtros del Panel
+                            Filtros del Reporte
                         </span>
                     </div>
 
