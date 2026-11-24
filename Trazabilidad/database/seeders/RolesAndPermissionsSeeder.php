@@ -151,6 +151,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $areaAmbientalRole = Role::firstOrCreate(['name' => 'area-ambiental', 'guard_name' => 'web']);
         $areaAmbientalRole->syncPermissions([
             'ver dashboard',
+            'ver reportes',
             'listar tamBolsas', 'listar flujosResiduos', 'listar servicios',
             'listar bolsas', 'verDetalle bolsas', 'descargarExcel bolsas',
             'listar remitosRecepcion', 'verDetalle remitosRecepcion', 'descargarPDF remitosRecepcion',
@@ -164,6 +165,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $administracionRole = Role::firstOrCreate(['name' => 'administracion', 'guard_name' => 'web']);
         $administracionRole->syncPermissions([
             'ver dashboard',
+            'ver reportes',
             'listar bolsas', 'verDetalle bolsas', 'descargarExcel bolsas',
             'listar remitosRecepcion', 'verDetalle remitosRecepcion', 'descargarPDF remitosRecepcion',
             'listar remitosEntregaServicio', 'descargarPDF remitosEntregaServicio',

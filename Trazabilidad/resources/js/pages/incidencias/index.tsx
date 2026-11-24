@@ -63,7 +63,7 @@ export default function IncidenciasIndex({
         <div>
             <Head title="Incidencias" />
 
-            <div className="max-w-6xl mx-auto space-y-6 p-6">
+            <div className="space-y-6 p-6">
                 {/* Encabezado */}
                 <div className="space-y-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

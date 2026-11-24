@@ -95,7 +95,7 @@ export default function IndexManifiestosFinales({
         <>
             <Head title="Manifiestos Finales" />
 
-            <div className="max-w-7xl mx-auto p-6 space-y-6">
+            <div className="p-6 space-y-6">
                 <FlashMessage />
 
                 {/* Encabezado */}

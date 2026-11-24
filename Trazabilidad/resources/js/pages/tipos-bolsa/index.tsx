@@ -99,7 +99,7 @@ export function TiposBolsaPage({
             <FlashMessage />
 
             <div className="flex justify-between items-center">
-                <div className='p-8'>
+                <div className='space-y-1'>
                     <h1 className="text-2xl font-bold tracking-tight">
                         Gestión de Tipos de Bolsa / Residuos
                     </h1>
