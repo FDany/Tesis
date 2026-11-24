@@ -60,7 +60,7 @@ export default function CreateIncidencia() {
         <div>
             <Head title="Registrar Incidencia Manual" />
 
-            <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div className="p-6 y-6">
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Registrar Incidencia Manual</h1>

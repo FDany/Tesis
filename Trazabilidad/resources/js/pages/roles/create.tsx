@@ -1,14 +1,23 @@
-import { Head } from '@inertiajs/react';
-
+import { Head, Link } from '@inertiajs/react';
+import { Button } from '@/components/ui/button';
 import { RoleForm } from '@/features/roles-y-permisos/components/RoleForm';
 import type { RoleCreateProps } from '@/features/roles-y-permisos/types/rolYPermiso';
+
+import { ArrowLeft } from 'lucide-react';
 
 export default function RolesCreate({ permissions }: RoleCreateProps) {
     return (
         <>
-            <Head title="Nuevo rol" />
+            <Head title="Nuevo Rol" />
 
-            <div className="mx-auto w-full max-w-5xl space-y-6 p-6">
+            <div className="y-6 p-6">
+
+                <Link href="/roles">
+                    <Button variant="outline" size="icon" className="h-9 w-9">
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                </Link>
+
                 <header>
                     <h1 className="text-2xl font-bold tracking-tight">
                         Nuevo rol

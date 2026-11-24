@@ -61,7 +61,7 @@ export default function ShowManifiestoFinal({ manifiesto }: Props) {
         <>
             <Head title={`Manifiesto Final ${manifiesto.numero_manifiesto}`} />
 
-            <div className="max-w-6xl mx-auto p-6 space-y-6">
+            <div className="p-6 space-y-6">
                 <FlashMessage />
 
                 {/* Encabezado Principal */}

@@ -33,10 +33,10 @@ export default function IncidenciaShow({ incidencia }: Props) {
     const { can } = useAuth();
 
     return (
-        <div>
+        <>
             <Head title={`Incidencia #${incidencia.id}`} />
 
-            <div className="space-y-6 p-6 max-w-5xl mx-auto">
+            <div className="space-y-6 p-6">
                 {/* Header principal */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
@@ -285,6 +285,6 @@ export default function IncidenciaShow({ incidencia }: Props) {
                     onOpenChange={setIsModalOpen}
                 />
             </div>
-        </div>
+        </>
     );
 }
