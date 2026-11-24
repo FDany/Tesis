@@ -15,6 +15,7 @@ use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\TamanioController;
 use App\Http\Controllers\TipoBolsaController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ManifiestoFinalController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -79,13 +80,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('remitos-salida', RemitoSalidaRetiroController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('remitos-salida/{remito}/conciliar', [RemitoSalidaRetiroController::class, 'conciliar'])
         ->name('remitos-salida.conciliar');
+    Route::post('remitos-salida/{remito}/anular', [RemitoSalidaRetiroController::class, 'anular'])
+        ->name('remitos-salida.anular');
     Route::get('remitos-salida/{remito}/pdf', [RemitoSalidaRetiroController::class, 'descargarPdf'])
         ->name('remitos-salida.pdf');
+    Route::post('remitos-salida/{remito}/manifiesto-final', [ManifiestoFinalController::class, 'store'])
+        ->name('remitos-salida.manifiesto-final.store');
 
     // Módulo Incidencias
     Route::get('incidencias/create', [IncidenciaController::class, 'create'])->name('incidencias.create');
     Route::patch('incidencias/{incidencia}/resolver', [IncidenciaController::class, 'resolver'])->name('incidencias.resolver');
     Route::resource('incidencias', IncidenciaController::class)->only(['index', 'create', 'store', 'show']);
+
+    // Manifiestos Finales (Disposición Final)
+    Route::get('manifiestos-finales', [ManifiestoFinalController::class, 'index'])
+        ->name('manifiestos-finales.index');
+    Route::get('manifiestos-finales/{manifiesto}', [ManifiestoFinalController::class, 'show'])
+        ->name('manifiestos-finales.show');
+    Route::get('manifiestos-finales/{manifiesto}/documento', [ManifiestoFinalController::class, 'verDocumento'])
+        ->name('manifiestos-finales.documento');
 });
 
 require __DIR__ . '/settings.php';

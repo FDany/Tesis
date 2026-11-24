@@ -1,12 +1,22 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 
 import {
+    AlertTriangle,
     BarChart3,
+    Building2,
+    ClipboardCheck,
+    FileCheck2,
+    KeyRound,
     LayoutDashboard,
-    Plus,
+    Package,
+    PackageCheck,
+    Recycle,
+    Ruler,
+    Scale,
+    Send,
     Settings,
     ShieldCheck,
-    Trash2,
+    Truck,
     Users,
 } from 'lucide-react';
 
@@ -53,81 +63,75 @@ const navItems: AppNavItem[] = [
     {
         title: 'Permisos',
         href: '/permisos',
-        icon: ShieldCheck,
+        icon: KeyRound,
         permission: 'listar permisos',
     },
     {
         title: 'Tamaños de Bolsa',
         href: '/tamanios',
-        icon: Trash2,
+        icon: Ruler,
         permission: 'listar tamBolsas',
     },
     {
         title: 'Flujos de Residuos',
         href: '/tipos-bolsa',
-        icon: Trash2,
+        icon: Recycle,
         permission: 'listar flujosResiduos',
     },
     {
         title: 'Remitos de Recepción',
         href: '/remitos-recepcion',
-        icon: LayoutDashboard,
+        icon: ClipboardCheck,
         permission: 'listar remitosRecepcion',
     },
     {
         title: 'Bolsas',
         href: '/bolsas',
-        icon: Trash2,
+        icon: Package,
         permission: 'listar bolsas',
     },
     {
         title: 'Servicios',
         href: '/servicios',
-        icon: LayoutDashboard,
+        icon: Building2,
         permission: 'listar servicios',
     },
     {
         title: 'Remitos de Servicios',
         href: '/remitos-entrega-servicio',
-        icon: Trash2,
+        icon: Send,
         permission: 'listar remitosEntregaServicio',
     },
     {
         title: 'Recepción Depósito',
         href: '/recepciones-deposito',
-        icon: Trash2,
+        icon: PackageCheck,
         permission: 'registrarRecepcionBolsa Deposito',
     },
     {
         title: 'Pesaje Depósito',
         href: '/pesaje-deposito',
-        icon: Trash2,
+        icon: Scale,
         permission: 'registrarPesoBolsa Deposito',
     },
     {
         title: 'Remitos de Salida',
         href: '/remitos-salida',
-        icon: LayoutDashboard,
+        icon: Truck,
         permission: 'listar remitosSalida',
     },
     {
         title: 'Incidencias',
         href: '/incidencias',
-        icon: LayoutDashboard,
+        icon: AlertTriangle,
         permission: 'listar incidencias',
     },
-    /*{
-        title: 'Nueva Carga',
-        href: '/bolsas/create',
-        icon: Plus,
-        permission: 'crear bolsas',
+    {
+        title: 'Manifiestos Finales',
+        href: '/manifiestos-finales',
+        icon: FileCheck2,
+        permission: 'listar manifiestosFinales',
     },
-    /*{
-        title: 'Crear Remito de Recepción',
-        href: '/remitos-recepcion/create',
-        icon: Plus,
-        permission: 'crear remitosRecepcion',
-    },*/
     {
         title: 'Reportes',
         href: '/reportes',
@@ -147,8 +151,6 @@ export function AppSidebar() {
     const { can } = useAuth();
 
     const filteredNavItems = navItems.filter((item) => {
-        // Si el ítem no tiene la propiedad 'permission', se muestra a todos.
-        // Si la tiene, evalúa si el usuario tiene el permiso asignado en Spatie (o es super-admin).
         return !item.permission || can(item.permission);
     });
 

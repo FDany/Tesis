@@ -60,10 +60,10 @@ class RemitoSalidaRetiro extends Model
         return $this->hasMany(Bolsa::class, 'rem_sal_id');
     }
 
-    /**Manifiestos de tratamiento final vinculados a esta salida.*/
-    public function manifiestosFinales(): HasMany
+    /**Manifiesto de tratamiento final vinculado a esta salida.*/
+    public function manifiestoFinal(): HasOne
     {
-        return $this->hasMany(ManifiestoFinal::class, 'rem_sal_id');
+        return $this->hasOne(ManifiestoFinal::class, 'rem_sal_id');
     }
 
     public function incidencia(): HasOne
