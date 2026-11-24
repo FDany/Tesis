@@ -98,12 +98,12 @@ class BolsaController extends Controller
             'remitoEntregaServicio.servicio',  
             'remitoEntregaServicio.usuarioEntrega',  
             'recepcionDeposito.usuarioRecibe',  
-            'remitoSalidaRetiro.manifiestosFinales',  
+            'remitoSalidaRetiro.manifiestoFinal',  
             'pesaUsuario',
         ]);
 
         $remito = $bolsa->remitoSalidaRetiro; 
-        $manifiesto = $bolsa->remitoSalidaRetiro?->manifiestosFinales->first();  
+        $manifiesto = $bolsa->remitoSalidaRetiro?->manifiestoFinal;
 
 
         // 'eventos' => collect([      // Creo una colección de eventos asociados a la bolsa
