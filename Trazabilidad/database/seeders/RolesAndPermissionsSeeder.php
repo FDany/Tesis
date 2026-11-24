@@ -17,7 +17,7 @@ class RolesAndPermissionsSeeder extends Seeder
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        //Crear Permisos
+        // Crear Permisos
         $permissions = [
             // Dashboard
             'ver dashboard',
@@ -82,6 +82,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'verDetalle remitosSalida',
             'descargarPDF remitosSalida',
             'conciliar remitosSalida',
+            'anular remitosSalida',
+
+            // Manifiestos Finales (Disposición Final)
+            'listar manifiestosFinales',
+            'crear manifiestosFinales',
+            'verDetalle manifiestosFinales',
+            'descargarDocumento manifiestosFinales',
 
             // Incidencias
             'listar incidencias',
@@ -131,7 +138,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'listar bolsas', 'verDetalle bolsas', 'descargarExcel bolsas',
             'registrarRecepcionBolsa Deposito', 'registrarPesoBolsa Deposito',
             'listar remitosSalida', 'crear remitosSalida', 'verDetalle remitosSalida',
-            'descargarPDF remitosSalida', 'conciliar remitosSalida',
+            'descargarPDF remitosSalida', 'conciliar remitosSalida', 'anular remitosSalida',
+            'listar manifiestosFinales', 'crear manifiestosFinales', 'verDetalle manifiestosFinales', 'descargarDocumento manifiestosFinales',
             'listar incidencias', 'crear incidencias', 'verDetalle incidencias', 'resolver incidencias',
         ]);
 
@@ -144,6 +152,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'listar remitosRecepcion', 'verDetalle remitosRecepcion', 'descargarPDF remitosRecepcion',
             'listar remitosEntregaServicio', 'descargarPDF remitosEntregaServicio',
             'listar remitosSalida', 'verDetalle remitosSalida', 'descargarPDF remitosSalida',
+            'listar manifiestosFinales', 'verDetalle manifiestosFinales', 'descargarDocumento manifiestosFinales',
             'listar incidencias', 'verDetalle incidencias', 'resolver incidencias',
         ]);
 
@@ -155,10 +164,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'listar remitosRecepcion', 'verDetalle remitosRecepcion', 'descargarPDF remitosRecepcion',
             'listar remitosEntregaServicio', 'descargarPDF remitosEntregaServicio',
             'listar remitosSalida', 'verDetalle remitosSalida', 'descargarPDF remitosSalida',
+            'listar manifiestosFinales', 'verDetalle manifiestosFinales', 'descargarDocumento manifiestosFinales',
             'listar incidencias', 'verDetalle incidencias',
         ]);
 
-        //Crear Usuarios y asignar roles
+        // Crear Usuarios y asignar roles
         // Usuarios de prueba por perfil
         $usuariosPrueba = [
             [

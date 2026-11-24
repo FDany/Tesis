@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, FileText } from 'lucide-react';
 import type { RemitoSalidaRetiro } from '@/features/remitos-salida/types/remitoSalidaRetiro';
 import { RemitoSalidaFiltros } from '@/features/remitos-salida/components/RemitoSalidaFiltros';
-import { RemitoSalidaTabla } from '@/features/remitos-salida/components/RemitoSalidaTabla';
+import { RemitosSalidaTabla } from '@/features/remitos-salida/components/RemitosSalidaTabla';
 import Paginacion, { type PaginacionData } from '@/components/Paginador';
 import FlashMessage from '@/components/FlashMessage';
 import { useAuth } from '@/hooks/use-auth';
@@ -108,7 +108,7 @@ export default function IndexRemitosSalida({ remitos, filtros }: Props) {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <RemitoSalidaTabla data={remitos.data} />
+                        <RemitosSalidaTabla data={remitos.data} />
 
                         {/* Paginación */}
                         <Paginacion pagination={remitos} />

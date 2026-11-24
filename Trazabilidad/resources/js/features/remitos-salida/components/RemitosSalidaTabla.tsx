@@ -22,6 +22,7 @@ import {
     CheckCircle2,
     AlertTriangle,
     XCircle,
+    FileCheck2,
 } from 'lucide-react';
 import type {
     RemitoSalidaRetiro,
@@ -29,11 +30,11 @@ import type {
 } from '@/features/remitos-salida/types/remitoSalidaRetiro';
 import { useAuth } from '@/hooks/use-auth';
 
-interface RemitoSalidaTablaProps {
+interface RemitosSalidaTablaProps {
     data: RemitoSalidaRetiro[];
 }
 
-export function RemitoSalidaTabla({ data }: RemitoSalidaTablaProps) {
+export function RemitosSalidaTabla({ data }: RemitosSalidaTablaProps) {
     const { can } = useAuth();
 
     /**
@@ -63,6 +64,12 @@ export function RemitoSalidaTabla({ data }: RemitoSalidaTablaProps) {
                         className="flex items-center justify-center gap-1 w-fit mx-auto"
                     >
                         <AlertTriangle className="h-3 w-3" /> Con Incidencia
+                    </Badge>
+                );
+            case 'FINALIZADO':
+                return (
+                    <Badge className="bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-1 w-fit mx-auto">
+                        <FileCheck2 className="h-3 w-3" /> Finalizado
                     </Badge>
                 );
             case 'ANULADO':
@@ -122,7 +129,12 @@ export function RemitoSalidaTabla({ data }: RemitoSalidaTablaProps) {
                             const cantDgm =
                                 remito.cantidad_bolsas_declaradas_Empresa ??
                                 '-';
-
+                            const labelDetalle =
+                                remito.estado === 'PENDIENTE_RETIRO'
+                                    ? 'Ver Detalle y Conciliar'
+                                    : remito.estado === 'CONCILIADO' || remito.estado === 'CON_INCIDENCIA'
+                                        ? 'Ver Detalle y Cargar Manifiesto Final'
+                                        : 'Ver Detalle';
                             return (
                                 <TableRow key={remito.id}>
                                     <TableCell className="font-mono font-bold text-primary">
@@ -182,7 +194,7 @@ export function RemitoSalidaTabla({ data }: RemitoSalidaTablaProps) {
                                                 </Tooltip>
                                             )}
 
-                                            {/* Botón Ver Detalle y Conciliar */}
+                                            {/* Botón Ver Detalle */}
                                             {can('verDetalle remitosSalida') && (
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
@@ -190,7 +202,7 @@ export function RemitoSalidaTabla({ data }: RemitoSalidaTablaProps) {
                                                             variant="ghost"
                                                             size="icon"
                                                             asChild
-                                                            aria-label="Ver Detalle y Conciliar"
+                                                            aria-label={labelDetalle}
                                                         >
                                                             <Link
                                                                 href={`/remitos-salida/${remito.id}`}
@@ -200,7 +212,7 @@ export function RemitoSalidaTabla({ data }: RemitoSalidaTablaProps) {
                                                         </Button>
                                                     </TooltipTrigger>
                                                     <TooltipContent>
-                                                        Ver Detalle y Conciliar
+                                                        {labelDetalle}
                                                     </TooltipContent>
                                                 </Tooltip>
                                             )}

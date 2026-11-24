@@ -1,9 +1,15 @@
 import type { User } from '@/types/auth';
 import type { Bolsa } from '@/features/bolsas/types/bolsa';
 import type { Incidencia } from '@/features/incidencias/types/incidencia';
+import type { ManifiestoFinal } from '@/features/manifiestos-finales';
 
 // Estados válidos del remito de salida
-export type EstadoRemitoSalida = 'PENDIENTE_RETIRO' | 'CONCILIADO' | 'CON_INCIDENCIA' | 'ANULADO';
+export type EstadoRemitoSalida =
+  | 'PENDIENTE_RETIRO'
+  | 'CONCILIADO'
+  | 'CON_INCIDENCIA'
+  | 'FINALIZADO'
+  | 'ANULADO';
 
 // Entidad principal del Remito de Salida
 export interface RemitoSalidaRetiro {
@@ -30,6 +36,7 @@ export interface RemitoSalidaRetiro {
   usuario_despacha?: User;
   bolsas?: Bolsa[];
   incidencia?: Incidencia | null;
+  manifiesto_final?: ManifiestoFinal | null;
 
   // Métricas agregadas opcionales (vía withCount / withSum)
   bolsas_count?: number;

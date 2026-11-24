@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('usuario_despacha_id')->constrained('users');
 
             // Estado del flujo operativo y de conciliación
-            $table->string('estado')->default('PENDIENTE_RETIRO'); // PENDIENTE_RETIRO, CONCILIADO, CON_INCIDENCIA, ANULAD
+            $table->string('estado')->default('PENDIENTE_RETIRO'); // PENDIENTE_RETIRO, CONCILIADO, CON_INCIDENCIA, ANULADO
 
             // --- Datos del Remito Oficial DGM (Completados al conciliar / retirar) ---
             $table->string('numero_remito')->nullable(); // Número de manifiesto DGM

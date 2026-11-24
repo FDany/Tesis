@@ -2,19 +2,7 @@ import type { User } from '@/types/auth';
 import type { Bolsa } from '@/features/bolsas/types/bolsa';
 import type { Servicio } from '@/features/servicios/types/servicio';
 import type { TipoBolsa } from '@/features/tipos-bolsa/types/tipoBolsa';
-
-// Documento adjunto polimórfico (fotografías / evidencias)
-export interface DocumentoAdjunto {
-  id: number;
-  documentable_type?: string;
-  documentable_id?: number;
-  tipo_documento: string;
-  nombre_archivo: string;
-  url_archivo: string;
-  fecha_hora?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+import type { DocumentoAdjunto } from '@/types/documentoAdjunto';
 
 // Definición para el remito de salida cargado desde Eloquent
 export interface RemitoSalidaRetiroRef {

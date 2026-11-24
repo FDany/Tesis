@@ -1,3 +1,4 @@
+import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -16,8 +17,11 @@ type ConfirmDeleteDialogProps = {
     title: string;
     description: string;
     confirmLabel?: string;
+    processingLabel?: string;
     onConfirm: () => void;
     processing?: boolean;
+    confirmDisabled?: boolean;
+    children?: React.ReactNode;
 };
 
 export function ConfirmDeleteDialog({
@@ -26,8 +30,11 @@ export function ConfirmDeleteDialog({
     title,
     description,
     confirmLabel = 'Sí, eliminar',
+    processingLabel = 'Procesando...',
     onConfirm,
     processing = false,
+    confirmDisabled = false,
+    children,
 }: ConfirmDeleteDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -46,6 +53,8 @@ export function ConfirmDeleteDialog({
                     </DialogDescription>
                 </DialogHeader>
 
+                {children && <div className="pt-2">{children}</div>}
+
                 <DialogFooter className="mt-4 flex justify-end gap-2 sm:justify-end">
                     <Button
                         type="button"
@@ -59,9 +68,9 @@ export function ConfirmDeleteDialog({
                         type="button"
                         variant="destructive"
                         onClick={onConfirm}
-                        disabled={processing}
+                        disabled={processing || confirmDisabled}
                     >
-                        {processing ? 'Eliminando...' : confirmLabel}
+                        {processing ? processingLabel : confirmLabel}
                     </Button>
                 </DialogFooter>
             </DialogContent>

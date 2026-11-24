@@ -13,14 +13,19 @@ return new class extends Migration
     {
         Schema::create('manifiestos_finales', function (Blueprint $table) {
             $table->id();
-            $table->integer('numero_manifiesto');
+            $table->string('numero_manifiesto');
             $table->date('fecha');
             $table->date('fecha_tratamiento');
-            $table->unsignedBigInteger('rem_sal_id');
-            $table->foreign('rem_sal_id')->references('id')->on('remitos_salida_retiro');
-            $table->string('cantidad_bolsas');
-            $table->float('peso_informado');
-            $table->foreignId('documento_digital')->constrained('documentos_adjuntos')->nullable();
+            $table->foreignId('rem_sal_id')
+                ->unique()
+                ->constrained('remitos_salida_retiro')
+                ->cascadeOnDelete();
+            $table->integer('cantidad_bolsas');
+            $table->decimal('peso_informado', 8, 2);
+            $table->foreignId('documento_digital')
+                ->nullable()
+                ->constrained('documentos_adjuntos')
+                ->nullOnDelete();
             $table->string('observaciones')->nullable();
             $table->timestamps();
         });
