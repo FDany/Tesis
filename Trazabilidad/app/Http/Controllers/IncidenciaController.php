@@ -17,6 +17,7 @@ use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Services\AuditoriaService;
 
 class IncidenciaController extends Controller
 {
@@ -135,9 +136,24 @@ class IncidenciaController extends Controller
             ]);
 
             if ($bolsa) {
+                $estadoAnterior = $bolsa->estado;
+
                 $bolsa->update([
                     'estado' => EstadoBolsa::CON_INCIDENCIA,
                 ]);
+
+                AuditoriaService::registrar(
+                    bolsaId: $bolsa->id,
+                    operacion: 'Cambio de estado de bolsa con Incidencia',
+                    valorAnterior: $estadoAnterior instanceof EstadoBolsa ? $estadoAnterior->value : (string) $estadoAnterior,
+                    valorNuevo: [
+                        'estado' => EstadoBolsa::CON_INCIDENCIA->value,
+                        'incidencia_id' => $incidencia->id,
+                        'tipo_incidencia' => $incidencia->tipo_incidencia,
+                    ],
+                    responsableId: $request->user()->id,
+                    fechaHora: $incidencia->fecha_hora,
+                );
             }
 
             if ($request->hasFile('documentos')) {
@@ -202,4 +218,3 @@ class IncidenciaController extends Controller
         return redirect()->back()->with('message', "Incidencia #{$incidencia->id} actualizada correctamente.");
     }
 }
-
