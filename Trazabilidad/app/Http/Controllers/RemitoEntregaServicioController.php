@@ -14,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Enums\EstadoBolsa;
+use App\Services\AuditoriaService;
 
 class RemitoEntregaServicioController extends Controller
 {
@@ -42,7 +43,7 @@ class RemitoEntregaServicioController extends Controller
             })
             ->when(
                 $servicioId !== '' && $servicioId !== 'TODOS',
-                fn ($query) => $query->where('servicio_id', $servicioId)
+                fn($query) => $query->where('servicio_id', $servicioId)
             )
             ->orderByDesc('fecha_entrega')
             ->paginate($porPagina)
@@ -116,9 +117,10 @@ class RemitoEntregaServicioController extends Controller
             }
 
             $codigosNoDisponibles = $bolsas
-                ->filter(fn (Bolsa $bolsa) =>
+                ->filter(
+                    fn(Bolsa $bolsa) =>
                     $bolsa->estado !== EstadoBolsa::DISPONIBLE
-                    || $bolsa->remitos_serv_id !== null
+                        || $bolsa->remitos_serv_id !== null
                 )
                 ->pluck('codigo_barra')
                 ->all();
@@ -130,6 +132,8 @@ class RemitoEntregaServicioController extends Controller
                 ]);
             }
 
+            $fechaEntrega = now();
+
             $remito = RemitoEntregaServicio::create([
                 'entrega_usuario_id' => $request->user()->id,
                 'retira_nombre' => $validated['retira_nombre'],
@@ -140,10 +144,28 @@ class RemitoEntregaServicioController extends Controller
             ]);
 
             foreach ($bolsas as $bolsa) {
+                $estadoAnterior = $bolsa->estado->value;
+                $remitoServAnterior = $bolsa->remitos_serv_id;
+
                 $bolsa->update([
                     'estado' => EstadoBolsa::ENTREGADA_A_SERVICIO->value,
                     'remitos_serv_id' => $remito->id,
                 ]);
+
+                AuditoriaService::registrar(
+                    bolsaId: $bolsa->id,
+                    operacion: 'ENTREGA A SERVICIO',
+                    valorAnterior: [
+                        'estado' => $estadoAnterior,
+                        'remitos_serv_id' => $remitoServAnterior,
+                    ],
+                    valorNuevo: [
+                        'estado' => EstadoBolsa::ENTREGADA_A_SERVICIO->value,
+                        'remitos_serv_id' => $remito->id,
+                    ],
+                    responsableId: $request->user()->id,
+                    fechaHora: $fechaEntrega,
+                );
             }
 
             return redirect()
@@ -167,7 +189,7 @@ class RemitoEntregaServicioController extends Controller
         $remito->load([
             'usuarioEntrega',
             'servicio',
-            'bolsas' => fn ($query) => $query->orderBy('id'),
+            'bolsas' => fn($query) => $query->orderBy('id'),
         ]);
 
         return Pdf::loadView('pdfs.remitoentregaservicio.generarremitoentregaservicio', [

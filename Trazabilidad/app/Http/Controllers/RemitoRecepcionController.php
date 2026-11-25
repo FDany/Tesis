@@ -19,6 +19,7 @@ use Inertia\Response;
 use App\Enums\EstadoBolsa;
 use App\Models\DocumentoAdjunto;
 use Illuminate\Support\Facades\Storage;
+use App\Services\AuditoriaService;
 
 class RemitoRecepcionController extends Controller
 {
@@ -223,6 +224,22 @@ class RemitoRecepcionController extends Controller
             }
 
             Bolsa::insert($bolsasData);
+
+            $bolsasCreadas = Bolsa::query()
+                ->where('rem_rep_id', $remito->id)
+                ->pluck('id');
+
+            AuditoriaService::registrarLote(
+                bolsaIds: $bolsasCreadas,
+                operacion: 'ALTA RECEPCION',
+                valorAnterior: null,
+                valorNuevo: [
+                    'estado' => EstadoBolsa::DISPONIBLE->value,
+                    'remito_recepcion_id' => $remito->id,
+                ],
+                responsableId: $request->user()->id,
+                fechaHora: $now,
+            );
         });
 
         return redirect()

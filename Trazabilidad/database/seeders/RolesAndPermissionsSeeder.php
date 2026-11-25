@@ -99,6 +99,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
             //Reportes
             'ver reportes',
+
+            //Auditorias
+            'listar auditorias'
         ];
 
         foreach ($permissions as $permission) {
