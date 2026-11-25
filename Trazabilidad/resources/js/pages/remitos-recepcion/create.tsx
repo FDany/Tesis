@@ -92,7 +92,7 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
         setError('');
         setErrorBolsa('');
 
-        const prefijo = inicio[1].padStart(4, '0');
+        const prefijo = inicio[0].padStart(4, '0');
         const bolsas = Array.from({ length: cantidad }, (_, index) => ({
             codigo_barra:
                 prefijo + String(numeroInicio + index).padStart(9, '0'),
