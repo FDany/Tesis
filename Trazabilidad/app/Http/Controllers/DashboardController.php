@@ -24,7 +24,7 @@ class DashboardController extends Controller
                 EstadoBolsa::RECIBIDA->value,
                 EstadoBolsa::DISPONIBLE->value,
                 EstadoBolsa::ENTREGADA_A_SERVICIO->value,
-                EstadoBolsa::UTILIZADA->value,
+                // EstadoBolsa::UTILIZADA->value,
                 EstadoBolsa::INGRESADA_AL_DEPOSITO->value,
                 EstadoBolsa::PESADA->value,
                 EstadoBolsa::DESPACHADA->value,
@@ -35,7 +35,8 @@ class DashboardController extends Controller
 
         $bolsasUtilizadasMes = Bolsa::whereBetween('created_at', [$inicioMes, $finMes])
             ->whereIn('estado', [
-                EstadoBolsa::UTILIZADA->value,
+                // EstadoBolsa::UTILIZADA->value,
+                EstadoBolsa::ENTREGADA_A_SERVICIO->value,
                 EstadoBolsa::INGRESADA_AL_DEPOSITO->value,
                 EstadoBolsa::PESADA->value,
                 EstadoBolsa::DESPACHADA->value,
