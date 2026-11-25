@@ -8,7 +8,7 @@ import {
     RemitoEntregaServicioPreviewModal,
     type RemitoEntregaServicioPreview,
 } from '@/features/remitos-entrega-servicio/components/RemitoEntregaServicioPreviewModal';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -286,12 +286,21 @@ export default function CreateResiduo({
                             </ul>
                         )}
                     </section>
-
-                    {can('crear remitosEntregaServicio') && (
-                        <Button type="submit" disabled={processing || verificando}>
-                            {processing ? 'Guardando…' : 'Registrar entrega'}
+                    
+                    <div className="flex justify-end gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.get('/remitos-entrega-servicio')}
+                        >
+                            Cancelar
                         </Button>
-                    )}
+                        {can('crear remitosEntregaServicio') && (
+                            <Button type="submit" disabled={processing || verificando}>
+                                {processing ? 'Guardando…' : 'Registrar entrega'}
+                            </Button>
+                        )}
+                    </div>
                 </form>
             </div>
 

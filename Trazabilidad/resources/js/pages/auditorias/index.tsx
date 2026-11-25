@@ -127,6 +127,7 @@ export default function AuditoriasIndex({
                         value={porPagina}
                         options={opcionesPorPagina}
                         onChange={handleCambiarFilas}
+                        total={auditorias.total}
                     />
                 </div>
 

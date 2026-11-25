@@ -20,7 +20,6 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useState } from 'react';
-import { ScannerInput } from '@/features/bolsas';
 import { ESTADO_BOLSA_LABELS } from '@/features/bolsas/types/bolsa';
 
 interface CrearProps {
@@ -47,12 +46,7 @@ interface VistaPrevia {
     bolsas: BolsaVistaPrevia[];
 }
 
-type ModoCargaBolsas = 'lote' | 'individual';
-
 export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
-
-    // Estado para los 2 tipos de carga de bolsas: por lote o individual
-    const [modoCarga, setModoCarga] = useState<ModoCargaBolsas | null>(null);
     const [errorBolsa, setErrorBolsa] = useState('');
     //**************************************************************
 
@@ -69,161 +63,78 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
     const [vistaPrevia, setVistaPrevia] = useState<VistaPrevia | null>(null);
     const [error, setError] = useState('');
 
-    const cantidadAlcanzada =
-        vistaPrevia !== null &&
-        vistaPrevia.bolsas.length >= Number(vistaPrevia.remito.cantidad_declarada);
-
     const [documento, setDocumento] = useState<File | null>(null);
-        // Genera las bolsas
     const generarBolsas = () => {
-        const inicio = formulario.codigo_inicio.match(/^(\d{1,4})-(\d{1,9})$/);
-        const fin = formulario.codigo_fin.match(/^(\d{1,4})-(\d{1,9})$/);
-        const cantidad = Number(formulario.cantidad_declarada);
+        const inicio = formulario.codigo_inicio.split('-');
+        const fin = formulario.codigo_fin.split('-');
 
-        if (
-            !formulario.fecha_recepcion ||
-            !formulario.tipo_bolsa_id ||
-            !formulario.tamanio_id ||
-            !inicio ||
-            !fin ||
-            !Number.isInteger(cantidad) ||
-            cantidad < 1
-        ) {
-            setError('Completa los datos y verifica el formato de los códigos.');
+        if (inicio.length !== 2 || fin.length !== 2) {
+            setError('Formato de código inválido. Use XXXX-XXXXXXXXX');
             return;
         }
 
-        const prefijoInicio = inicio[1].replace(/^0+/, '') || '0';
-        const prefijoFin = fin[1].replace(/^0+/, '') || '0';
-        const numeroInicio = Number(inicio[2]);
-        const numeroFin = Number(fin[2]);
-        const cantidadEnRango = numeroFin - numeroInicio + 1;
+        const numeroInicio = parseInt(inicio[1]);
+        const numeroFin = parseInt(fin[1]);
+        const cantidad = numeroFin - numeroInicio + 1;
 
-        if (prefijoInicio !== prefijoFin || numeroInicio > numeroFin) {
-            setError('Los códigos deben tener el mismo prefijo y un rango válido.');
+        if (cantidad <= 0) {
+            setError('El código de inicio debe ser menor al código de fin');
             return;
         }
 
-        if (cantidadEnRango !== cantidad || cantidad > 1000) {
-            setError('La cantidad debe coincidir con el rango y no superar 1000.');
+        if (cantidad !== Number(formulario.cantidad_declarada)) {
+            setError(
+                `La cantidad declarada (${formulario.cantidad_declarada}) no coincide con el rango de códigos (${cantidad})`,
+            );
             return;
         }
-
+  
         setError('');
         setErrorBolsa('');
-        setModoCarga(null);
-        setVistaPrevia({ remito: { ...formulario }, bolsas: [] });
-    };
 
-
-    const cargarPorLote = () => {
-        if (!vistaPrevia) return;
-
-        const inicio = vistaPrevia.remito.codigo_inicio.match(
-            /^(\d{1,4})-(\d{1,9})$/,
-        );
-
-        if (!inicio) {
-            setError('El código inicial no tiene un formato válido.');
-            return;
-        }
-
-        const cantidad = Number(vistaPrevia.remito.cantidad_declarada);
-        const numeroInicio = Number(inicio[2]);
         const prefijo = inicio[1].padStart(4, '0');
-
         const bolsas = Array.from({ length: cantidad }, (_, index) => ({
-            codigo_barra: prefijo + String(numeroInicio + index).padStart(9, '0'),
+            codigo_barra:
+                prefijo + String(numeroInicio + index).padStart(9, '0'),
         }));
 
-        setError('');
-        setModoCarga('lote');
-        setVistaPrevia({ ...vistaPrevia, bolsas });
+        setVistaPrevia({ remito: { ...formulario }, bolsas });
     };
+
 
     const tipoBolsaSeleccionado = tiposBolsa.find(
         (tipo) => String(tipo.id) === vistaPrevia?.remito.tipo_bolsa_id,
     );
 
-
-    const agregarBolsaIndividual = (codigoIngresado: string): boolean => {
-        if (!vistaPrevia || modoCarga !== 'individual') return false;
-
-        const codigo = codigoIngresado.trim();
-        const inicio = vistaPrevia.remito.codigo_inicio.match(
-            /^(\d{1,4})-(\d{1,9})$/,
-        );
-        const fin = vistaPrevia.remito.codigo_fin.match(
-            /^(\d{1,4})-(\d{1,9})$/,
-        );
-
-        if (!inicio || !fin || !/^\d{13}$/.test(codigo)) {
-            setErrorBolsa('Ingresa o escanea un código de barras válido de 13 dígitos.');
-            return false;
-        }
-
-        const prefijo = inicio[1].padStart(4, '0');
-        const numero = Number(codigo.slice(4));
-        const numeroInicio = Number(inicio[2]);
-        const numeroFin = Number(fin[2]);
-        const codigoEsperado = prefijo + String(numero).padStart(9, '0');
-
-        if (
-            codigo.slice(0, 4) !== prefijo ||
-            codigo !== codigoEsperado ||
-            numero < numeroInicio ||
-            numero > numeroFin
-        ) {
-            setErrorBolsa('El código no pertenece al rango de este remito.');
-            return false;
-        }
-
-        if (vistaPrevia.bolsas.some((bolsa) => bolsa.codigo_barra === codigo)) {
-            setErrorBolsa('Ese código ya fue agregado.');
-            return false;
-        }
-
-        if (vistaPrevia.bolsas.length >= Number(vistaPrevia.remito.cantidad_declarada)) {
-            setErrorBolsa('Ya alcanzaste la cantidad declarada para este remito.');
-            return false;
-        }
-
-        setVistaPrevia({
-            ...vistaPrevia,
-            bolsas: [...vistaPrevia.bolsas, { codigo_barra: codigo }],
-        });
-        setErrorBolsa('');
-        return true;
-    };
-
     const guardarRemito = () => {
-    if (!vistaPrevia || !modoCarga) return;
+        //if (!vistaPrevia || !modoCarga) return;
+        if (!vistaPrevia) return;
 
-    const cantidad = Number(vistaPrevia.remito.cantidad_declarada);
+        const cantidad = Number(vistaPrevia.remito.cantidad_declarada);
 
-    if (vistaPrevia.bolsas.length !== cantidad) {
-        setErrorBolsa('Debes completar la cantidad declarada de bolsas.');
-        return;
-    }
+        if (vistaPrevia.bolsas.length !== cantidad) {
+            setErrorBolsa('Debes completar la cantidad declarada de bolsas.');
+            return;
+        }
 
-    setErrorBolsa('');
+        setErrorBolsa('');
 
-    const payload: Record<string, any> = {
-        ...vistaPrevia.remito,
-        codigos: vistaPrevia.bolsas.map((bolsa) => bolsa.codigo_barra),
+        const payload: Record<string, any> = {
+            ...vistaPrevia.remito,
+            codigos: vistaPrevia.bolsas.map((bolsa) => bolsa.codigo_barra),
+        };
+
+        if (documento) {
+            payload.documento = documento;
+        }
+
+        router.post('/remitos-recepcion', payload, {
+            forceFormData: true,
+            onError: (errors) => {
+                setErrorBolsa(Object.values(errors).join(' '));
+            },
+        });
     };
-
-    if (documento) {
-        payload.documento = documento;
-    }
-
-    router.post('/remitos-recepcion', payload, {
-        forceFormData: true,
-        onError: (errors) => {
-            setErrorBolsa(Object.values(errors).join(' '));
-        },
-    });
-};
 
 
     return (
@@ -399,8 +310,14 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
 
                         <div className="space-y-2">
                             {error && <p className="text-sm text-destructive">{error}</p>}
-
-                            <div className="flex justify-end">
+                            <div className="flex justify-end gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => router.get('/remitos-recepcion')}
+                                >
+                                    Cancelar
+                                </Button>
                                 <Button type="button" onClick={generarBolsas}>
                                     Continuar a la carga de bolsas
                                 </Button>
@@ -461,58 +378,11 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
 
                         </section>
 
-                        {/* Botones de opciones para cargar bolsas: por lote o individual */}
-                        <div className="flex gap-2">
-                            <Button
-                                type="button"
-                                variant={modoCarga === 'lote' ? 'default' : 'outline'}
-                                onClick={cargarPorLote}
-                            >
-                                Generar bolsas por lote
-                            </Button>
-
-                            <Button
-                                type="button"
-                                variant={modoCarga === 'individual' ? 'default' : 'outline'}
-                                onClick={() => {
-                                    setErrorBolsa('');
-                                    setModoCarga('individual');
-                                    setVistaPrevia({ ...vistaPrevia, bolsas: [] });
-                                }}
-                            >
-                                Ingresar las bolsas una por una
-                            </Button>
-                        </div>
-
-                        {modoCarga && (
+                        {vistaPrevia.bolsas.length > 0 && (
                             <section className="space-y-4 rounded-md border p-4">
                                 <h2 className="text-lg font-semibold">
                                     Bolsas generadas ({vistaPrevia.bolsas.length})
                                 </h2>
-
-                                {/* Si el modo es individual, mostrar el input para agregar bolsas */}
-                                {modoCarga === 'individual' && (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="codigo_bolsa_individual">Código de barras</Label>
-
-                                        <ScannerInput
-                                            id="codigo_bolsa_individual"
-                                            onScan={agregarBolsaIndividual}
-                                            disabled={cantidadAlcanzada}
-                                            placeholder="Escanea o escribe los 13 dígitos"
-                                            buttonLabel={cantidadAlcanzada ? 'Cantidad completa' : 'Agregar bolsa'}
-                                        />
-
-                                        <p className="text-sm text-muted-foreground">
-                                            Agregadas: {vistaPrevia.bolsas.length} de{' '}
-                                            {vistaPrevia.remito.cantidad_declarada}
-                                        </p>
-
-                                        {errorBolsa && (
-                                            <p className="text-sm text-destructive">{errorBolsa}</p>
-                                        )}
-                                    </div>
-                                )}
 
                                 <Table>
                                     <TableHeader>
@@ -549,8 +419,14 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
                         <div className="flex justify-end">
                             <Button
                                 type="button"
+                                variant="outline"
+                                onClick={() => router.get('/remitos-recepcion')}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                type="button"
                                 disabled={
-                                    !modoCarga ||
                                     vistaPrevia.bolsas.length !==
                                     Number(vistaPrevia.remito.cantidad_declarada)
                                 }

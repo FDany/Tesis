@@ -110,6 +110,7 @@ export const ServiciosPage: React.FC<Props> = ({ servicios, porPagina, opcionesP
                 value={porPagina}
                 options={opcionesPorPagina}
                 onChange={handlePorPaginaChange}
+                total={servicios.total}
             />
 
             {/* La tabla recibe directamente las props de Inertia */}

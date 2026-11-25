@@ -1,8 +1,8 @@
 import React from 'react';
 import { router } from '@inertiajs/react';
 
-import { Button } from '@/components/ui/button'; 
-import { ChevronLeft, ChevronRight } from 'lucide-react'; 
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Esta interfaz refleja la estructura exacta que Laravel envía desde el backend
 export interface PaginacionData {
@@ -13,6 +13,7 @@ export interface PaginacionData {
     last_page: number;      //número de la última página
     prev_page_url: string | null;
     next_page_url: string | null;
+    links: { url: string | null; label: string; active: boolean }[];
 }
 
 interface PaginacionProps {
@@ -20,17 +21,33 @@ interface PaginacionProps {
     //itemName?: string; // Ej: "carreras", "usuarios", "registros"
 }
 
-export default function Paginacion({ 
-    pagination, 
+export default function Paginacion({
+    pagination,
     //itemName = "registros"
 }: PaginacionProps) {
     // Si no hay datos, no renderizamos el paginador
-    if (!pagination.total) 
+    if (pagination.last_page <= 1)
         return null;
 
+    const TAMANIO_VENTANA = 5;
+
+    const inicio = Math.max(
+        1,
+        Math.min(
+            pagination.current_page - Math.floor(TAMANIO_VENTANA / 2),
+            pagination.last_page - TAMANIO_VENTANA + 1,
+        ),
+    );
+    const fin = Math.min(pagination.last_page, inicio + TAMANIO_VENTANA - 1);
+
+    const paginasVisibles = Array.from(
+        { length: fin - inicio + 1 },
+        (_, i) => inicio + i,
+    );
+
     return (
-        <div className={`bg-muted px-6 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4`}> 
-            {/* Información de Registros */} 
+        <div className={`bg-muted px-6 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4`}>
+            {/* Información de Registros */}
             {/* <p className="text-sm text-muted-foreground text-center sm:text-left"> 
                 Mostrando{' '}
                 <span className="font-semibold text-foreground">
@@ -44,16 +61,12 @@ export default function Paginacion({
                 <span className="font-semibold text-foreground">
                     {pagination.total}
                 </span> */}
-                {/* {' '}{itemName}  */}
+            {/* {' '}{itemName}  */}
             {/* </p>  */}
 
 
             <p className="text-sm text-muted-foreground text-center sm:text-left">
                 Mostrando{' '}
-                <span className="font-semibold text-foreground">
-                    {pagination.from ?? 0}
-                </span>
-                {'–'}
                 <span className="font-semibold text-foreground">
                     {pagination.to ?? 0}
                 </span>
@@ -64,46 +77,91 @@ export default function Paginacion({
                 {' registros'}
             </p>
 
-            {/* Botones de Navegación */} 
-            <div className="flex items-center gap-4"> 
-                {/* Botón Anterior */} 
-                <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm" 
-                    disabled={!pagination.prev_page_url} 
-                    onClick={() => router.get(pagination.prev_page_url!)} 
-                    className="bg-card text-muted-foreground hover:bg-muted shadow-xs disabled:opacity-50" 
-                > 
-                    <ChevronLeft className="w-4 h-4 mr-1" /> 
-                    Anterior 
+            {/* Botones de Navegación */}
+            <div className="flex items-center gap-4">
+                {/* Botón Anterior */}
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    disabled={!pagination.prev_page_url}
+                    onClick={() => router.get(pagination.prev_page_url!)}
+                    aria-label="Página anterior"
+                >
+                    <ChevronLeft className="w-4 h-4" />
                 </Button>
 
-                {/* Indicador de Página Actual */} 
-                <span className="text-sm text-muted-foreground bg-muted border border-border px-3 py-1.5 rounded-lg font-medium"> 
+                {/* Indicador de Página Actual */}
+                {/* <span className="text-sm text-muted-foreground bg-muted border border-border px-3 py-1.5 rounded-lg font-medium">
                     Página{' '}
                     <span className="text-foreground font-semibold">
                         {pagination.current_page}
-                    </span> 
-                    {' '}de{' '} 
+                    </span>
+                    {' '}de{' '}
                     <span className="text-foreground font-semibold">
                         {pagination.last_page}
                     </span>
-                </span>
+                </span> */}
+                {/* Números de página (ventana deslizante) */}
+                <div className="hidden sm:flex items-center gap-1">
+                    {inicio > 1 && (
+                        <>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => router.get(pagination.links[1].url!)}
+                            >
+                                1
+                            </Button>
+                            {inicio > 2 && <span className="px-1 text-muted-foreground">…</span>}
+                        </>
+                    )}
 
-                {/* Botón Siguiente */} 
-                <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm" 
-                    disabled={!pagination.next_page_url} 
-                    onClick={() => router.get(pagination.next_page_url!)} 
-                    className="bg-card text-muted-foreground hover:bg-muted shadow-xs disabled:opacity-50" 
-                > 
-                    Siguiente 
-                    <ChevronRight className="w-4 h-4 ml-1" /> 
-                </Button> 
-            </div> 
+                    {paginasVisibles.map((pagina) => {
+                        const link = pagination.links[pagina];
+                        return (
+                            <Button
+                                key={pagina}
+                                variant={pagina === pagination.current_page ? 'default' : 'outline'}
+                                size="sm"
+                                disabled={!link?.url}
+                                onClick={() => link?.url && router.get(link.url)}
+                            >
+                                {pagina}
+                            </Button>
+                        );
+                    })}
+
+                    {fin < pagination.last_page && (
+                        <>
+                            {fin < pagination.last_page - 1 && (
+                                <span className="px-1 text-muted-foreground">…</span>
+                            )}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                    router.get(pagination.links[pagination.last_page].url!)
+                                }
+                            >
+                                {pagination.last_page}
+                            </Button>
+                        </>
+                    )}
+                </div>
+
+                {/* Botón Siguiente */}
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    disabled={!pagination.next_page_url}
+                    onClick={() => router.get(pagination.next_page_url!)}
+                    aria-label="Página siguiente"
+                >
+                    <ChevronRight className="w-4 h-4" />
+                </Button>
+            </div>
         </div>
     );
 }

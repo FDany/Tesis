@@ -13,15 +13,22 @@ interface cantFilasSelectorProps {
     onChange: (value: number) => void;
     options?: number[];
     className?: string;
+    total?: number;
 }
 
 export default function CantFilas({
     value,
     onChange,
     options = [5, 10, 20],
-    className = "inline-flex w-fit"
+    className = "inline-flex w-fit",
+    total,
 }: cantFilasSelectorProps) {
+    if (total !== undefined && total <= Math.min(...options)) {
+        return null;
+    }
+
     return (
+
         <div className={`${className} flex flex-row flex-nowrap items-center gap-2`}>
             <label htmlFor="cantidad-filas" className="shrink-0 whitespace-nowrap text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Mostrar

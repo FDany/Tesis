@@ -73,6 +73,7 @@ export default function UsersIndex({ users, porPagina, opcionesPorPagina }: Inde
                     value={porPagina}
                     options={opcionesPorPagina}
                     onChange={handlePorPaginaChange}
+                    total={users.total}
                 />
                 <UserTable users={users.data} />
 

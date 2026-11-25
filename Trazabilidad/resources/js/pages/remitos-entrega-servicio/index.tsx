@@ -134,6 +134,7 @@ export default function RemitosEntregaServicioIndex({
                             value={porPagina}
                             options={opcionesPorPagina}
                             onChange={handlePorPaginaChange}
+                            total={remitos.total}
                         />
                     </div>
                 </div>

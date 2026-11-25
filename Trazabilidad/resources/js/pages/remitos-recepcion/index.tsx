@@ -207,6 +207,7 @@ export default function Index({
                             value={porPagina}
                             options={opcionesPorPagina}
                             onChange={handlePorPaginaChange}
+                            total={remitos.total}
                         />
                     </div>
                 </div>

@@ -118,6 +118,7 @@ export function TiposBolsaPage({
                 value={porPagina}
                 options={opcionesPorPagina}
                 onChange={handlePorPaginaChange}
+                total={tiposBolsa.total}
             />
 
             {/* La tabla recibe directamente las props de Inertia */}
