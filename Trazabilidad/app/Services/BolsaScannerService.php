@@ -8,6 +8,50 @@ use App\Models\RemitoRecepcion;
 
 class BolsaScannerService
 {
+    public function buscarParaIncidencia(string $codigo): array
+    {
+        $codigoLimpio = trim($codigo);
+
+        if ($codigoLimpio === '') {
+            return [
+                'status' => 422,
+                'payload' => ['message' => 'Debe ingresar o escanear un código de bolsa.'],
+            ];
+        }
+
+        $bolsa = Bolsa::query()
+            ->where('codigo_barra', $codigoLimpio)
+            ->first();
+
+        if (! $bolsa) {
+            return [
+                'status' => 404,
+                'payload' => ['message' => "No existe una bolsa registrada con el código {$codigoLimpio}."],
+            ];
+        }
+
+        if ($bolsa->estado === EstadoBolsa::CON_INCIDENCIA) {
+            return [
+                'status' => 422,
+                'payload' => [
+                    'message' => "La bolsa {$bolsa->codigo_barra} ya se encuentra en estado '{$bolsa->estado->label()}'.",
+                ],
+            ];
+        }
+
+        return [
+            'status' => 200,
+            'payload' => [
+                'id' => $bolsa->id,
+                'codigo_barra' => $bolsa->codigo_barra,
+                'estado' => $bolsa->estado->value,
+                'estado_label' => $bolsa->estado->label(),
+                'tipo_bolsa_id' => $bolsa->tipo_bolsa_id,
+                'tamanio_id' => $bolsa->tamanio_id,
+            ],
+        ];
+    }
+
     public function buscarParaEntrega(string $codigo): array
     {
         $bolsa = Bolsa::query()
@@ -18,6 +62,15 @@ class BolsaScannerService
             return [
                 'status' => 404,
                 'payload' => ['message' => 'No existe una bolsa con ese código.'],
+            ];
+        }
+
+        if ($bolsa->estado === EstadoBolsa::CON_INCIDENCIA) {
+            return [
+                'status' => 422,
+                'payload' => [
+                    'message' => "La bolsa {$bolsa->codigo_barra} tiene una incidencia activa ({$bolsa->estado->label()}) y no puede entregarse.",
+                ],
             ];
         }
 
@@ -50,6 +103,15 @@ class BolsaScannerService
             return [
                 'status' => 404,
                 'payload' => ['message' => 'No existe una bolsa con ese código.'],
+            ];
+        }
+
+        if ($bolsa->estado === EstadoBolsa::CON_INCIDENCIA) {
+            return [
+                'status' => 422,
+                'payload' => [
+                    'message' => "La bolsa {$bolsa->codigo_barra} tiene una incidencia activa ({$bolsa->estado->label()}) y no puede recibirse en depósito.",
+                ],
             ];
         }
 
@@ -86,6 +148,15 @@ class BolsaScannerService
             return [
                 'status' => 404,
                 'payload' => ['message' => 'No se encontró ninguna bolsa con ese código.'],
+            ];
+        }
+
+        if ($bolsa->estado === EstadoBolsa::CON_INCIDENCIA) {
+            return [
+                'status' => 422,
+                'payload' => [
+                    'message' => "La bolsa {$bolsa->codigo_barra} tiene una incidencia activa ({$bolsa->estado->label()}) y no puede despacharse.",
+                ],
             ];
         }
 
@@ -199,50 +270,30 @@ class BolsaScannerService
                 || strcmp($codigo, $remito->codigo_fin) > 0;
         }
 
-        // if ($bolsa || $fueraDeRango) {
-        //     return [
-        //         'status' => 200,
-        //         'payload' => [
-        //             'codigo_barra' => $codigo,
-        //             'resultado' => 'FUERA_DE_RANGO',
-        //             'message' => $bolsa
-        //                 ? "Código fuera de rango: la bolsa pertenece al remito #{$bolsa->rem_rep_id}."
-        //                 : "Código fuera de rango: no pertenece al rango ({$remito->codigo_inicio} - {$remito->codigo_fin}) del remito.",
-        //         ],
-        //     ];
-        // }
+        if ($bolsa || $fueraDeRango) {
+            if ($bolsa && $bolsa->estado !== EstadoBolsa::RECIBIDA) {
+                return [
+                    'status' => 422,
+                    'payload' => [
+                        'codigo_barra' => $bolsa->codigo_barra,
+                        'resultado' => 'ESTADO_INVALIDO',
+                        'message' => "La bolsa {$bolsa->codigo_barra} no está pendiente de control. Estado actual: {$bolsa->estado->label()}.",
+                    ],
+                ];
+            }
 
-        // return [
-        //     'status' => 200,
-        //     'payload' => [
-        //         'codigo_barra' => $codigo,
-        //         'resultado' => 'INEXISTENTE',
-        //         'message' => 'Código inexistente: no corresponde a una recepción registrada.',
-        //     ],
-        // ];
-        if ($bolsa || $fueraDeRango) {  
-            if ($bolsa && $bolsa->estado !== EstadoBolsa::RECIBIDA) {  
-                return [  
-                    'status' => 422,  
-                    'payload' => [  
-                        'codigo_barra' => $bolsa->codigo_barra,  
-                        'resultado' => 'ESTADO_INVALIDO',  
-                        'message' => "La bolsa {$bolsa->codigo_barra} no está pendiente de control. Estado actual: {$bolsa->estado->label()}.",  
-                    ],  
-                ];  
-            }  
-        
-            return [  
-                'status' => 422,  
-                'payload' => [  
-                    'codigo_barra' => $codigo,  
-                    'resultado' => 'FUERA_DE_RANGO',  
-                    'message' => $bolsa  
-                        ? "Código fuera de rango: la bolsa pertenece al remito #{$bolsa->rem_rep_id}."  
-                        : "Código fuera de rango: no pertenece al rango ({$remito->codigo_inicio} - {$remito->codigo_fin}) del remito.",  
-                ],  
-            ];  
+            return [
+                'status' => 422,
+                'payload' => [
+                    'codigo_barra' => $codigo,
+                    'resultado' => 'FUERA_DE_RANGO',
+                    'message' => $bolsa
+                        ? "Código fuera de rango: la bolsa pertenece al remito #{$bolsa->rem_rep_id}."
+                        : "Código fuera de rango: no pertenece al rango ({$remito->codigo_inicio} - {$remito->codigo_fin}) del remito.",
+                ],
+            ];
         }
+
         return [
             'status' => 422,
             'payload' => [

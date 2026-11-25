@@ -8,7 +8,8 @@ export type EstadoBolsa =
     | 'PESADA'
     | 'DESPACHADA'
     | 'RETIRADA_POR_DGM'
-    | 'TRATADA_DISPOSICION_FINAL';
+    | 'TRATADA_DISPOSICION_FINAL'
+    | 'CON_INCIDENCIA';
 
 export const ESTADO_BOLSA_LABELS: Record<EstadoBolsa, string> = {
     NO_RECIBIDA: 'No Recibida',
@@ -21,6 +22,7 @@ export const ESTADO_BOLSA_LABELS: Record<EstadoBolsa, string> = {
     DESPACHADA: 'Despachada',
     RETIRADA_POR_DGM: 'Retirada por DGM',
     TRATADA_DISPOSICION_FINAL: 'Tratada / Disposición Final',
+    CON_INCIDENCIA: 'Con Incidencia',
 };
 
 export interface Bolsa {
