@@ -3,12 +3,17 @@ import type { Bolsa } from '@/features/bolsas/types/bolsa';
 import type { Servicio } from '@/features/servicios/types/servicio';
 import type { TipoBolsa } from '@/features/tipos-bolsa/types/tipoBolsa';
 import type { DocumentoAdjunto } from '@/types/documentoAdjunto';
+import type {RemitoRecepcion} from '@/features/remitos-recepcion/types/remitoRecepcion';
 
 // Definición para el remito de salida cargado desde Eloquent
 export interface RemitoSalidaRetiroRef {
   id: number;
   numero_remito: string;
   fecha_retiro?: string;
+}
+export interface RemitoRecepcionRef {
+  id: number;
+  fecha_recepcion?: string;
 }
 
 export interface Incidencia {
@@ -19,6 +24,7 @@ export interface Incidencia {
   // Relaciones opcionales (IDs)
   bolsa_id?: number | null;
   rem_sal_id?: number | null;
+  rem_rep_id?: number | null;
   codigo_no_registrado?: string | null;
   tipo_bolsa_id?: number | null;
   servicio_id?: number | null;
@@ -37,6 +43,7 @@ export interface Incidencia {
   usuario_cierra?: User | null;
   bolsa?: Bolsa | null;
   remito_salida_retiro?: RemitoSalidaRetiroRef | null;
+  remito_recepcion?: RemitoRecepcionRef | null;
   servicio?: Servicio | null;
   tipo_bolsa?: TipoBolsa | null;
   documentos?: DocumentoAdjunto[];

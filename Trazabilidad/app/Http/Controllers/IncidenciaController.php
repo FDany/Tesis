@@ -23,6 +23,7 @@ class IncidenciaController extends Controller
             'usuarioRegistra',
             'usuarioCierra',
             'remitoSalidaRetiro',
+            'remitoRecepcion',
             'bolsa',
             'tipoBolsa',
             'servicio',

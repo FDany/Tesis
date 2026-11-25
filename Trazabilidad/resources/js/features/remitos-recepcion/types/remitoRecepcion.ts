@@ -13,6 +13,9 @@ export interface RemitoRecepcion {
   tipo_bolsa_id: number;
   cantidad_declarada: number;
   tamanio_id: number;
+  estado: string;
+  control_usuario_id?: number | null;
+  fecha_control?: string | null;
   created_at?: string;
   updated_at?: string;
   usuario_recep?: User;
