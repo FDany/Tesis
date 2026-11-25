@@ -89,7 +89,7 @@ class ReporteController extends Controller
         $bolsasPorColor = $queryPorColor
             ->groupBy('tipos_bolsa.color', 'tipos_bolsa.tipo_residuo')
             ->get()
-            ->map(fn ($item) => [
+            ->map(fn($item) => [
                 'color' => $item->color,
                 'nombre_tipo' => $item->nombre_tipo,
                 'cantidad' => (int) $item->cantidad,
@@ -134,7 +134,7 @@ class ReporteController extends Controller
                 $porTamanio = $queryPorTamanio
                     ->groupBy('bolsas.tamanio_id', 'tamanios.nombre')
                     ->get()
-                    ->map(fn ($item) => [
+                    ->map(fn($item) => [
                         'tamanio_id' => $item->tamanio_id,
                         'nombre_tamanio' => $item->nombre_tamanio,
                         'cantidad' => (int) $item->cantidad,
@@ -192,12 +192,19 @@ class ReporteController extends Controller
             $kilogramosPorPeriodo[] = [
                 'periodo' => $clave,
                 'etiqueta' => $etiqueta,
-                'kilogramos' => round((float) $items->sum(fn ($b) => (float) ($b->peso ?? 0)), 2),
+                'kilogramos' => round((float) $items->sum(fn($b) => (float) ($b->peso ?? 0)), 2),
                 'cantidad_bolsas' => $items->count(),
             ];
         }
 
         // 4. Desglose por Servicio Hospitalario
+        $estadosConPeso = [
+            EstadoBolsa::PESADA->value,
+            EstadoBolsa::DESPACHADA->value,
+            EstadoBolsa::RETIRADA_POR_DGM->value,
+            EstadoBolsa::TRATADA_DISPOSICION_FINAL->value,
+        ];
+
         $metricasServicio = DB::table('bolsas')
             ->join('remitos_entrega_servicios', 'bolsas.remitos_serv_id', '=', 'remitos_entrega_servicios.id')
             ->join('servicios', 'remitos_entrega_servicios.servicio_id', '=', 'servicios.id')
@@ -205,15 +212,20 @@ class ReporteController extends Controller
                 'servicios.id as servicio_id',
                 'servicios.nombre as nombre_servicio',
                 DB::raw('COUNT(bolsas.id) as cantidad_bolsas'),
-                DB::raw('COALESCE(SUM(bolsas.peso), 0) as kilogramos')
+                DB::raw(
+                    'COALESCE(SUM(CASE WHEN bolsas.estado IN ('
+                        . implode(',', array_fill(0, count($estadosConPeso), '?'))
+                        . ') AND bolsas.peso IS NOT NULL THEN bolsas.peso ELSE 0 END), 0) as kilogramos'
+                )
             )
-            ->where('bolsas.estado', '!=', EstadoBolsa::NO_RECIBIDA->value)
+            ->addBinding($estadosConPeso, 'select')
+            ->whereIn('bolsas.estado', $estadosConPeso)->whereNotNull('bolsas.peso')
             ->whereBetween('bolsas.created_at', [$desde, $hasta])
             ->whereNull('servicios.deleted_at')
             ->groupBy('servicios.id', 'servicios.nombre')
             ->orderByDesc('kilogramos')
             ->get()
-            ->map(fn ($item) => [
+            ->map(fn($item) => [
                 'servicio_id' => (int) $item->servicio_id,
                 'nombre_servicio' => $item->nombre_servicio,
                 'cantidad_bolsas' => (int) $item->cantidad_bolsas,
