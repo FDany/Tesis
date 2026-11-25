@@ -57,7 +57,7 @@ export function GraficoCorrientes({ corrientes }: Props) {
             </CardHeader>
             <CardContent className="space-y-6">
                 {/* Gráfica Donut / Pie Chart */}
-                <div className="h-55 w-full">
+                <div className="h-64 w-full">
                     {chartData.length === 0 ? (
                         <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
                             Sin datos para el período seleccionado.
@@ -68,9 +68,9 @@ export function GraficoCorrientes({ corrientes }: Props) {
                                 <Pie
                                     data={chartData}
                                     cx="50%"
-                                    cy="50%"
-                                    innerRadius={55}
-                                    outerRadius={80}
+                                    cy="44%"
+                                    innerRadius={48}
+                                    outerRadius={72}
                                     paddingAngle={4}
                                     dataKey="value"
                                 >
@@ -82,7 +82,15 @@ export function GraficoCorrientes({ corrientes }: Props) {
                                     content={<CustomTooltip />}
                                     wrapperStyle={{ zIndex: 1000 }}
                                 />
-                                <Legend />
+                                <Legend
+                                    verticalAlign="bottom"
+                                    wrapperStyle={{ paddingTop: '8px' }}
+                                    formatter={(value) => (
+                                        <span className="text-xs font-medium text-foreground">
+                                            {value}
+                                        </span>
+                                    )}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                     )}
