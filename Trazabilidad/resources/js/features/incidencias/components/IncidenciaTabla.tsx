@@ -79,6 +79,11 @@ export function IncidenciaTabla({ incidencias, onResolve }: IncidenciaTablaProps
                                     <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                     Remito DGM: #{incidencia.remito_salida_retiro.numero_remito}
                                 </span>
+                            ) : incidencia.remito_recepcion ?(
+                                <span className="text-xs font-medium flex items-center gap-1">
+                                    <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                    Remito DGM: #{incidencia.remito_recepcion.id}
+                                </span>
                             ) : incidencia.bolsa ? (
                                 <span className="text-xs font-medium flex items-center gap-1">
                                     <Package className="h-3.5 w-3.5 text-muted-foreground shrink-0" />

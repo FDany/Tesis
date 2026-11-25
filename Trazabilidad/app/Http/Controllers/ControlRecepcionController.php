@@ -182,7 +182,7 @@ class ControlRecepcionController extends Controller
                         . "{$remito->cantidad_declarada} bolsas declaradas, {$bolsasControladas->count()} controladas. "
                         . "Faltantes ({$cantidadFaltantes}): "
                         . $bolsasFaltantes->pluck('codigo_barra')->implode(', ') . '.',
-                    'estado' => 'PENDIENTE',
+                    'estado' => 'ABIERTA',
                 ]);
             }
 
@@ -208,7 +208,7 @@ class ControlRecepcionController extends Controller
                             . ($bolsa
                                 ? " (pertenece al remito #{$bolsa->rem_rep_id}, estado {$bolsa->estado->label()})."
                                 : ' (código no registrado en el sistema).'),
-                        'estado' => 'PENDIENTE',
+                        'estado' => 'ABIERTA',
                     ]);
                 }
             }

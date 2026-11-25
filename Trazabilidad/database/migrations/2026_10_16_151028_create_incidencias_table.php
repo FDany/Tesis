@@ -18,6 +18,7 @@ return new class extends Migration
             //Relaciones opcionales
             $table->foreignId('bolsa_id')->nullable()->constrained('bolsas');
             $table->foreignId('rem_sal_id')->nullable()->constrained('remitos_salida_retiro');
+            $table->foreignId('rem_rep_id')->nullable()->constrained('remitos_recepcion');
             $table->string('codigo_no_registrado', 30)->nullable();
             $table->foreignId('tipo_bolsa_id')->nullable()->constrained('tipos_bolsa');
             $table->foreignId('servicio_id')->nullable()->constrained('servicios');
