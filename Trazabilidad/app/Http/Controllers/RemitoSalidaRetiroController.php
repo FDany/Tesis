@@ -15,6 +15,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Enums\EstadoBolsa;
+use App\Services\AuditoriaService;
 
 class RemitoSalidaRetiroController extends Controller
 {
@@ -35,7 +36,7 @@ class RemitoSalidaRetiroController extends Controller
             })
             ->when(
                 $estado !== '' && $estado !== 'TODOS',
-                fn ($query) => $query->where('estado', $estado)
+                fn($query) => $query->where('estado', $estado)
             )
             ->latest()
             ->paginate(15)
@@ -77,8 +78,8 @@ class RemitoSalidaRetiroController extends Controller
             }
 
             $bolsasNoDisponibles = $bolsas->filter(
-                fn (Bolsa $bolsa) =>
-                    $bolsa->estado !== EstadoBolsa::PESADA
+                fn(Bolsa $bolsa) =>
+                $bolsa->estado !== EstadoBolsa::PESADA
                     || $bolsa->peso === null
                     || $bolsa->peso <= 0
                     || $bolsa->rem_sal_id !== null
@@ -97,6 +98,8 @@ class RemitoSalidaRetiroController extends Controller
 
             $cantidadBolsas = count($validated['bolsas_ids']);
 
+            $fechaEmision = now();
+
             $remito = RemitoSalidaRetiro::create([
                 'numero_remito_interno' => $numeroRemitoInterno,
                 'fecha_emision' => now(),
@@ -106,10 +109,31 @@ class RemitoSalidaRetiroController extends Controller
                 'observaciones' => $validated['observaciones'] ?? null,
             ]);
 
+            $estadosAnteriores = $bolsas->mapWithKeys(
+                fn(Bolsa $bolsa) => [$bolsa->id => $bolsa->estado->value]
+            );
+
             Bolsa::whereIn('id', $validated['bolsas_ids'])->update([
                 'rem_sal_id' => $remito->id,
                 'estado' => EstadoBolsa::DESPACHADA->value,
             ]);
+
+            foreach ($bolsas as $bolsa) {
+                AuditoriaService::registrar(
+                    bolsaId: $bolsa->id,
+                    operacion: 'DESPACHO A RETIRO',
+                    valorAnterior: [
+                        'estado' => $estadosAnteriores[$bolsa->id],
+                        'rem_sal_id' => null,
+                    ],
+                    valorNuevo: [
+                        'estado' => EstadoBolsa::DESPACHADA->value,
+                        'rem_sal_id' => $remito->id,
+                    ],
+                    responsableId: $request->user()->id,
+                    fechaHora: $fechaEmision,
+                );
+            }
 
             return redirect()->route('remitos-salida.show', $remito->id)
                 ->with('success', "Remito interno {$numeroRemitoInterno} generado exitosamente. Listo para imprimir.");
@@ -147,9 +171,29 @@ class RemitoSalidaRetiroController extends Controller
                 'observaciones' => $validated['observaciones'] ?? $remito->observaciones,
             ]);
 
+            $fechaRetiroAuditoria = now();
+            $bolsasPrevias = $remito->bolsas()->get();
+
             $remito->bolsas()->update([
                 'estado' => EstadoBolsa::RETIRADA_POR_DGM->value,
             ]);
+
+            foreach ($bolsasPrevias as $bolsa) {
+                AuditoriaService::registrar(
+                    bolsaId: $bolsa->id,
+                    operacion: 'RETIRO POR DGM',
+                    valorAnterior: [
+                        'estado' => $bolsa->estado->value,
+                        'rem_sal_id' => $remito->id,
+                    ],
+                    valorNuevo: [
+                        'estado' => EstadoBolsa::RETIRADA_POR_DGM->value,
+                        'rem_sal_id' => $remito->id,
+                    ],
+                    responsableId: $request->user()->id,
+                    fechaHora: $fechaRetiroAuditoria,
+                );
+            }
 
             if (! $coincide) {
                 $diferencia = $cantidadSistema - $cantidadDgm;
@@ -187,11 +231,31 @@ class RemitoSalidaRetiroController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $remito, $validated) {
+            $fechaAnulacion = now();
+            $bolsasPrevias = $remito->bolsas()->get();
+
             // 1. Liberar las bolsas vinculadas para que vuelvan a estar disponibles para despacho
             $remito->bolsas()->update([
                 'rem_sal_id' => null,
                 'estado' => EstadoBolsa::PESADA->value,
             ]);
+
+            foreach ($bolsasPrevias as $bolsa) {
+                AuditoriaService::registrar(
+                    bolsaId: $bolsa->id,
+                    operacion: 'ANULACION REMITO SALIDA',
+                    valorAnterior: [
+                        'estado' => $bolsa->estado->value,
+                        'rem_sal_id' => $remito->id,
+                    ],
+                    valorNuevo: [
+                        'estado' => EstadoBolsa::PESADA->value,
+                        'rem_sal_id' => null,
+                    ],
+                    responsableId: $request->user()->id,
+                    fechaHora: $fechaAnulacion,
+                );
+            }
 
             // 2. Registrar auditoría de anulación en observaciones y cambiar estado
             $usuarioNombre = $request->user()->full_name ?? $request->user()->name;

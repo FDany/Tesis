@@ -8,8 +8,16 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Download, Mail } from 'lucide-react';
+import { Download, Mail, FileText } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth'
+
+export type DocumentoAdjuntoItem = {
+    id: number;
+    tipo_documento: string;
+    nombre_archivo: string;
+    url_archivo: string;
+    fecha_hora?: string | null;
+};
 
 export type RemitoDetalle = {
     id: number;
@@ -31,6 +39,7 @@ export type RemitoDetalle = {
     tamanio: {
         nombre: string;
     } | null;
+    documento_adjunto?: DocumentoAdjuntoItem | null;
     bolsas: string[];
 };
 
@@ -233,6 +242,35 @@ export function RemitoRecepcionDetalleModal({
                                     <p className="text-muted-foreground">Observaciones</p>
                                     <p className="whitespace-pre-wrap">{detalle.observaciones || '-'}</p>
                                 </div>
+                            </div>
+
+                            <div className="col-span-2">
+                                <p className="text-muted-foreground">Documentación adjunta</p>
+                                {detalle.documento_adjunto ? (
+                                    <div className="mt-1 flex items-center justify-between gap-3 rounded-md border bg-muted/30 px-3 py-2">
+                                        <div className="flex min-w-0 items-center gap-2.5">
+                                            <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
+                                            <div className="min-w-0">
+                                                <p className="truncate font-medium">
+                                                    {detalle.documento_adjunto.nombre_archivo}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {detalle.documento_adjunto.tipo_documento}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <a
+                                            href={detalle.documento_adjunto.url_archivo}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="shrink-0 text-sm font-medium text-primary underline underline-offset-4"
+                                        >
+                                            Ver / Descargar
+                                        </a>
+                                    </div>
+                                ) : (
+                                    <p className="mt-1 text-muted-foreground">-</p>
+                                )}
                             </div>
 
                             <div>

@@ -16,6 +16,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Enums\EstadoBolsa;
+use App\Services\AuditoriaService;
 
 class ManifiestoFinalController extends Controller
 {
@@ -51,8 +52,8 @@ class ManifiestoFinalController extends Controller
                         });
                 });
             })
-            ->when($fechaDesde !== '', fn ($q) => $q->whereDate('fecha', '>=', $fechaDesde))
-            ->when($fechaHasta !== '', fn ($q) => $q->whereDate('fecha', '<=', $fechaHasta))
+            ->when($fechaDesde !== '', fn($q) => $q->whereDate('fecha', '>=', $fechaDesde))
+            ->when($fechaHasta !== '', fn($q) => $q->whereDate('fecha', '<=', $fechaHasta))
             ->orderByDesc('fecha')
             ->orderByDesc('id')
             ->paginate($porPagina)
@@ -144,6 +145,9 @@ class ManifiestoFinalController extends Controller
                 'observaciones' => $validated['observaciones'] ?? null,
             ]);
 
+            $fechaAuditoria = now();
+            $bolsasPrevias = $remito->bolsas()->get();
+
             $remito->update([
                 'estado' => 'FINALIZADO',
             ]);
@@ -151,6 +155,22 @@ class ManifiestoFinalController extends Controller
             $remito->bolsas()->update([
                 'estado' => EstadoBolsa::TRATADA_DISPOSICION_FINAL->value,
             ]);
+
+            foreach ($bolsasPrevias as $bolsa) {
+                AuditoriaService::registrar(
+                    bolsaId: $bolsa->id,
+                    operacion: 'Tratamiento / disposición final',
+                    valorAnterior: [
+                        'estado' => $bolsa->estado->value,
+                    ],
+                    valorNuevo: [
+                        'estado' => EstadoBolsa::TRATADA_DISPOSICION_FINAL->value,
+                        'numero_manifiesto' => $validated['numero_manifiesto'],
+                    ],
+                    responsableId: $request->user()->id,
+                    fechaHora: $fechaAuditoria,
+                );
+            }
 
             return redirect()
                 ->route('remitos-salida.show', $remito->id)

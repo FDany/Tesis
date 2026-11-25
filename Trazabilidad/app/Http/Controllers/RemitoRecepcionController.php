@@ -17,6 +17,9 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Enums\EstadoBolsa;
+use App\Models\DocumentoAdjunto;
+use Illuminate\Support\Facades\Storage;
+use App\Services\AuditoriaService;
 
 class RemitoRecepcionController extends Controller
 {
@@ -59,11 +62,11 @@ class RemitoRecepcionController extends Controller
             })
             ->when(
                 $tipoBolsaId !== '' && $tipoBolsaId !== 'TODOS',
-                fn ($query) => $query->where('tipo_bolsa_id', $tipoBolsaId)
+                fn($query) => $query->where('tipo_bolsa_id', $tipoBolsaId)
             )
             ->when(
                 $tamanioId !== '' && $tamanioId !== 'TODOS',
-                fn ($query) => $query->where('tamanio_id', $tamanioId)
+                fn($query) => $query->where('tamanio_id', $tamanioId)
             )
             ->orderBy($orden, $direccion)
             ->orderBy('id', 'asc')
@@ -113,6 +116,7 @@ class RemitoRecepcionController extends Controller
             'tipo_bolsa_id' => 'required|exists:tipos_bolsa,id',
             'cantidad_declarada' => 'required|integer|min:1|max:1000',
             'tamanio_id' => 'required|exists:tamanios,id',
+            'documento' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
         $codigos = $validated['codigos'];
@@ -189,6 +193,21 @@ class RemitoRecepcionController extends Controller
 
             $remito = RemitoRecepcion::create($validated);
 
+            if ($request->hasFile('documento')) {
+                $archivo = $request->file('documento');
+                $extension = strtolower($archivo->getClientOriginalExtension());
+                $tipoDocumento = $extension === 'pdf' ? 'pdf' : 'foto_remito_recepcion';
+                $nombreOriginal = $archivo->getClientOriginalName();
+                $ruta = $archivo->store('documentos/remitos-recepcion', 'public');
+
+                $remito->documentosAdjuntos()->create([
+                    'tipo_documento' => $tipoDocumento,
+                    'nombre_archivo' => $nombreOriginal,
+                    'url_archivo' => Storage::url($ruta),
+                    'fecha_hora' => now(),
+                ]);
+            }
+
             $bolsasData = [];
             $now = now();
 
@@ -205,6 +224,22 @@ class RemitoRecepcionController extends Controller
             }
 
             Bolsa::insert($bolsasData);
+
+            $bolsasCreadas = Bolsa::query()
+                ->where('rem_rep_id', $remito->id)
+                ->pluck('id');
+
+            AuditoriaService::registrarLote(
+                bolsaIds: $bolsasCreadas,
+                operacion: 'ALTA RECEPCION',
+                valorAnterior: null,
+                valorNuevo: [
+                    'estado' => EstadoBolsa::DISPONIBLE->value,
+                    'remito_recepcion_id' => $remito->id,
+                ],
+                responsableId: $request->user()->id,
+                fechaHora: $now,
+            );
         });
 
         return redirect()
@@ -231,11 +266,14 @@ class RemitoRecepcionController extends Controller
             'tipoBolsa',
             'tamanio',
             'usuarioRecep',
+            'documentosAdjuntos'
         ])->findOrFail($id);
 
         $codigos = $remito->bolsas()
             ->orderBy('id')
             ->pluck('codigo_barra');
+
+        $ultimoAdjunto = $remito->documentosAdjuntos->sortByDesc('id')->first();
 
         return Inertia::render('remitos-recepcion/index', [
             'remitoDetalle' => [
@@ -258,6 +296,13 @@ class RemitoRecepcionController extends Controller
                 'tamanio' => $remito->tamanio ? [
                     'nombre' => $remito->tamanio->nombre,
                 ] : null,
+                'documento_adjunto' => $ultimoAdjunto ? [
+                    'id' => $ultimoAdjunto->id,
+                    'tipo_documento' => $ultimoAdjunto->tipo_documento,
+                    'nombre_archivo' => $ultimoAdjunto->nombre_archivo,
+                    'url_archivo' => $ultimoAdjunto->url_archivo,
+                    'fecha_hora' => $ultimoAdjunto->fecha_hora?->toIso8601String(),
+                ] : null,
                 'bolsas' => $codigos,
             ],
         ]);
@@ -270,7 +315,7 @@ class RemitoRecepcionController extends Controller
             'usuarioRecep',
             'tipoBolsa',
             'tamanio',
-            'bolsas' => fn ($query) => $query->orderBy('id'),
+            'bolsas' => fn($query) => $query->orderBy('id'),
         ]);
 
         return Pdf::loadView('pdfs.remitorecepcion.generarremitorecepcion', [
@@ -293,7 +338,7 @@ class RemitoRecepcionController extends Controller
             'usuarioRecep',
             'tipoBolsa',
             'tamanio',
-            'bolsas' => fn ($query) => $query->orderBy('id'),
+            'bolsas' => fn($query) => $query->orderBy('id'),
         ]);
 
         $pdf = Pdf::loadView('pdfs.remitorecepcion.generarremitorecepcion', compact('remito'));

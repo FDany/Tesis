@@ -64,7 +64,7 @@ export default function IndexRemitosSalida({ remitos, filtros }: Props) {
         <>
             <Head title="Remitos de Salida" />
 
-            <div className="max-w-7xl mx-auto p-6 space-y-6">
+            <div className="p-6 space-y-6">
                 <FlashMessage />
 
                 {/* Encabezado */}

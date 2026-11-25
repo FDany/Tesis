@@ -73,7 +73,8 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
         vistaPrevia !== null &&
         vistaPrevia.bolsas.length >= Number(vistaPrevia.remito.cantidad_declarada);
 
-    // Genera las bolsas
+    const [documento, setDocumento] = useState<File | null>(null);
+        // Genera las bolsas
     const generarBolsas = () => {
         const inicio = formulario.codigo_inicio.match(/^(\d{1,4})-(\d{1,9})$/);
         const fin = formulario.codigo_fin.match(/^(\d{1,4})-(\d{1,9})$/);
@@ -196,36 +197,33 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
     };
 
     const guardarRemito = () => {
-        if (!vistaPrevia || !modoCarga) return;
+    if (!vistaPrevia || !modoCarga) return;
 
-        const cantidad = Number(vistaPrevia.remito.cantidad_declarada);
+    const cantidad = Number(vistaPrevia.remito.cantidad_declarada);
 
-        if (vistaPrevia.bolsas.length !== cantidad) {
-            setErrorBolsa('Debes completar la cantidad declarada de bolsas.');
-            return;
-        }
+    if (vistaPrevia.bolsas.length !== cantidad) {
+        setErrorBolsa('Debes completar la cantidad declarada de bolsas.');
+        return;
+    }
 
-        setErrorBolsa('');
+    setErrorBolsa('');
 
-        // router.post('/remitos-recepcion', { ...vistaPrevia.remito }, {
-        //     onError: (errors) => {
-        //         setErrorBolsa(Object.values(errors).join(' '));
-        //     },
-        // });
-
-        router.post(
-            '/remitos-recepcion',
-            {
-                ...vistaPrevia.remito,
-                codigos: vistaPrevia.bolsas.map((bolsa) => bolsa.codigo_barra),
-            },
-            {
-                onError: (errors) => {
-                    setErrorBolsa(Object.values(errors).join(' '));
-                },
-            },
-        );
+    const payload: Record<string, any> = {
+        ...vistaPrevia.remito,
+        codigos: vistaPrevia.bolsas.map((bolsa) => bolsa.codigo_barra),
     };
+
+    if (documento) {
+        payload.documento = documento;
+    }
+
+    router.post('/remitos-recepcion', payload, {
+        forceFormData: true,
+        onError: (errors) => {
+            setErrorBolsa(Object.values(errors).join(' '));
+        },
+    });
+};
 
 
     return (
@@ -366,6 +364,35 @@ export default function Crear({ tiposBolsa, tamanios }: CrearProps) {
                                             setFormulario({ ...formulario, observaciones: e.target.value })
                                         }
                                     />
+                                </div>
+                                <div className="space-y-2 sm:col-span-2">
+                                    <Label htmlFor="documento">Documento respaldatorio (opcional)</Label>
+                                    <Input
+                                        id="documento"
+                                        type="file"
+                                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                                        onChange={(e) => {
+                                            const archivo = e.target.files?.[0] ?? null;
+                                            setDocumento(archivo);
+                                        }}
+                                    />
+                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                        <span>PDF, JPG, PNG o WEBP (máx. 5 MB).</span>
+                                        {documento && (
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-medium text-foreground">{documento.name}</span>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-6 px-2 text-xs text-destructive"
+                                                    onClick={() => setDocumento(null)}
+                                                >
+                                                    Quitar
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </section>

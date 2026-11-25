@@ -6,13 +6,15 @@ import {
     type UserRoleOption,
 } from '@/features/users/components/UserForm';
 
+import { ArrowLeft } from 'lucide-react';
+
 export default function UsersCreate({ roles }: { roles: UserRoleOption[] }) {
     return (
         <>
             <Head title="Crear usuario" />
             <FlashMessage />
 
-            <div className="mx-auto max-w-2xl space-y-6 p-4">
+            <div className="y-6 p-6">
                 <div>
                     <Link
                         href="/users"
