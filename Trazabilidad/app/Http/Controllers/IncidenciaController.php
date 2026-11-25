@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EstadoBolsa;
 use App\Enums\TipoIncidencia;
+use App\Models\Bolsa;
 use App\Models\Incidencia;
 use App\Models\Servicio;
 use App\Models\TipoBolsa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Attributes\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -91,7 +95,8 @@ class IncidenciaController extends Controller
         $validated = $request->validate([
             'tipo_incidencia' => ['required', 'string', new Enum(TipoIncidencia::class)],
             'descripcion' => 'required|string|min:5|max:600',
-            'bolsa_id' => 'nullable|exists:bolsas,id',
+            'bolsa_id' => 'required_if:tipo_incidencia,BOLSA_DANADA|nullable|integer|exists:bolsas,id',
+            'codigo_bolsa' => 'nullable|string|max:30',
             'codigo_no_registrado' => 'nullable|string|max:30',
             'servicio_id' => 'nullable|exists:servicios,id',
             'tipo_bolsa_id' => 'nullable|exists:tipos_bolsa,id',
@@ -100,35 +105,60 @@ class IncidenciaController extends Controller
             'documentos.*' => 'file|mimes:jpeg,png,jpg,webp,pdf|max:5120',
         ]);
 
-        $incidencia = Incidencia::create([
-            'fecha_hora' => now(),
-            'usuario_registra' => $request->user()->id,
-            'tipo_incidencia' => $validated['tipo_incidencia'],
-            'descripcion' => $validated['descripcion'],
-            'bolsa_id' => $validated['bolsa_id'] ?? null,
-            'codigo_no_registrado' => $validated['codigo_no_registrado'] ?? null,
-            'servicio_id' => $validated['servicio_id'] ?? null,
-            'tipo_bolsa_id' => $validated['tipo_bolsa_id'] ?? null,
-            'rem_sal_id' => $validated['rem_sal_id'] ?? null,
-            'estado' => 'ABIERTA',
-        ]);
+        $bolsa = null;
+        if (! empty($validated['bolsa_id'])) {
+            $bolsa = Bolsa::findOrFail($validated['bolsa_id']);
 
-        if ($request->hasFile('documentos')) {
-            foreach ($request->file('documentos') as $file) {
-                if ($file->isValid()) {
-                    $extension = strtolower($file->getClientOriginalExtension());
-                    $tipoDoc = ($extension === 'pdf') ? 'pdf' : 'foto_incidencia';
-                    $path = $file->store('incidencias', 'public');
-
-                    $incidencia->documentos()->create([
-                        'tipo_documento' => $tipoDoc,
-                        'nombre_archivo' => $file->getClientOriginalName(),
-                        'url_archivo' => $path,
-                        'fecha_hora' => now(),
-                    ]);
-                }
+            if (
+                $validated['tipo_incidencia'] === TipoIncidencia::BOLSA_DANADA->value
+                && ! empty($validated['codigo_bolsa'])
+                && strcasecmp(trim($validated['codigo_bolsa']), $bolsa->codigo_barra) !== 0
+            ) {
+                throw ValidationException::withMessages([
+                    'codigo_bolsa' => 'El código de bolsa no coincide con la bolsa seleccionada.',
+                ]);
             }
         }
+
+        $incidencia = DB::transaction(function () use ($request, $validated, $bolsa) {
+            $incidencia = Incidencia::create([
+                'fecha_hora' => now(),
+                'usuario_registra' => $request->user()->id,
+                'tipo_incidencia' => $validated['tipo_incidencia'],
+                'descripcion' => $validated['descripcion'],
+                'bolsa_id' => $bolsa?->id,
+                'codigo_no_registrado' => $validated['codigo_no_registrado'] ?? null,
+                'servicio_id' => $validated['servicio_id'] ?? null,
+                'tipo_bolsa_id' => $validated['tipo_bolsa_id'] ?? null,
+                'rem_sal_id' => $validated['rem_sal_id'] ?? null,
+                'estado' => 'ABIERTA',
+            ]);
+
+            if ($bolsa) {
+                $bolsa->update([
+                    'estado' => EstadoBolsa::CON_INCIDENCIA,
+                ]);
+            }
+
+            if ($request->hasFile('documentos')) {
+                foreach ($request->file('documentos') as $file) {
+                    if ($file->isValid()) {
+                        $extension = strtolower($file->getClientOriginalExtension());
+                        $tipoDoc = ($extension === 'pdf') ? 'pdf' : 'foto_incidencia';
+                        $path = $file->store('incidencias', 'public');
+
+                        $incidencia->documentos()->create([
+                            'tipo_documento' => $tipoDoc,
+                            'nombre_archivo' => $file->getClientOriginalName(),
+                            'url_archivo' => $path,
+                            'fecha_hora' => now(),
+                        ]);
+                    }
+                }
+            }
+
+            return $incidencia;
+        });
 
         return redirect()->route('incidencias.index')
             ->with('message', "Incidencia #{$incidencia->id} registrada correctamente.");
@@ -172,3 +202,4 @@ class IncidenciaController extends Controller
         return redirect()->back()->with('message', "Incidencia #{$incidencia->id} actualizada correctamente.");
     }
 }
+

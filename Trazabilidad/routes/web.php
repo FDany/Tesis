@@ -49,6 +49,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('recepciones-deposito.verificar-bolsa');
         Route::get('buscar-para-despacho', [BolsaScannerController::class, 'buscarParaDespacho'])
             ->name('remitos-salida.buscar-bolsa');
+        Route::get('buscar-para-incidencia', [BolsaScannerController::class, 'buscarParaIncidencia'])
+            ->name('incidencias.buscar-bolsa');
     });
 
     // Módulo Bolsas

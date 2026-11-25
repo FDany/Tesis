@@ -70,4 +70,16 @@ class BolsaScannerController extends Controller
 
         return response()->json($resultado['payload'], $resultado['status']);
     }
+
+    #[Middleware('permission:crear incidencias')]
+    public function buscarParaIncidencia(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'codigo' => ['required', 'string', 'max:30'],
+        ]);
+
+        $resultado = $this->scannerService->buscarParaIncidencia($validated['codigo']);
+
+        return response()->json($resultado['payload'], $resultado['status']);
+    }
 }
