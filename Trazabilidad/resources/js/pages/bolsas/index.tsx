@@ -18,6 +18,7 @@ import { useAuth } from '@/hooks/use-auth';
 interface Filtros {
     buscar: string;
     estado: string;
+    tipo_bolsa_id: string;
     orden: string;
     direccion: string;
 }
@@ -27,6 +28,7 @@ interface IndexProps {
     porPagina: number;                            //requiere un número con la cantidad de remitos que se muestran por página.
     opcionesPorPagina: number[];                 //requiere un arreglo de números con las cantidades que el selector puede ofrecer
     filtros: Filtros;
+    tiposBolsa: { id: number; tipo_residuo: string; color: string }[];
     estados: string[];
     bolsaDetalle?: BolsaDetalle;
 }
@@ -36,12 +38,15 @@ export default function Index({
     porPagina,
     opcionesPorPagina,
     filtros,
+    tiposBolsa,
     estados,
     bolsaDetalle
 }: IndexProps) {
 
     const { can } = useAuth();
     const [modalOpen, setModalOpen] = useState(false);
+
+    const [tipoBolsaId, setTipoBolsaId] = useState(filtros?.tipo_bolsa_id ?? '');
 
     // Inicializamos los estados con los valores provenientes
     const [buscar, setBuscar] = useState(filtros?.buscar ?? '');
@@ -94,6 +99,7 @@ export default function Index({
                 {
                     buscar,
                     estado: nuevoEstado,
+                    tipo_bolsa_id: tipoBolsaId,
                     orden,
                     direccion,
                     por_pagina: porPagina,
@@ -104,6 +110,15 @@ export default function Index({
                     replace: true,
                 },
             );
+        }
+
+        if (key === 'tipo_bolsa_id') {
+            const nuevoTipo = value === 'todos' ? '' : value;
+            setTipoBolsaId(nuevoTipo);
+            router.get('/bolsas', {
+                buscar, estado, tipo_bolsa_id: nuevoTipo,
+                orden, direccion, por_pagina: porPagina,
+            }, { preserveState: true, preserveScroll: true, replace: true });
         }
     };
 
@@ -203,8 +218,9 @@ export default function Index({
                         className="min-w-0 flex-1"
                     >
                         <FiltrosBolsas
-                            valores={{ buscar, estado }}
+                            valores={{ buscar, estado, tipo_bolsa_id: tipoBolsaId }} 
                             estados={estados}
+                            tiposBolsa={tiposBolsa}
                             onChange={cambiarFiltro}
                         />
                         <button type="submit" className="sr-only">

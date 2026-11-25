@@ -32,6 +32,28 @@ class RecepcionDepositoSeeder extends Seeder
             'id' => 3,  
             'fecha_hora' => '2026-11-06 07:30:00',  
             'recibe_usuario_id' => 4,  
-        ]);  
+        ]);
+
+        // Tanda 4: bolsas de los remitos de servicio #2 y #3 que luego salieron en los remitos 4-9
+        RecepcionDeposito::firstOrCreate(
+            ['id' => 4],
+            [
+                'fecha_hora' => '2026-11-13 18:00:00',
+                'recibe_usuario_id' => 4,
+                'created_at' => '2026-11-13 18:00:00',
+                'updated_at' => '2026-11-13 18:00:00',
+            ]
+        );
+
+        // Tanda 5: bolsas 20-22, aún en depósito (INGRESADA_AL_DEPOSITO / PESADA)
+        RecepcionDeposito::firstOrCreate(
+            ['id' => 5],
+            [
+                'fecha_hora' => '2026-11-21 18:00:00',
+                'recibe_usuario_id' => 4,
+                'created_at' => '2026-11-21 18:00:00',
+                'updated_at' => '2026-11-21 18:00:00',
+            ]
+        );
     }
 }

@@ -6,12 +6,14 @@ interface Props {
     valores: {
         buscar: string;
         estado: string;
+        tipo_bolsa_id: string;
     };
     estados: string[];
+    tiposBolsa: { id: number; tipo_residuo: string; color: string }[];
     onChange: (key: string, value: string) => void;
 }
 
-export function FiltrosBolsas({ valores, estados, onChange }: Props) {
+export function FiltrosBolsas({ valores, estados, tiposBolsa, onChange }: Props) {
     const campos: CampoFiltro[] = [
         {
             key: 'buscar',
@@ -31,15 +33,28 @@ export function FiltrosBolsas({ valores, estados, onChange }: Props) {
                 })),
             ],
         },
+        {
+            key: 'tipo_bolsa_id',
+            label: 'Tipo de bolsa',
+            type: 'select',
+            options: [
+                { value: 'todos', label: 'Todos los tipos' },
+                ...tiposBolsa.map((tipo) => ({
+                    value: String(tipo.id),
+                    label: tipo.tipo_residuo,
+                })),
+            ],
+        },
     ];
 
     return (
         <FiltroGenerico
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-3"
             campos={campos}
             valores={{
                 buscar: valores.buscar,
                 estado: valores.estado || 'todos',
+                tipo_bolsa_id: valores.tipo_bolsa_id || 'todos', 
             }}
             onChange={onChange}
         />

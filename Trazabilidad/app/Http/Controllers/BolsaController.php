@@ -35,6 +35,8 @@ class BolsaController extends Controller
         $opcionesPorPagina = self::OPCIONES_POR_PAGINA;
         $porPagina = (int) $request->input('por_pagina', $opcionesPorPagina[0]);
 
+        $tipoBolsaId = $request->input('tipo_bolsa_id', '');  
+
         if (! in_array($porPagina, $opcionesPorPagina, true)) {
             $porPagina = $opcionesPorPagina[0];
         }
@@ -53,6 +55,10 @@ class BolsaController extends Controller
             ->when($request->filled('estado'), function ($query) use ($estado) {
                 $query->where('estado', $estado);
             })
+            // Filtro por tipo de bolsa  
+            ->when($request->filled('tipo_bolsa_id'), function ($query) use ($tipoBolsaId) {  
+                $query->where('tipo_bolsa_id', $tipoBolsaId);  
+            })  
             ->orderBy($orden, $direccion)
             ->paginate($porPagina)
             ->withQueryString();
@@ -64,6 +70,7 @@ class BolsaController extends Controller
             'filtros' => [
                 'buscar' => $buscar,
                 'estado' => $estado,
+                'tipo_bolsa_id' => $tipoBolsaId,
                 'orden' => $orden,
                 'direccion' => $direccion,
             ],
@@ -74,6 +81,8 @@ class BolsaController extends Controller
                 ->orderBy('estado')
                 ->pluck('estado')
                 ->all(),
+            'tiposBolsa' => \App\Models\TipoBolsa::orderBy('tipo_residuo')  
+                ->get(['id', 'tipo_residuo', 'color']),  
         ]);
     }
 

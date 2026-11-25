@@ -25,5 +25,15 @@ class TiposBolsaSeeder extends Seeder
             'color' => '#FFFF00',
             'proveedor' => 'DGM',
         ]);
+
+        // Nuevo flujo: residuos comunes reciclables (verde claro).
+        TipoBolsa::firstOrCreate(
+            ['id' => 3],
+            [
+                'tipo_residuo' => 'Residuos Comunes Reciclables',
+                'color' => '#86EFAC',
+                'proveedor' => 'DGM',
+            ]
+        );
     }
 }

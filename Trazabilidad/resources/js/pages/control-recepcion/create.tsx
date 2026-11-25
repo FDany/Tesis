@@ -124,6 +124,10 @@ export default function CreateControlRecepcion({
             if (bolsa.codigo_barra !== codigo) {
                 throw new Error('El servidor devolvió una respuesta inesperada.');
             }
+            
+            if (bolsa.resultado === 'ESTADO_INVALIDO' || bolsa.resultado === 'DUPLICADO') {
+                throw new Error(bolsa.message);
+            }
 
             setEscaneadas((anteriores) => [
                 {

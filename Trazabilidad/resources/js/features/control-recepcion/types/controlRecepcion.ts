@@ -14,7 +14,14 @@ export interface RemitoPendienteControl {
   usuario_recep: string | null;
 }
 
-export type ResultadoEscaneo = 'DECLARADA' | 'FUERA_DE_RANGO' | 'INEXISTENTE' ;
+// export type ResultadoEscaneo = 'DECLARADA' | 'FUERA_DE_RANGO' | 'INEXISTENTE' ;
+export type ResultadoEscaneo =  
+  | 'DECLARADA'  
+  | 'FUERA_DE_RANGO'  
+  | 'INEXISTENTE'  
+  | 'ESTADO_INVALIDO'  
+  | 'DUPLICADO';  
+
 
 export interface BolsaEscaneada {
   codigo_barra: string;
