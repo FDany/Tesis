@@ -125,6 +125,7 @@ export default function IndexManifiestosFinales({
                                 value={porPagina}
                                 options={opcionesPorPagina}
                                 onChange={(val) => aplicarFiltros(val)}
+                                total={manifiestos.total} 
                             />
 
                             <div className="flex items-center gap-2">

@@ -25,7 +25,7 @@ enum EstadoBolsa: string
             self::RECIBIDA => 'Recibida',
             self::DISPONIBLE => 'Disponible',
             self::ENTREGADA_A_SERVICIO => 'Entregada a Servicio',
-            self::UTILIZADA => 'Utilizada',
+            // self::UTILIZADA => 'Utilizada',
             self::INGRESADA_AL_DEPOSITO => 'Ingresada al Depósito',
             self::PESADA => 'Pesada',
             self::DESPACHADA => 'Despachada',
@@ -43,7 +43,7 @@ enum EstadoBolsa: string
             self::RECIBIDA->value,
             self::DISPONIBLE->value,
             self::ENTREGADA_A_SERVICIO->value,
-            self::UTILIZADA->value,
+            // self::UTILIZADA->value,
             self::INGRESADA_AL_DEPOSITO->value,
             self::PESADA->value,
             self::DESPACHADA->value,
@@ -58,7 +58,8 @@ enum EstadoBolsa: string
     public static function utilizadas(): array
     {
         return [
-            self::UTILIZADA->value,
+            // self::UTILIZADA->value,
+            self::ENTREGADA_A_SERVICIO->value,
             self::INGRESADA_AL_DEPOSITO->value,
             self::PESADA->value,
             self::DESPACHADA->value,

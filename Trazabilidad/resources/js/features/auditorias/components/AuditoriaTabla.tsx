@@ -50,7 +50,7 @@ const ETIQUETAS_ESTADOS: Record<string, string> = {
     RECIBIDA : 'Recibida',
     DISPONIBLE: 'Disponible',
     ENTREGADA_A_SERVICIO: 'Entregada a servicio',
-    UTILIZADA: 'Utilizada',
+    // UTILIZADA: 'Utilizada',
     INGRESADA_AL_DEPOSITO: 'Recibida en depósito',
     PESADA: 'Pesada',
     DESPACHADA: 'Despachada',

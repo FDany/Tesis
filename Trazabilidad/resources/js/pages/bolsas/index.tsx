@@ -232,6 +232,7 @@ export default function Index({
                             value={porPagina}
                             options={opcionesPorPagina}
                             onChange={handlePorPaginaChange}
+                            total={bolsas.total}
                         />
                     </div>
 
