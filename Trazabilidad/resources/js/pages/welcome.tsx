@@ -9,7 +9,7 @@ export default function Welcome() {
         <>
             <Head title="Hospital San Bernardo" />
 
-            <div className="flex min-h-screen flex-col justify-between bg-neutral-100 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+            <div className="flex min-h-screen flex-col justify-between bg-muted text-foreground dark:bg-background">
                 {/* Barra superior */}
                 <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
                     <div className="flex items-center gap-3">
@@ -18,12 +18,12 @@ export default function Welcome() {
                             alt="Logo HSB"
                             className="h-9 w-auto object-contain"
                         />
-                        <div className="h-6 w-px bg-neutral-300 dark:bg-neutral-700" />
+                        <div className="h-6 w-px bg-border" />
                         <div>
                             <span className="block text-sm font-semibold leading-none tracking-tight">
                                 EcoGestión
                             </span>
-                            <span className="mt-1 block text-xs text-neutral-500 dark:text-neutral-400">
+                            <span className="mt-1 block text-xs text-muted-foreground">
                                 Trazabilidad de Residuos
                             </span>
                         </div>
@@ -47,10 +47,10 @@ export default function Welcome() {
 
                 {/* Tarjeta central */}
                 <main className="mx-auto flex w-full max-w-5xl flex-1 items-center px-6 py-6">
-                    <div className="grid w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900 lg:grid-cols-12">
+                    <div className="grid w-full overflow-hidden rounded-2xl border border-border bg-card shadow-sm lg:grid-cols-12">
                         {/* Columna Izquierda: Presentación y Acción */}
                         <div className="flex flex-col justify-center p-8 sm:p-12 lg:col-span-7">
-                            <div className="mb-4 inline-flex w-fit items-center rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-600 dark:border-neutral-800 dark:bg-neutral-800/60 dark:text-neutral-300">
+                            <div className="mb-4 inline-flex w-fit items-center rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                                 Gestión Ambiental Hospitalaria
                             </div>
 
@@ -58,7 +58,7 @@ export default function Welcome() {
                                 Control integral de residuos peligrosos
                             </h1>
 
-                            <p className="mt-4 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                                 Sistema interno del Hospital San Bernardo para la trazabilidad por código de barras, pesaje, distribución por servicios y conciliación de manifiestos de disposición final.
                             </p>
 
@@ -146,7 +146,7 @@ export default function Welcome() {
                 </main>
 
                 {/* Pie de página */}
-                <footer className="py-6 text-center text-xs text-neutral-500 dark:text-neutral-400">
+                <footer className="py-6 text-center text-xs text-muted-foreground">
                     Hospital San Bernardo • Salta, Argentina — EcoGestión
                 </footer>
             </div>

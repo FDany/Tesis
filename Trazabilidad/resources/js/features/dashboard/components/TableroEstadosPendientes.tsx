@@ -95,7 +95,7 @@ export function TableroEstadosPendientes({ pendientes }: Props) {
                             {remitosDgm.toLocaleString('es-AR')}
                         </span>
                     </div>
-                    <div className="flex justify-between items-center text-sm bg-slate-50 dark:bg-slate-900 p-2 rounded-md border">
+                    <div className="flex justify-between items-center text-sm bg-muted p-2 rounded-md border">
                         <span className="text-muted-foreground font-medium">Manifiestos</span>
                         <span className="font-bold font-mono">
                             {manifiestos.toLocaleString('es-AR')}

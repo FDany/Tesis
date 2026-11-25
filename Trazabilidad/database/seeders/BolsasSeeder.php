@@ -189,5 +189,25 @@ class BolsasSeeder extends Seeder
             'created_at' => '2026-10-05 10:00:00',
             'updated_at' => '2026-10-05 10:00:00',
         ]);
+
+        // ------------------------------------------------------------------------
+        // 4. Bolsas RECIBIDAS (Remito de recepción #2 pendiente de control)
+        // ------------------------------------------------------------------------
+        for ($i = 1; $i <= 5; $i++) {
+            Bolsa::firstOrCreate([
+                'id' => 10 + $i,
+                'codigo_barra' => '0002' . str_pad((string) $i, 9, '0', STR_PAD_LEFT),
+                'tipo_bolsa_id' => 1,
+                'tamanio_id' => 1,
+                'estado' => EstadoBolsa::RECIBIDA->value,
+                'peso' => null,
+                'rem_rep_id' => 2,
+                'remitos_serv_id' => null,
+                'recep_dep_id' => null,
+                'rem_sal_id' => null,
+                'created_at' => '2026-11-20 09:00:00',
+                'updated_at' => '2026-11-20 09:00:00',
+            ]);
+        }
     }
 }

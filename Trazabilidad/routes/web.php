@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BolsaController;
 use App\Http\Controllers\BolsaScannerController;
+use App\Http\Controllers\ControlRecepcionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IncidenciaController;
 use App\Http\Controllers\PermissionController;
@@ -61,6 +62,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('remitos-recepcion.pdf');
     Route::post('/remitos-recepcion/{remito}/enviar-pdf', [RemitoRecepcionController::class, 'enviarPdf'])
         ->name('remitos-recepcion.enviar-pdf');
+
+    // Control de Recepción (escaneo de bolsas RECIBIDA de un remito de recepción)
+    Route::get('control-recepcion', [ControlRecepcionController::class, 'create'])
+        ->name('control-recepcion.create');
+    Route::post('control-recepcion', [ControlRecepcionController::class, 'store'])
+        ->name('control-recepcion.store');
+    Route::get('control-recepcion/verificar-bolsa', [ControlRecepcionController::class, 'verificarBolsa'])
+        ->name('control-recepcion.verificar-bolsa');
 
     // Módulo Remitos de Entrega al Servicio
     Route::resource('remitos-entrega-servicio', RemitoEntregaServicioController::class)

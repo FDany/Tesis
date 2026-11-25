@@ -56,7 +56,7 @@ export function GraficoGeneracionServicio({ metricasServicio }: Props) {
                                         name === 'kilogramos' ? `${value} Kg` : `${value} bolsas`,
                                         name === 'kilogramos' ? 'Peso Total' : 'Cantidad Bolsas',
                                     ]}
-                                    contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                                    contentStyle={{ borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--popover)', color: 'var(--popover-foreground)' }}
                                 />
                                 <Bar dataKey="kilogramos" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />
                             </BarChart>

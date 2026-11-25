@@ -18,7 +18,10 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
     'codigo_fin',
     'cantidad_declarada',
     'tipo_bolsa_id',
-    'tamanio_id'
+    'tamanio_id',
+    'estado',
+    'control_usuario_id',
+    'fecha_control',
 ])]
 class RemitoRecepcion extends Model
 {
@@ -29,7 +32,11 @@ class RemitoRecepcion extends Model
     protected $casts = [
         'fecha_recepcion' => 'datetime',
         'cantidad_declarada' => 'integer',
+        'fecha_control' => 'datetime',
     ];
+
+    public const ESTADO_PENDIENTE_CONTROL = 'PENDIENTE_CONTROL';
+    public const ESTADO_CONCILIADO = 'CONCILIADO';
 
     /** Relaciones Eloquent */
 
@@ -60,5 +67,16 @@ class RemitoRecepcion extends Model
     public function documentosAdjuntos(): MorphMany
     {
         return $this->morphMany(DocumentoAdjunto::class, 'documentable');
+    }
+
+    public function usuarioControl(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'control_usuario_id');
+    }
+
+    /** Incidencias generadas durante el control de recepción. */
+    public function incidencias(): HasMany
+    {
+        return $this->hasMany(Incidencia::class, 'rem_rep_id');
     }
 }

@@ -66,7 +66,7 @@ export function RemitoRecepcionModalForm({
   };
 
   const inputStyle =
-    'border border-slate-400 bg-white focus:border-slate-800 focus:ring-1 focus:ring-slate-800 shadow-sm transition-all';
+    'border border-slate-400 bg-background focus:border-foreground focus:ring-1 focus:ring-foreground shadow-sm transition-all';
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -218,14 +218,14 @@ export function RemitoRecepcionModalForm({
               type="button"
               variant="outline"
               onClick={() => handleClose(false)}
-              className="border-2 border-black bg-white hover:bg-zinc-100 text-black font-semibold shadow-sm px-4 cursor-pointer"
+              className="border-2 border-foreground bg-background hover:bg-muted text-foreground font-semibold shadow-sm px-4 cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={processing}
-              className="bg-black hover:bg-zinc-800 text-white font-semibold shadow-sm px-4 cursor-pointer"
+              className="bg-foreground hover:bg-foreground/85 text-background font-semibold shadow-sm px-4 cursor-pointer"
             >
               {processing ? 'Guardando...' : 'Guardar y Generar Bolsas'}
             </Button>

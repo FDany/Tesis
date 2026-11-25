@@ -18,6 +18,8 @@ enum TipoIncidencia: string
     // G-I: Pesaje y Cantidades
     case DIFERENCIA_PESO = 'DIFERENCIA_PESO';
     case DIFERENCIA_CONCILIACION_DGM = 'DIFERENCIA_CONCILIACION_DGM';
+    case BOLSA_FALTANTE_RECEPCION = 'BOLSA_FALTANTE_RECEPCION';
+    case BOLSA_SOBRANTE_RECEPCION = 'BOLSA_SOBRANTE_RECEPCION';
     case BOLSA_SIN_PESAJE = 'BOLSA_SIN_PESAJE';
 
     // K-L: Documentación y Otros
@@ -43,6 +45,8 @@ enum TipoIncidencia: string
             self::BOLSA_SIN_SERVICIO => 'Bolsa sin servicio de origen identificado',
             self::DIFERENCIA_PESO => 'Diferencia en el peso registrado',
             self::DIFERENCIA_CONCILIACION_DGM => 'Diferencia de cantidad en retiro DGM',
+            self::BOLSA_FALTANTE_RECEPCION => 'Bolsas declaradas en remito de recepción no recibidas',
+            self::BOLSA_SOBRANTE_RECEPCION => 'Bolsa recibida no declarada en remito de recepción',
             self::BOLSA_SIN_PESAJE => 'Bolsa pendiente de pesaje',
             self::DOCUMENTACION_FALTANTE => 'Documentación física o digital faltante',
 
