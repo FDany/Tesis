@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'usuario_registra',
     'bolsa_id',
     'rem_sal_id',
+    'rem_rep_id',
     'codigo_no_registrado',
     'tipo_bolsa_id',
     'servicio_id',
@@ -69,6 +70,12 @@ class Incidencia extends Model
     public function remitoSalidaRetiro(): BelongsTo
     {
         return $this->belongsTo(RemitoSalidaRetiro::class, 'rem_sal_id');
+    }
+
+    /**Remito de recepción controlado que originó la incidencia (opcional).*/
+    public function remitoRecepcion(): BelongsTo
+    {
+        return $this->belongsTo(RemitoRecepcion::class, 'rem_rep_id');
     }
 
     /**Evidencias o fotografías adjuntas a esta incidencia (Polimórfico).*/

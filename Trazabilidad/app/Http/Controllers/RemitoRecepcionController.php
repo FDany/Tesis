@@ -186,6 +186,9 @@ class RemitoRecepcionController extends Controller
             }
 
             $validated['recep_usuario_id'] = $request->user()->id;
+            // Antes: el remito no tenía estado.
+            // Ahora: nace pendiente del control físico de recepción.
+            $validated['estado'] = 'PENDIENTE_CONTROL';
 
             $remito = RemitoRecepcion::create($validated);
 
@@ -197,7 +200,9 @@ class RemitoRecepcionController extends Controller
                     'codigo_barra' => $codigo13Digitos,
                     'tipo_bolsa_id' => $validated['tipo_bolsa_id'],
                     'tamanio_id' => $validated['tamanio_id'],
-                    'estado' => EstadoBolsa::DISPONIBLE->value,
+                    // 'estado' => EstadoBolsa::DISPONIBLE->value,
+                    // Las bolsas quedan RECIBIDA hasta que se escaneen en "Control Recepción".
+                    'estado' => EstadoBolsa::RECIBIDA->value,
                     'rem_rep_id' => $remito->id,
                     'created_at' => $now,
                     'updated_at' => $now,

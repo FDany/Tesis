@@ -13,6 +13,7 @@ import {
     Recycle,
     Ruler,
     Scale,
+    ScanBarcode,
     Send,
     Settings,
     ShieldCheck,
@@ -83,6 +84,11 @@ const navItems: AppNavItem[] = [
         href: '/remitos-recepcion',
         icon: ClipboardCheck,
         permission: 'listar remitosRecepcion',
+    },
+    {
+        title: 'Control Recepción',
+        href: '/control-recepcion',
+        icon: ScanBarcode,
     },
     {
         title: 'Bolsas',
