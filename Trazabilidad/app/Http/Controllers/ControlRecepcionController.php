@@ -7,6 +7,8 @@ use App\Enums\TipoIncidencia;
 use App\Models\Bolsa;
 use App\Models\Incidencia;
 use App\Models\RemitoRecepcion;
+use App\Services\AuditoriaService;
+use App\Services\BolsaScannerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,7 +23,7 @@ class ControlRecepcionController extends Controller
     /**
      * Vista de control físico de remitos de recepción con bolsas en estado RECIBIDA.
      */
-    #[Middleware('auth')]
+    #[Middleware('permission:controlar remitosRecepcion')]
     public function create(Request $request): Response
     {
         $remitos = RemitoRecepcion::query()
@@ -63,15 +65,16 @@ class ControlRecepcionController extends Controller
     }
 
     /**
-     * Verifica un código escaneado contra las bolsas del remito seleccionado.
-     * Devuelve si la bolsa está declarada (RECIBIDA en el remito) o si es sobrante.
+     * Verifica un código escaneado contra el remito seleccionado usando BolsaScannerService.
      */
-    #[Middleware('auth')]
-    public function verificarBolsa(Request $request): JsonResponse
+    #[Middleware('permission:controlar remitosRecepcion')]
+    public function verificarBolsa(Request $request, BolsaScannerService $scanner): JsonResponse
     {
         $validated = $request->validate([
             'remito_id' => ['required', 'integer', 'exists:remitos_recepcion,id'],
             'codigo' => ['required', 'string', 'regex:/^\d{13}$/'],
+            'codigos_ya_escaneados' => ['nullable', 'array'],
+            'codigos_ya_escaneados.*' => ['string', 'regex:/^\d{13}$/'],
         ]);
 
         $remito = RemitoRecepcion::findOrFail($validated['remito_id']);
@@ -82,38 +85,21 @@ class ControlRecepcionController extends Controller
             ], 422);
         }
 
-        $bolsa = Bolsa::query()
-            ->where('codigo_barra', $validated['codigo'])
-            ->first();
+        $resultado = $scanner->evaluarEscaneoRecepcion(
+            remito: $remito,
+            codigo: $validated['codigo'],
+            codigosYaEscaneados: $validated['codigos_ya_escaneados'] ?? [],
+        );
 
-        if ($bolsa && (int) $bolsa->rem_rep_id === $remito->id) {
-            if ($bolsa->estado !== EstadoBolsa::RECIBIDA) {
-                return response()->json([
-                    'message' => "La bolsa {$bolsa->codigo_barra} no está pendiente de control. Estado actual: {$bolsa->estado->label()}.",
-                ], 422);
-            }
-
-            return response()->json([
-                'codigo_barra' => $bolsa->codigo_barra,
-                'resultado' => 'DECLARADA',
-                'message' => 'Bolsa declarada en el remito.',
-            ]);
-        }
-
-        return response()->json([
-            'codigo_barra' => $validated['codigo'],
-            'resultado' => 'SOBRANTE',
-            'message' => $bolsa
-                ? "La bolsa pertenece a otro remito (#{$bolsa->rem_rep_id}). Se registrará como sobrante."
-                : 'El código no está registrado en el sistema. Se registrará como sobrante.',
-        ]);
+        return response()->json($resultado['payload'], $resultado['status']);
     }
 
     /**
      * Confirma el control: las bolsas escaneadas pasan de RECIBIDA a DISPONIBLE,
-     * se generan incidencias por faltantes/sobrantes y el remito queda CONCILIADO.
+     * las faltantes pasan a NO_RECIBIDA, se registran auditorías e incidencias
+     * y el remito queda CONCILIADO.
      */
-    #[Middleware('auth')]
+    #[Middleware('permission:controlar remitosRecepcion')]
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -159,6 +145,23 @@ class ControlRecepcionController extends Controller
                         'estado' => EstadoBolsa::DISPONIBLE->value,
                         'updated_at' => $ahora,
                     ]);
+
+                foreach ($bolsasControladas as $bolsa) {
+                    AuditoriaService::registrar(
+                        bolsaId: $bolsa->id,
+                        operacion: 'Control recepción - Disponible',
+                        valorAnterior: [
+                            'estado' => EstadoBolsa::RECIBIDA->value,
+                            'remito_recepcion_id' => $remito->id,
+                        ],
+                        valorNuevo: [
+                            'estado' => EstadoBolsa::DISPONIBLE->value,
+                            'remito_recepcion_id' => $remito->id,
+                        ],
+                        responsableId: $usuarioId,
+                        fechaHora: $ahora,
+                    );
+                }
             }
 
             if ($bolsasFaltantes->isNotEmpty()) {
@@ -169,6 +172,23 @@ class ControlRecepcionController extends Controller
                         'estado' => EstadoBolsa::NO_RECIBIDA->value,
                         'updated_at' => $ahora,
                     ]);
+
+                foreach ($bolsasFaltantes as $bolsa) {
+                    AuditoriaService::registrar(
+                        bolsaId: $bolsa->id,
+                        operacion: 'Control recepción - No recibida',
+                        valorAnterior: [
+                            'estado' => EstadoBolsa::RECIBIDA->value,
+                            'remito_recepcion_id' => $remito->id,
+                        ],
+                        valorNuevo: [
+                            'estado' => EstadoBolsa::NO_RECIBIDA->value,
+                            'remito_recepcion_id' => $remito->id,
+                        ],
+                        responsableId: $usuarioId,
+                        fechaHora: $ahora,
+                    );
+                }
 
                 $cantidadFaltantes = $bolsasFaltantes->count();
 

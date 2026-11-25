@@ -49,14 +49,18 @@ export default function CreateControlRecepcion({
         [remitos, data.remito_id],
     );
 
-    const declaradasEscaneadas = escaneadas.filter(
+    const correctasEscaneadas = escaneadas.filter(
         (bolsa) => bolsa.resultado === 'DECLARADA',
     ).length;
-    const sobrantes = escaneadas.filter(
-        (bolsa) => bolsa.resultado === 'SOBRANTE',
+    const fueraDeRango = escaneadas.filter(
+        (bolsa) => bolsa.resultado === 'FUERA_DE_RANGO',
     ).length;
+    const inexistentes = escaneadas.filter(
+        (bolsa) => bolsa.resultado === 'INEXISTENTE',
+    ).length;
+    const sobrantes = fueraDeRango + inexistentes;
     const pendientes = remitoSeleccionado
-        ? remitoSeleccionado.bolsas_recibidas_count - declaradasEscaneadas
+        ? Math.max(0, remitoSeleccionado.bolsas_recibidas_count - correctasEscaneadas)
         : 0;
 
     const seleccionarRemito = (valor: string) => {
@@ -76,7 +80,9 @@ export default function CreateControlRecepcion({
         }
 
         if (escaneadas.some((bolsa) => bolsa.codigo_barra === codigo)) {
-            setErrorEscaneo('Ese código ya fue escaneado.');
+            const mensajeDuplicado = 'Código duplicado: ya fue escaneado en este control.';
+            setErrorEscaneo(mensajeDuplicado);
+            toast.warning(mensajeDuplicado);
             return false;
         }
 
@@ -104,9 +110,9 @@ export default function CreateControlRecepcion({
             if (!response.ok) {
                 const mensaje =
                     typeof resultado === 'object' &&
-                    resultado !== null &&
-                    'message' in resultado &&
-                    typeof resultado.message === 'string'
+                        resultado !== null &&
+                        'message' in resultado &&
+                        typeof resultado.message === 'string'
                         ? resultado.message
                         : 'No se pudo validar la bolsa.';
 
@@ -128,7 +134,7 @@ export default function CreateControlRecepcion({
                 ...anteriores,
             ]);
 
-            if (bolsa.resultado === 'SOBRANTE') {
+            if (bolsa.resultado === 'FUERA_DE_RANGO' || bolsa.resultado === 'INEXISTENTE') {
                 toast.warning(bolsa.message);
             }
 
@@ -299,7 +305,7 @@ export default function CreateControlRecepcion({
 
                     {remitoSeleccionado && (
                         <div className="grid gap-2 sm:grid-cols-3">
-                            <Contador label="Controladas" valor={declaradasEscaneadas} />
+                            <Contador label="Controladas" valor={correctasEscaneadas} />
                             <Contador label="Pendientes" valor={pendientes} />
                             <Contador label="Sobrantes" valor={sobrantes} />
                         </div>
@@ -333,8 +339,10 @@ export default function CreateControlRecepcion({
                                                 }
                                             >
                                                 {bolsa.resultado === 'DECLARADA'
-                                                    ? 'Declarada'
-                                                    : 'Sobrante'}
+                                                    ? 'Código correcto'
+                                                    : bolsa.resultado === 'FUERA_DE_RANGO'
+                                                        ? 'Fuera de rango'
+                                                        : 'Inexistente'}
                                             </Badge>
                                         </div>
                                         <Button

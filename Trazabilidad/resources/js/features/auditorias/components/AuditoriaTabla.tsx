@@ -40,15 +40,18 @@ const ETIQUETAS_CAMPOS: Record<string, string> = {
     remitos_serv_id: 'Remito de entrega',
     rem_sal_id: 'Remito de salida',
     remito_recepcion_id: 'Remito de Recepción',
+    recep_dep_id: 'Recepcion Deposito N°',
     peso: 'Peso',
     numero_manifiesto: 'Manifiesto N°',
 };
 
 const ETIQUETAS_ESTADOS: Record<string, string> = {
+    NO_RECIBIDA : 'No Recibida',
+    RECIBIDA : 'Recibida',
     DISPONIBLE: 'Disponible',
     ENTREGADA_A_SERVICIO: 'Entregada a servicio',
     UTILIZADA: 'Utilizada',
-    RECIBIDA_EN_DEPOSITO: 'Recibida en depósito',
+    INGRESADA_AL_DEPOSITO: 'Recibida en depósito',
     PESADA: 'Pesada',
     DESPACHADA: 'Despachada',
     RETIRADA_POR_DGM: 'Retirada por DGM',
