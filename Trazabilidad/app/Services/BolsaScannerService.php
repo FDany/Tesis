@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\EstadoBolsa;
 use App\Models\Bolsa;
+use App\Models\RemitoRecepcion;
 
 class BolsaScannerService
 {
@@ -141,5 +142,97 @@ class BolsaScannerService
                 'disponible' => true,
             ],
         ];
+    }
+
+    public function evaluarEscaneoRecepcion(
+        RemitoRecepcion $remito,
+        string $codigo,
+        array $codigosYaEscaneados = [],
+    ): array {
+        if (in_array($codigo, $codigosYaEscaneados, true)) {
+            return [
+                'status' => 422,
+                'payload' => [
+                    'codigo_barra' => $codigo,
+                    'resultado' => 'DUPLICADO',
+                    'message' => "El código {$codigo} ya fue escaneado en este control.",
+                ],
+            ];
+        }
+
+        $bolsa = Bolsa::query()
+            ->where('codigo_barra', $codigo)
+            ->first();
+
+        if ($bolsa && (int) $bolsa->rem_rep_id === $remito->id) {
+            if ($bolsa->estado !== EstadoBolsa::RECIBIDA) {
+                return [
+                    'status' => 422,
+                    'payload' => [
+                        'codigo_barra' => $bolsa->codigo_barra,
+                        'resultado' => 'ESTADO_INVALIDO',
+                        'message' => "La bolsa {$bolsa->codigo_barra} no está pendiente de control. Estado actual: {$bolsa->estado->label()}.",
+                    ],
+                ];
+            }
+
+            return [
+                'status' => 200,
+                'payload' => [
+                    'id' => $bolsa->id,
+                    'codigo_barra' => $bolsa->codigo_barra,
+                    'resultado' => 'DECLARADA',
+                    'message' => 'Código correcto: pertenece al remito recibido.',
+                ],
+            ];
+        }
+
+        $fueraDeRango = false;
+        if (
+            is_string($remito->codigo_inicio)
+            && is_string($remito->codigo_fin)
+            && preg_match('/^\d{13}$/', $remito->codigo_inicio)
+            && preg_match('/^\d{13}$/', $remito->codigo_fin)
+            && preg_match('/^\d{13}$/', $codigo)
+        ) {
+            $fueraDeRango = strcmp($codigo, $remito->codigo_inicio) < 0
+                || strcmp($codigo, $remito->codigo_fin) > 0;
+        }
+
+        if ($bolsa || $fueraDeRango) {
+            return [
+                'status' => 200,
+                'payload' => [
+                    'codigo_barra' => $codigo,
+                    'resultado' => 'FUERA_DE_RANGO',
+                    'message' => $bolsa
+                        ? "Código fuera de rango: la bolsa pertenece al remito #{$bolsa->rem_rep_id}."
+                        : "Código fuera de rango: no pertenece al rango ({$remito->codigo_inicio} - {$remito->codigo_fin}) del remito.",
+                ],
+            ];
+        }
+
+        return [
+            'status' => 200,
+            'payload' => [
+                'codigo_barra' => $codigo,
+                'resultado' => 'INEXISTENTE',
+                'message' => 'Código inexistente: no corresponde a una recepción registrada.',
+            ],
+        ];
+    }
+
+    /**
+     * @param  array<int, string>  $codigosEscaneados
+     * @return array<int, string>
+     */
+    public function obtenerFaltantesRecepcion(RemitoRecepcion $remito, array $codigosEscaneados = []): array
+    {
+        return $remito->bolsas()
+            ->where('estado', EstadoBolsa::RECIBIDA->value)
+            ->pluck('codigo_barra')
+            ->reject(fn (string $codigo) => in_array($codigo, $codigosEscaneados, true))
+            ->values()
+            ->all();
     }
 }

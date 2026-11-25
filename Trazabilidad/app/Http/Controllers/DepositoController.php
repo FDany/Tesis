@@ -2,29 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EstadoBolsa;
 use App\Models\Bolsa;
 use App\Models\RecepcionDeposito;
-use Illuminate\Http\JsonResponse;
+use App\Services\AuditoriaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Routing\Attributes\Controllers\Middleware;
-use App\Enums\EstadoBolsa;
 
 class DepositoController extends Controller
 {
-
     #[Middleware('permission:gestionar deposito')]
     public function create(Request $request): Response
     {
-        $puedeGestionar = $request->user()->can('gestionar deposito');  
+        $puedeGestionar = $request->user()->can('gestionar deposito');
 
         return Inertia::render('deposito/create', [
-            'puedeRecepcionar' => $puedeGestionar,  
-            'puedePesar' => $puedeGestionar, 
+            'puedeRecepcionar' => $puedeGestionar,
+            'puedePesar' => $puedeGestionar,
         ]);
     }
 
@@ -60,7 +59,6 @@ class DepositoController extends Controller
 
             $bolsasEstado = $bolsas
                 ->filter(fn (Bolsa $bolsa) =>
-                    // $bolsa->estado !== 'OCUPADO'
                     $bolsa->estado !== EstadoBolsa::ENTREGADA_A_SERVICIO
                     || $bolsa->remitos_serv_id === null
                     || $bolsa->recep_dep_id !== null
@@ -75,17 +73,37 @@ class DepositoController extends Controller
                 ]);
             }
 
+            $usuarioId = $request->user()->id;
+            $fechaRecepcion = now();
+
             $recepcion = RecepcionDeposito::create([
-                'fecha_hora' => now(),
-                'recibe_usuario_id' => $request->user()->id,
+                'fecha_hora' => $fechaRecepcion,
+                'recibe_usuario_id' => $usuarioId,
             ]);
 
             foreach ($bolsas as $bolsa) {
+                $estadoAnterior = $bolsa->estado->value;
+                $recepDepAnterior = $bolsa->recep_dep_id;
+
                 $bolsa->update([
-                    // 'estado' => 'EN_DEPOSITO',
-                    'estado' => EstadoBolsa::INGRESADA_AL_DEPOSITO,
+                    'estado' => EstadoBolsa::INGRESADA_AL_DEPOSITO->value,
                     'recep_dep_id' => $recepcion->id,
                 ]);
+
+                AuditoriaService::registrar(
+                    bolsaId: $bolsa->id,
+                    operacion: 'Recepción en depósito',
+                    valorAnterior: [
+                        'estado' => $estadoAnterior,
+                        'recep_dep_id' => $recepDepAnterior,
+                    ],
+                    valorNuevo: [
+                        'estado' => EstadoBolsa::INGRESADA_AL_DEPOSITO->value,
+                        'recep_dep_id' => $recepcion->id,
+                    ],
+                    responsableId: $usuarioId,
+                    fechaHora: $fechaRecepcion,
+                );
             }
 
             return back()->with('success', 'Bolsas recibidas en depósito correctamente.');
@@ -101,7 +119,7 @@ class DepositoController extends Controller
             'peso' => ['required', 'numeric', 'gt:0'],
         ]);
 
-        return DB::transaction(function () use ($validated) {
+        return DB::transaction(function () use ($validated, $request) {
             $bolsa = Bolsa::query()
                 ->where('codigo_barra', $validated['codigo'])
                 ->lockForUpdate()
@@ -114,7 +132,6 @@ class DepositoController extends Controller
             }
 
             if (
-                // $bolsa->estado !== 'EN_DEPOSITO'
                 $bolsa->estado !== EstadoBolsa::INGRESADA_AL_DEPOSITO
                 || $bolsa->recep_dep_id === null
                 || $bolsa->rem_sal_id !== null
@@ -124,11 +141,30 @@ class DepositoController extends Controller
                 ]);
             }
 
+            $usuarioId = $request->user()->id;
+            $fechaPesaje = now();
+            $estadoAnterior = $bolsa->estado->value;
+            $pesoAnterior = $bolsa->peso;
+
             $bolsa->update([
                 'peso' => $validated['peso'],
-                // 'estado' => 'PESADA',
-                'estado' => EstadoBolsa::PESADA,
+                'estado' => EstadoBolsa::PESADA->value,
             ]);
+
+            AuditoriaService::registrar(
+                bolsaId: $bolsa->id,
+                operacion: 'Pesaje en depósito',
+                valorAnterior: [
+                    'estado' => $estadoAnterior,
+                    'peso' => $pesoAnterior,
+                ],
+                valorNuevo: [
+                    'estado' => EstadoBolsa::PESADA->value,
+                    'peso' => $validated['peso'],
+                ],
+                responsableId: $usuarioId,
+                fechaHora: $fechaPesaje,
+            );
 
             return back()->with(
                 'success',

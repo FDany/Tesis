@@ -90,6 +90,7 @@ const navItems: AppNavItem[] = [
         title: 'Control Recepción',
         href: '/control-recepcion',
         icon: ScanBarcode,
+        permission: 'controlar remitosRecepcion',
     },
     {
         title: 'Bolsas',

@@ -118,7 +118,7 @@ export function RemitoRecepcionTable({
                 </TableCell>
 
                 <TableCell className="text-right">
-                  {remito.estado === 'PENDIENTE_CONTROL' && (
+                  {remito.estado === 'PENDIENTE_CONTROL' && (can('controlar remitosRecepcion')) && (
                     <Button
                       asChild
                       variant="ghost"

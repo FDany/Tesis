@@ -60,6 +60,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'verDetalle remitosRecepcion',
             'enviarPDFxCorreo remitosRecepcion',
             'descargarPDF remitosRecepcion',
+            'controlar remitosRecepcion',
 
             // Bolsas
             'listar bolsas',
@@ -123,7 +124,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'listar flujosResiduos', 'crear flujosResiduos', 'editar flujosResiduos',
             'listar servicios',
             'listar remitosRecepcion', 'crear remitosRecepcion', 'verDetalle remitosRecepcion',
-            'enviarPDFxCorreo remitosRecepcion', 'descargarPDF remitosRecepcion',
+            'enviarPDFxCorreo remitosRecepcion', 'descargarPDF remitosRecepcion', 'controlar remitosRecepcion',
             'listar bolsas', 'crear bolsas', 'verDetalle bolsas', 'descargarExcel bolsas',
             'listar remitosEntregaServicio', 'crear remitosEntregaServicio', 'descargarPDF remitosEntregaServicio',
             'listar incidencias', 'crear incidencias', 'verDetalle incidencias',
