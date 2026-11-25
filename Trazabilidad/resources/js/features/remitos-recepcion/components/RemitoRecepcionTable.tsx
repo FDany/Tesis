@@ -136,6 +136,7 @@ export function RemitoRecepcionTable({
                   )}
                   {(can('verDetalle remitosRecepcion'))&&(
                     <Button
+                    title="Ver Detalle Remito"
                     type="button"
                     variant="ghost"
                     size="icon"
