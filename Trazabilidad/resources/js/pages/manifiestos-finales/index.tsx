@@ -22,6 +22,8 @@ interface Props {
         buscar: string;
         fecha_desde: string;
         fecha_hasta: string;
+        orden: string;
+        direccion: 'asc' | 'desc';
     };
 }
 
@@ -50,6 +52,31 @@ export default function IndexManifiestosFinales({
     opcionesPorPagina,
     filtros,
 }: Props) {
+
+    const [orden, setOrden] = useState<string>(filtros.orden || 'fecha');
+    const [direccion, setDireccion] = useState<'asc' | 'desc'>(filtros.direccion || 'desc');
+
+    const ordenarPor = (campo: string) => {
+        const nuevaDireccion = orden === campo && direccion === 'asc' ? 'desc' : 'asc';
+        setOrden(campo);
+        setDireccion(nuevaDireccion);
+        router.get(
+            '/manifiestos-finales',
+            {
+                ...valores,
+                por_pagina: porPagina,
+                orden: campo,
+                direccion: nuevaDireccion,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            }
+        );
+    };
+
+
     const [valores, setValores] = useState<Record<string, string>>({
         buscar: filtros.buscar || '',
         fecha_desde: filtros.fecha_desde || '',
@@ -66,6 +93,8 @@ export default function IndexManifiestosFinales({
             {
                 ...valores,
                 por_pagina: nuevaCantidadFilas,
+                orden,
+                direccion,
             },
             {
                 preserveState: true,
@@ -125,7 +154,7 @@ export default function IndexManifiestosFinales({
                                 value={porPagina}
                                 options={opcionesPorPagina}
                                 onChange={(val) => aplicarFiltros(val)}
-                                total={manifiestos.total} 
+                                total={manifiestos.total}
                             />
 
                             <div className="flex items-center gap-2">
@@ -157,7 +186,13 @@ export default function IndexManifiestosFinales({
                 {/* Tabla + Paginador integrado */}
                 <Card className="shadow-sm overflow-hidden">
                     <CardContent className="p-0">
-                        <ManifiestosFinalesTabla manifiestos={manifiestos.data} />
+                        {/* <ManifiestosFinalesTabla manifiestos={manifiestos.data} /> */}
+                        <ManifiestosFinalesTabla
+                            manifiestos={manifiestos.data}
+                            orden={orden}
+                            direccion={direccion}
+                            onOrdenar={ordenarPor}
+                        />
                     </CardContent>
 
                     <Paginacion pagination={manifiestos} />

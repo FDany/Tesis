@@ -31,6 +31,19 @@ class ManifiestoFinalController extends Controller
         $fechaDesde = (string) $request->input('fecha_desde', '');
         $fechaHasta = (string) $request->input('fecha_hasta', '');
 
+        // Ordenamiento
+        $orden = $request->input('orden', 'fecha');  
+        $direccion = $request->input('direccion', 'desc');  
+        
+        $camposPermitidos = ['numero_manifiesto', 'rem_sal_id', 'fecha', 'fecha_tratamiento', 'peso_informado'];  
+        if (! in_array($orden, $camposPermitidos, true)) {  
+            $orden = 'fecha';  
+        }  
+        if (! in_array($direccion, ['asc', 'desc'], true)) {  
+            $direccion = 'desc';  
+        }  
+        // **************************************
+
         $opcionesPorPagina = self::OPCIONES_POR_PAGINA;
         $porPagina = (int) $request->input('por_pagina', $opcionesPorPagina[1]);
 
@@ -54,7 +67,9 @@ class ManifiestoFinalController extends Controller
             })
             ->when($fechaDesde !== '', fn($q) => $q->whereDate('fecha', '>=', $fechaDesde))
             ->when($fechaHasta !== '', fn($q) => $q->whereDate('fecha', '<=', $fechaHasta))
-            ->orderByDesc('fecha')
+            // ->orderByDesc('fecha')
+            // ->orderByDesc('id')
+            ->orderBy($orden, $direccion)  
             ->orderByDesc('id')
             ->paginate($porPagina)
             ->withQueryString();
@@ -67,6 +82,8 @@ class ManifiestoFinalController extends Controller
                 'buscar' => $buscar,
                 'fecha_desde' => $fechaDesde,
                 'fecha_hasta' => $fechaHasta,
+                'orden' => $orden,  
+                'direccion' => $direccion, 
             ],
         ]);
     }
