@@ -29,7 +29,7 @@ export default function Paginacion({
         return null;
 
     return (
-        <div className={`bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4`}> 
+        <div className={`bg-muted px-6 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4`}> 
             {/* Información de Registros */} 
             {/* <p className="text-sm text-muted-foreground text-center sm:text-left"> 
                 Mostrando{' '}
@@ -73,14 +73,14 @@ export default function Paginacion({
                     size="sm" 
                     disabled={!pagination.prev_page_url} 
                     onClick={() => router.get(pagination.prev_page_url!)} 
-                    className="bg-white text-gray-700 hover:bg-gray-50 shadow-xs disabled:opacity-50" 
+                    className="bg-card text-muted-foreground hover:bg-muted shadow-xs disabled:opacity-50" 
                 > 
                     <ChevronLeft className="w-4 h-4 mr-1" /> 
                     Anterior 
                 </Button>
 
                 {/* Indicador de Página Actual */} 
-                <span className="text-sm text-muted-foreground bg-gray-100/80 border border-gray-200/60 px-3 py-1.5 rounded-lg font-medium"> 
+                <span className="text-sm text-muted-foreground bg-muted border border-border px-3 py-1.5 rounded-lg font-medium"> 
                     Página{' '}
                     <span className="text-foreground font-semibold">
                         {pagination.current_page}
@@ -98,7 +98,7 @@ export default function Paginacion({
                     size="sm" 
                     disabled={!pagination.next_page_url} 
                     onClick={() => router.get(pagination.next_page_url!)} 
-                    className="bg-white text-gray-700 hover:bg-gray-50 shadow-xs disabled:opacity-50" 
+                    className="bg-card text-muted-foreground hover:bg-muted shadow-xs disabled:opacity-50" 
                 > 
                     Siguiente 
                     <ChevronRight className="w-4 h-4 ml-1" /> 

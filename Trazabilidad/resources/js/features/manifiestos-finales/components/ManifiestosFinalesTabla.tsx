@@ -120,7 +120,7 @@ export function ManifiestosFinalesTabla({ manifiestos }: ManifiestosFinalesTabla
                                                     <TooltipTrigger asChild>
                                                         <Link href={`/manifiestos-finales/${manifiesto.id}`}>
                                                             <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                <Eye className="h-4 w-4 text-slate-600" />
+                                                                <Eye className="h-4 w-4 text-muted-foreground" />
                                                             </Button>
                                                         </Link>
                                                     </TooltipTrigger>

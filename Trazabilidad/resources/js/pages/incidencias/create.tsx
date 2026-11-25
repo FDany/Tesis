@@ -63,14 +63,14 @@ export default function CreateIncidencia() {
             <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Registrar Incidencia Manual</h1>
-                        <p className="text-sm text-gray-600">
+                        <h1 className="text-2xl font-bold text-foreground">Registrar Incidencia Manual</h1>
+                        <p className="text-sm text-muted-foreground">
                             Reporte de imprevistos, discrepancias o anomalías operativas en la trazabilidad.
                         </p>
                     </div>
                     <Link
                         href="/incidencias"
-                        className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md font-medium transition-colors"
+                        className="px-4 py-2 text-sm bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md font-medium transition-colors"
                     >
                         Cancelar / Volver
                     </Link>
@@ -206,7 +206,7 @@ export default function CreateIncidencia() {
                                 {/* Lista interactiva de archivos adjuntados */}
                                 {data.documentos.length > 0 && (
                                     <div className="mt-3 space-y-2">
-                                        <p className="text-xs font-semibold text-gray-700">
+                                        <p className="text-xs font-semibold text-muted-foreground">
                                             Archivos seleccionados ({data.documentos.length}):
                                         </p>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -234,7 +234,7 @@ export default function CreateIncidencia() {
                                                             type="button"
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-6 w-6 text-gray-500 hover:text-red-600 shrink-0"
+                                                            className="h-6 w-6 text-muted-foreground hover:text-red-600 shrink-0"
                                                             onClick={() => handleRemoveFile(idx)}
                                                         >
                                                             <X className="h-3.5 w-3.5" />

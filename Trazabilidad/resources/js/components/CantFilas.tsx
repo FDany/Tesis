@@ -23,7 +23,7 @@ export default function CantFilas({
 }: cantFilasSelectorProps) {
     return (
         <div className={`${className} flex flex-row flex-nowrap items-center gap-2`}>
-            <label htmlFor="cantidad-filas" className="shrink-0 whitespace-nowrap text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <label htmlFor="cantidad-filas" className="shrink-0 whitespace-nowrap text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Mostrar
             </label>
 
@@ -33,7 +33,7 @@ export default function CantFilas({
                 value={String(value)}
                 onValueChange={(val) => onChange(Number(val))}
             >
-                <SelectTrigger id="cantidad-filas" className="w-32 shrink-0 bg-gray-50 border-gray-300 text-gray-900">
+                <SelectTrigger id="cantidad-filas" className="w-32 shrink-0 bg-muted border-border text-foreground">
                     <SelectValue />
                 </SelectTrigger>
 

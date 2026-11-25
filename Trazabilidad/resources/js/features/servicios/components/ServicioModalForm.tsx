@@ -75,7 +75,7 @@ export const ServicioModalForm: React.FC<Props> = ({
     };
 
     const inputStyle =
-        'border border-slate-400 bg-white focus:border-slate-800 focus:ring-1 focus:ring-slate-800 shadow-sm transition-all';
+        'border border-slate-400 bg-background focus:border-foreground focus:ring-1 focus:ring-foreground shadow-sm transition-all';
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
