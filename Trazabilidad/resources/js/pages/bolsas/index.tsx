@@ -99,6 +99,7 @@ export default function Index({
                 {
                     buscar,
                     estado: nuevoEstado,
+                    tipo_bolsa_id: tipoBolsaId,
                     orden,
                     direccion,
                     por_pagina: porPagina,

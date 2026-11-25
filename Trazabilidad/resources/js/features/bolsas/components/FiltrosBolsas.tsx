@@ -49,7 +49,7 @@ export function FiltrosBolsas({ valores, estados, tiposBolsa, onChange }: Props)
 
     return (
         <FiltroGenerico
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-3"
             campos={campos}
             valores={{
                 buscar: valores.buscar,
