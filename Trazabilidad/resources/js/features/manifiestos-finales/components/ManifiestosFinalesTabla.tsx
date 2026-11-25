@@ -7,12 +7,16 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Eye, FileText, FileCheck2 } from 'lucide-react';
 import type { ManifiestoFinal } from '../types/manifiestoFinal';
 import { useAuth } from '@/hooks/use-auth';
+import { EncabezadoOrdenable } from '@/components/EncabezadoOrdenable';
 
 interface ManifiestosFinalesTablaProps {
     manifiestos: ManifiestoFinal[];
+    orden: string;
+    direccion: 'asc' | 'desc';
+    onOrdenar: (campo: string) => void;
 }
 
-export function ManifiestosFinalesTabla({ manifiestos }: ManifiestosFinalesTablaProps) {
+export function ManifiestosFinalesTabla({ manifiestos, orden, direccion, onOrdenar }: ManifiestosFinalesTablaProps) {
     const { can } = useAuth();
 
     const formatearFecha = (fecha?: string | null) => {
@@ -30,12 +34,20 @@ export function ManifiestosFinalesTabla({ manifiestos }: ManifiestosFinalesTabla
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>N° Manifiesto</TableHead>
+                        {/* <TableHead>N° Manifiesto</TableHead>
                         <TableHead>Remito Salida Asociado</TableHead>
                         <TableHead>Fecha Manifiesto</TableHead>
                         <TableHead>Fecha Tratamiento</TableHead>
                         <TableHead className="text-center">Bolsas</TableHead>
                         <TableHead className="text-right">Peso Informado (Kg)</TableHead>
+                        <TableHead className="text-center">Certificado</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead> */}
+                        <EncabezadoOrdenable campo="numero_manifiesto" etiqueta="N° Manifiesto" ordenActual={orden} direccionActual={direccion} onOrdenar={onOrdenar} />
+                        <EncabezadoOrdenable campo="rem_sal_id" etiqueta="Remito Salida Asociado" ordenActual={orden} direccionActual={direccion} onOrdenar={onOrdenar} />
+                        <EncabezadoOrdenable campo="fecha" etiqueta="Fecha Manifiesto" ordenActual={orden} direccionActual={direccion} onOrdenar={onOrdenar} />
+                        <EncabezadoOrdenable campo="fecha_tratamiento" etiqueta="Fecha Tratamiento" ordenActual={orden} direccionActual={direccion} onOrdenar={onOrdenar} />
+                        <TableHead className="text-center">Bolsas</TableHead>
+                        <EncabezadoOrdenable campo="peso_informado" etiqueta="Peso Informado (Kg)" ordenActual={orden} direccionActual={direccion} onOrdenar={onOrdenar} className="text-right" />
                         <TableHead className="text-center">Certificado</TableHead>
                         <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>

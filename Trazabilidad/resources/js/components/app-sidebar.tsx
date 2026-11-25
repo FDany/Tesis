@@ -146,12 +146,12 @@ const navItems: AppNavItem[] = [
         icon: ClipboardList,
         permission: 'listar auditorias'
     },
-    {
-        title: 'Configuración',
-        href: '/configuracion',
-        icon: Settings,
-        adminOnly: true,
-    },
+    // {
+    //     title: 'Configuración',
+    //     href: '/configuracion',
+    //     icon: Settings,
+    //     adminOnly: true,
+    // },
 ];
 
 const footerNavItems: NavItem[] = [];
