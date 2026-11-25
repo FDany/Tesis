@@ -38,5 +38,6 @@ class DatabaseSeeder extends Seeder
         $this->call(BolsasSeeder::class);
         $this->call(ManifiestosFinalesSeeder::class);
         $this->call(IncidenciasSeeder::class);
+        $this->call(AuditoriasSeeder::class);
     }
 }
