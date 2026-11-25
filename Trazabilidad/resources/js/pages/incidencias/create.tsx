@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent } from 'react';
+import React, { ChangeEvent, FormEvent, KeyboardEvent, useState } from 'react';
 import { useForm, usePage, Head, Link } from '@inertiajs/react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,11 +6,18 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Image as ImageIcon, X, Paperclip } from 'lucide-react';
+import { FileText, Image as ImageIcon, X, Paperclip, Search, CheckCircle2, AlertCircle } from 'lucide-react';
 
 // Reutilización de tus tipos definidos por dominios
 import { Servicio } from '@/features/servicios/types/servicio';
 import { TipoBolsa } from '@/features/tipos-bolsa/types/tipoBolsa';
+
+interface BolsaEncontrada {
+    id: number;
+    codigo_barra: string;
+    estado: string;
+    estado_label?: string;
+}
 
 interface PageProps {
     [key: string]: unknown;
@@ -23,18 +30,109 @@ interface PageProps {
 export default function CreateIncidencia() {
     const { tiposManuales, servicios, tiposBolsa } = usePage<PageProps>().props;
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, clearErrors } = useForm({
         tipo_incidencia: '',
         descripcion: '',
         bolsa_id: '',
+        codigo_bolsa: '',
         codigo_no_registrado: '',
         servicio_id: '',
         tipo_bolsa_id: '',
         documentos: [] as File[], // Arreglo para la carga múltiple
     });
 
+    const [buscandoBolsa, setBuscandoBolsa] = useState(false);
+    const [bolsaEncontrada, setBolsaEncontrada] = useState<BolsaEncontrada | null>(null);
+    const [errorBusquedaBolsa, setErrorBusquedaBolsa] = useState<string | null>(null);
+
+    const handleTipoIncidenciaChange = (val: string) => {
+        setData((prev) => ({
+            ...prev,
+            tipo_incidencia: val,
+            bolsa_id: '',
+            codigo_bolsa: '',
+            codigo_no_registrado: '',
+            servicio_id: '',
+            tipo_bolsa_id: '',
+        }));
+        setBolsaEncontrada(null);
+        setErrorBusquedaBolsa(null);
+        clearErrors('bolsa_id', 'codigo_bolsa', 'codigo_no_registrado', 'servicio_id', 'tipo_bolsa_id');
+    };
+
+    const buscarBolsaPorCodigo = async (codigoOverride?: string) => {
+        const codigoLimpio = (codigoOverride ?? data.codigo_bolsa).trim();
+
+        if (!codigoLimpio) {
+            setBolsaEncontrada(null);
+            setData('bolsa_id', '');
+            setErrorBusquedaBolsa('Ingrese o escanee el código de barras de la bolsa.');
+            return;
+        }
+
+        setBuscandoBolsa(true);
+        setErrorBusquedaBolsa(null);
+        clearErrors('bolsa_id', 'codigo_bolsa');
+
+        try {
+            const params = new URLSearchParams({ codigo: codigoLimpio });
+            const response = await fetch(`/api/bolsas/buscar-para-incidencia?${params.toString()}`, {
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            const payload = await response.json();
+
+            if (!response.ok) {
+                setBolsaEncontrada(null);
+                setData('bolsa_id', '');
+                setErrorBusquedaBolsa(payload?.message || 'No se encontró una bolsa válida con ese código.');
+                return;
+            }
+
+            setBolsaEncontrada({
+                id: Number(payload.id),
+                codigo_barra: String(payload.codigo_barra),
+                estado: String(payload.estado),
+                estado_label: payload.estado_label ? String(payload.estado_label) : undefined,
+            });
+            setData('bolsa_id', String(payload.id));
+        } catch {
+            setBolsaEncontrada(null);
+            setData('bolsa_id', '');
+            setErrorBusquedaBolsa('Error de conexión al consultar la bolsa en el sistema.');
+        } finally {
+            setBuscandoBolsa(false);
+        }
+    };
+
+    const handleCodigoBolsaChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const valor = e.target.value;
+        setData('codigo_bolsa', valor);
+        if (bolsaEncontrada || errorBusquedaBolsa || data.bolsa_id) {
+            setBolsaEncontrada(null);
+            setErrorBusquedaBolsa(null);
+            setData('bolsa_id', '');
+        }
+    };
+
+    const handleCodigoBolsaKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            buscarBolsaPorCodigo(e.currentTarget.value);
+        }
+    };
+
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+
+        if (data.tipo_incidencia === 'BOLSA_DANADA' && !data.bolsa_id) {
+            setErrorBusquedaBolsa('Debe buscar y verificar un código de bolsa válido antes de registrar la incidencia.');
+            return;
+        }
+
         post('/incidencias', {
             forceFormData: true, // Necesario para procesar el envío del array de archivos (FormData)
         });
@@ -60,7 +158,7 @@ export default function CreateIncidencia() {
         <div>
             <Head title="Registrar Incidencia Manual" />
 
-            <div className="p-6 y-6">
+            <div className="p-6 space-y-6">
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h1 className="text-2xl font-bold text-foreground">Registrar Incidencia Manual</h1>
@@ -87,7 +185,7 @@ export default function CreateIncidencia() {
                                 <Label htmlFor="tipo_incidencia">Tipo de Incidencia *</Label>
                                 <Select
                                     value={data.tipo_incidencia}
-                                    onValueChange={(val) => setData('tipo_incidencia', val)}
+                                    onValueChange={handleTipoIncidenciaChange}
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Seleccione el tipo de incidencia" />
@@ -106,6 +204,85 @@ export default function CreateIncidencia() {
                             </div>
 
                             {/* Campos Dinámicos según la incidencia elegida */}
+
+                            {/* Bolsa Dañada o Comprometida */}
+                            {data.tipo_incidencia === 'BOLSA_DANADA' && (
+                                <div className="space-y-3 rounded-lg border p-4 bg-muted/20">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="codigo_bolsa">
+                                            Escanear o Ingresar Código de la Bolsa *
+                                        </Label>
+                                        <div className="flex gap-2">
+                                            <Input
+                                                id="codigo_bolsa"
+                                                type="text"
+                                                maxLength={30}
+                                                placeholder="Escanee o escriba el código de barras y presione Enter"
+                                                value={data.codigo_bolsa}
+                                                onChange={handleCodigoBolsaChange}
+                                                onKeyDown={handleCodigoBolsaKeyDown}
+                                                autoFocus
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                onClick={() => buscarBolsaPorCodigo()}
+                                                disabled={buscandoBolsa}
+                                                className="shrink-0"
+                                            >
+                                                <Search className="h-4 w-4 mr-1.5" />
+                                                {buscandoBolsa ? 'Buscando...' : 'Buscar'}
+                                            </Button>
+                                            {(data.codigo_bolsa || bolsaEncontrada) && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => {
+                                                        setData('codigo_bolsa', '');
+                                                        setBolsaEncontrada(null);
+                                                        setErrorBusquedaBolsa(null);
+                                                        setData('bolsa_id', '');
+                                                    }}
+                                                    title="Limpiar código"
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Verifica que la bolsa exista en el sistema para guardar su ID en la incidencia.
+                                        </p>
+                                    </div>
+
+                                    {bolsaEncontrada && (
+                                        <div className="flex items-center justify-between rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-700 dark:text-emerald-300">
+                                            <div className="flex items-center gap-2">
+                                                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                                                <span>
+                                                    Bolsa encontrada: <strong>{bolsaEncontrada.codigo_barra}</strong>{' '}
+                                                    (Estado actual: {bolsaEncontrada.estado_label || bolsaEncontrada.estado})
+                                                </span>
+                                            </div>
+                                            <span className="font-mono">ID #{bolsaEncontrada.id}</span>
+                                        </div>
+                                    )}
+
+                                    {errorBusquedaBolsa && (
+                                        <div className="flex items-center gap-2 text-sm text-red-600">
+                                            <AlertCircle className="h-4 w-4 shrink-0" />
+                                            <span>{errorBusquedaBolsa}</span>
+                                        </div>
+                                    )}
+
+                                    {errors.bolsa_id && (
+                                        <p className="text-sm text-red-600">{errors.bolsa_id}</p>
+                                    )}
+                                    {errors.codigo_bolsa && (
+                                        <p className="text-sm text-red-600">{errors.codigo_bolsa}</p>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Caso C: Código No Registrado */}
                             {data.tipo_incidencia === 'CODIGO_NO_REGISTRADO' && (
@@ -266,7 +443,7 @@ export default function CreateIncidencia() {
                             <div className="flex justify-end pt-4 border-t">
                                 <Button
                                     type="submit"
-                                    disabled={processing}
+                                    disabled={processing || buscandoBolsa}
                                     className="bg-sky-600 hover:bg-sky-700 text-white"
                                 >
                                     {processing ? 'Guardando...' : 'Registrar Incidencia'}
