@@ -19,6 +19,7 @@ import {
     ShieldCheck,
     Truck,
     Users,
+    ClipboardList
 } from 'lucide-react';
 
 import AppLogo from '@/components/app-logo';
@@ -137,6 +138,12 @@ const navItems: AppNavItem[] = [
         href: '/reportes',
         icon: BarChart3,
         permission: 'ver reportes'
+    },
+    {
+        title: 'Auditorias',
+        href: '/auditorias',
+        icon: ClipboardList,
+        permission: 'listar auditorias'
     },
     {
         title: 'Configuración',

@@ -18,6 +18,7 @@ use App\Http\Controllers\ManifiestoFinalController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DepositoController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\AuditoriaController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -104,6 +105,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('manifiestos-finales.show');
     Route::get('manifiestos-finales/{manifiesto}/documento', [ManifiestoFinalController::class, 'verDocumento'])
         ->name('manifiestos-finales.documento');
+
+    //Modulo Auditorias
+    Route::get('/auditorias', [AuditoriaController::class, 'index'])
+        ->name('auditorias.index');
 });
 
 require __DIR__ . '/settings.php';

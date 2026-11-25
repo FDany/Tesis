@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use App\Models\DocumentoAdjunto;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable([
     'fecha_recepcion',
@@ -62,7 +64,11 @@ class RemitoRecepcion extends Model
         return $this->hasMany(Bolsa::class, 'rem_rep_id');
     }
 
-    /** Usuario que realizó el control físico de recepción. */
+    public function documentosAdjuntos(): MorphMany
+    {
+        return $this->morphMany(DocumentoAdjunto::class, 'documentable');
+    }
+
     public function usuarioControl(): BelongsTo
     {
         return $this->belongsTo(User::class, 'control_usuario_id');

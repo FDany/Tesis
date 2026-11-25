@@ -30,13 +30,13 @@ interface Props {
     remitoEntregaServicio: RemitoEntregaServicioPreview | null;
 }
 
-export default function CreateResiduo({ 
+export default function CreateResiduo({
     servicios,
     remitoEntregaServicio,
 }: Props) {
 
     const { can } = useAuth();
-    
+
     const { data, setData, post, processing, errors, reset } = useForm({
         servicio_id: '',
         retira_nombre: '',
@@ -287,7 +287,7 @@ export default function CreateResiduo({
                         )}
                     </section>
 
-                    {can('registrar entregaBolsasServicio') && (
+                    {can('crear remitosEntregaServicio') && (
                         <Button type="submit" disabled={processing || verificando}>
                             {processing ? 'Guardando…' : 'Registrar entrega'}
                         </Button>
