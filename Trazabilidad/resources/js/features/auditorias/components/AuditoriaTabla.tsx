@@ -35,6 +35,44 @@ function formatearFechaHora(fechaIso: string): string {
     }).format(fecha);
 }
 
+const ETIQUETAS_CAMPOS: Record<string, string> = {
+    estado: 'Estado',
+    remitos_serv_id: 'Remito de entrega',
+    rem_sal_id: 'Remito de salida',
+    remito_recepcion_id: 'Remito de Recepción',
+    peso: 'Peso',
+    numero_manifiesto: 'Manifiesto N°',
+};
+
+const ETIQUETAS_ESTADOS: Record<string, string> = {
+    DISPONIBLE: 'Disponible',
+    ENTREGADA_A_SERVICIO: 'Entregada a servicio',
+    UTILIZADA: 'Utilizada',
+    RECIBIDA_EN_DEPOSITO: 'Recibida en depósito',
+    PESADA: 'Pesada',
+    DESPACHADA: 'Despachada',
+    RETIRADA_POR_DGM: 'Retirada por DGM',
+    TRATADA_DISPOSICION_FINAL: 'Tratada / disposición final',
+};
+
+function formatearValorDato(clave: string, val: unknown): string {
+    if (val === null || val === undefined || val === '') {
+        return 'Sin asignar';
+    }
+
+    const texto = String(val);
+
+    if (clave === 'estado' && ETIQUETAS_ESTADOS[texto]) {
+        return ETIQUETAS_ESTADOS[texto];
+    }
+
+    if (clave === 'peso') {
+        return `${texto} kg`;
+    }
+
+    return texto;
+}
+
 function formatearValor(valor: string | null): string {
     if (!valor) {
         return '—';
@@ -44,8 +82,12 @@ function formatearValor(valor: string | null): string {
         const parsed = JSON.parse(valor);
         if (typeof parsed === 'object' && parsed !== null) {
             return Object.entries(parsed)
-                .map(([clave, val]) => `${clave}: ${String(val)}`)
-                .join(' | ');
+                .map(([clave, val]) => {
+                    const etiquetaClave = ETIQUETAS_CAMPOS[clave] ?? clave;
+                    const valorLegible = formatearValorDato(clave, val);
+                    return `${etiquetaClave}: ${valorLegible}`;
+                })
+                .join(' · ');
         }
     } catch {
         // Si no es JSON, se muestra el texto plano tal cual
