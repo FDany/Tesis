@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Download, Mail } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth'
+import { EstadoRemitoRecepcionBadge } from './EstadoRemitoRecepcionBadge';
 
 export type RemitoDetalle = {
     id: number;
@@ -32,6 +33,9 @@ export type RemitoDetalle = {
         nombre: string;
     } | null;
     bolsas: string[];
+    estado: string;
+    usuario_control: string | null;
+    fecha_control: string | null;
 };
 
 interface RemitoRecepcionDetalleModalProps {
@@ -225,6 +229,20 @@ export function RemitoRecepcionDetalleModal({
                                     <p>
                                         {detalle.usuario_recep
                                             ? `${detalle.usuario_recep.first_name} ${detalle.usuario_recep.last_name}`
+                                            : '-'}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p className="text-muted-foreground">Estado</p>
+                                    <EstadoRemitoRecepcionBadge estado={detalle.estado} />
+                                </div>
+
+                                <div>
+                                    <p className="text-muted-foreground">Controlado por</p>
+                                    <p>
+                                        {detalle.usuario_control
+                                            ? `${detalle.usuario_control} (${detalle.fecha_control})`
                                             : '-'}
                                     </p>
                                 </div>

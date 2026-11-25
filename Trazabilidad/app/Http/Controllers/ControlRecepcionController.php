@@ -50,8 +50,14 @@ class ControlRecepcionController extends Controller
                 'usuario_recep' => $remito->usuarioRecep?->full_name,
             ]);
 
+        $remitoIdSolicitado = (int) $request->query('remito_id', 0);
+        $remitoSeleccionadoId = $remitos->contains('id', $remitoIdSolicitado)
+            ? $remitoIdSolicitado
+            : null;
+
         return Inertia::render('control-recepcion/create', [
             'remitos' => $remitos,
+            'remitoSeleccionadoId' => $remitoSeleccionadoId,
             'resultadoControl' => $request->session()->get('resultadoControl'),
         ]);
     }

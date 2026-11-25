@@ -236,6 +236,7 @@ class RemitoRecepcionController extends Controller
             'tipoBolsa',
             'tamanio',
             'usuarioRecep',
+            'usuarioControl',
         ])->findOrFail($id);
 
         $codigos = $remito->bolsas()
@@ -264,6 +265,9 @@ class RemitoRecepcionController extends Controller
                     'nombre' => $remito->tamanio->nombre,
                 ] : null,
                 'bolsas' => $codigos,
+                'estado' => $remito->estado,
+                'usuario_control' => $remito->usuarioControl?->full_name,
+                'fecha_control' => $remito->fecha_control?->format('d/m/Y H:i'),
             ],
         ]);
     }

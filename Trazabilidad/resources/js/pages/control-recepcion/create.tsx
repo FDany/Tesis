@@ -23,16 +23,19 @@ import {
 
 interface Props {
     remitos: RemitoPendienteControl[];
+    remitoSeleccionadoId: number | null;
     resultadoControl: ResultadoControl | null;
 }
 
 export default function CreateControlRecepcion({
     remitos,
+    remitoSeleccionadoId,
     resultadoControl,
 }: Props) {
-    const { data, setData, post, processing, errors, reset, transform } =
+    // Preselección desde /control-recepcion?remito_id=X (validada en el backend).
+    const { data, setData, post, processing, errors, transform } =
         useForm({
-            remito_id: '',
+            remito_id: remitoSeleccionadoId ? String(remitoSeleccionadoId) : '',
             codigos: [] as string[],
         });
 
@@ -170,7 +173,7 @@ export default function CreateControlRecepcion({
         post('/control-recepcion', {
             preserveScroll: true,
             onSuccess: (page) => {
-                reset();
+                setData({ remito_id: '', codigos: [] });
                 setEscaneadas([]);
                 setErrorEscaneo('');
 

@@ -7,11 +7,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Eye } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { Eye, ScanLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EncabezadoOrdenable } from '@/components/EncabezadoOrdenable';
 import { useAuth } from '@/hooks/use-auth'
+import { EstadoRemitoRecepcionBadge } from './EstadoRemitoRecepcionBadge';
 
 interface RemitoRecepcionTableProps {
   data: RemitoRecepcion[];
@@ -52,14 +54,16 @@ export function RemitoRecepcionTable({
             />
             <TableHead>Rango Manuscrito</TableHead>
             <TableHead>Tamaño</TableHead>
-            <TableHead className="text-right">Ver</TableHead>
+            <TableHead>Estado</TableHead>
+            {/* <TableHead className="text-right">Ver</TableHead> */}
+            <TableHead className="text-right">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {!data || data.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={7}
+                colSpan={8}
                 className="py-6 text-center text-muted-foreground"
               >
                 No hay remitos de recepción registrados.
@@ -109,8 +113,27 @@ export function RemitoRecepcionTable({
                     '-'
                   )}
                 </TableCell>
+                <TableCell>
+                  <EstadoRemitoRecepcionBadge estado={remito.estado} />
+                </TableCell>
 
                 <TableCell className="text-right">
+                  {remito.estado === 'PENDIENTE_CONTROL' && (
+                    <Button
+                      asChild
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Controlar recepción del remito ${remito.id}`}
+                      title="Controlar recepción"
+                    >
+                      <Link
+                        href="/control-recepcion"
+                        data={{ remito_id: remito.id }}
+                      >
+                        <ScanLine className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  )}
                   {(can('verDetalle remitosRecepcion'))&&(
                     <Button
                     type="button"
